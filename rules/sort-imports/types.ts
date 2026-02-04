@@ -48,6 +48,13 @@ export type Options = Partial<
     partitionSorting: 'type-first' | 'off'
 
     /**
+     * Whether to split import declarations when specifier sorting interleaves sources.
+     *
+     * @default false
+     */
+    partitionImportsSplitOnSort: boolean
+
+    /**
      * Whether to keep partition order stable within the same category.
      *
      * @default true
