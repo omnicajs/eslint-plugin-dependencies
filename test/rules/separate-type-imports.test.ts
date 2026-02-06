@@ -164,11 +164,10 @@ describe('separate-type-imports', () => {
       })
     })
 
-    it('keeps a blank line partition even when blankLine is never', async () => {
+    it('removes the blank line when blankLine is never', async () => {
       await invalid({
         output: dedent`
           import type { Bar } from './mod'
-
           import { foo } from './mod'
         `,
         code: dedent`

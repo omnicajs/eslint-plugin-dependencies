@@ -196,7 +196,7 @@ function buildSeparatedImportsFix({
   })
 
   let newline = sourceCode.text.includes('\r\n') ? '\r\n' : '\n'
-  let separator = newline + newline
+  let separator = options.blankLine === 'never' ? newline : newline + newline
   let combinedText =
     options.order === 'type-first' ?
       `${typeImportText}${separator}${valueImportText}`
