@@ -32,12 +32,12 @@ export default createEslintRule<Options, MessageId>({
           let valueBlockText = buildBlockText(valueChunks, newline)
           let combinedText = `${typeBlockText}${newline}${newline}${valueBlockText}`
 
+          let {rangeStart} = (chunks[0]!)
+          let {rangeEnd} = (chunks.at(-1)!)
+
           context.report({
             fix: fixer =>
-              fixer.replaceTextRange(
-                [partition[0]!.range[0], partition.at(-1)!.range[1]],
-                combinedText,
-              ),
+              fixer.replaceTextRange([rangeStart, rangeEnd], combinedText),
             messageId: 'separateTypePartitions',
             node: partition[0]!,
           })
@@ -104,21 +104,54 @@ function collectImportPartitions(
 function buildImportChunks(
   partition: TSESTree.ImportDeclaration[],
   sourceCode: Readonly<{ text: string }>,
-): { kind: 'value' | 'type'; prefix: string; text: string }[] {
+): {
+  kind: 'value' | 'type'
+  rangeStart: number
+  rangeEnd: number
+  prefix: string
+  text: string
+}[] {
+  let rangeEnds = partition.map(node =>
+    getImportRangeEndWithInlineComment(node, sourceCode),
+  )
   return partition.map((node, index) => {
     let previous = index === 0 ? null : partition[index - 1]!
+    let previousRangeEnd = index === 0 ? null : rangeEnds[index - 1]!
     let prefix =
       previous === null ? '' : (
-        sourceCode.text.slice(previous.range[1], node.range[0])
+        sourceCode.text.slice(previousRangeEnd!, node.range[0])
       )
-    let text = sourceCode.text.slice(node.range[0], node.range[1])
+    let rangeEnd = rangeEnds[index]!
+    let text = sourceCode.text.slice(node.range[0], rangeEnd)
 
     return {
       kind: getImportPartitionKind(node),
+      rangeStart: node.range[0],
+      rangeEnd,
       prefix,
       text,
     }
   })
+}
+
+function getImportRangeEndWithInlineComment(
+  node: TSESTree.ImportDeclaration,
+  sourceCode: Readonly<{ text: string }>,
+): number {
+  let [,end] = node.range
+  let lineEnd = getLineEndIndex(sourceCode.text, end)
+  let trailingText = sourceCode.text.slice(end, lineEnd)
+  let match = trailingText.match(/^[\t ]*(?:(?<temp1>\/\/.*)|\/\*.*\*\/[\t ]*)$/u)
+
+  if (!match) {
+    return end
+  }
+
+  if (match[1]) {
+    return lineEnd
+  }
+
+  return end + match[0].length
 }
 
 function buildBlockText(
@@ -151,6 +184,17 @@ function hasMixedPartitionKinds(
   }
 
   return hasType && hasValue
+}
+
+function getLineEndIndex(text: string, start: number): number {
+  let lineBreakIndex = text.indexOf('\n', start)
+  if (lineBreakIndex === -1) {
+    return text.length
+  }
+  if (lineBreakIndex > 0 && text[lineBreakIndex - 1] === '\r') {
+    return lineBreakIndex - 1
+  }
+  return lineBreakIndex
 }
 
 function hasBlankLineBetween(

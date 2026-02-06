@@ -113,6 +113,36 @@ describe('separate-type-partitions', () => {
       })
     })
 
+    it('keeps trailing inline comments with their imports', async () => {
+      await invalid({
+        output: dedent`
+          import type { A } from 'a' // type A
+
+          import { B } from 'b' // value B
+        `,
+        code: dedent`
+          import { B } from 'b' // value B
+          import type { A } from 'a' // type A
+        `,
+        errors: [{ messageId: 'separateTypePartitions' }],
+      })
+    })
+
+    it('keeps trailing block comments with their imports', async () => {
+      await invalid({
+        output: dedent`
+          import type { A } from 'a' /* type A */
+
+          import { B } from 'b' /* value B */
+        `,
+        code: dedent`
+          import { B } from 'b' /* value B */
+          import type { A } from 'a' /* type A */
+        `,
+        errors: [{ messageId: 'separateTypePartitions' }],
+      })
+    })
+
     it('reorders mixed blocks with default imports', async () => {
       await invalid({
         output: dedent`
