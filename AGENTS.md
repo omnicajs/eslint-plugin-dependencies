@@ -19,6 +19,13 @@
 - On failure, stop and report the failing test and likely cause; do not
   auto-retry in a loop.
 - Keep coverage at 100% (global thresholds are strict).
+- Run tests immediately after making any changes (excluding *.md files) in the codebase; do not add
+  suggestions to run them.
+- The maximum timeout for full test runs is 5 minutes.
+- If a full run exceeds the standard timeout, run specific tests instead. Use a
+  1 minute timeout for narrowed runs.
+- After the narrowed tests are green, run the full test suite again.
+- Check performance, and report if timeouts become insufficient.
 
 ## Loop prevention
 
