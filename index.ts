@@ -17,6 +17,7 @@ import sortUnionTypes from './rules/sort-union-types'
 import sortInterfaces from './rules/sort-interfaces'
 import sortDecorators from './rules/sort-decorators'
 import sortJsxProps from './rules/sort-jsx-props'
+import importStyle from './rules/import-style'
 import sortClasses from './rules/sort-classes'
 import sortImports from './rules/sort-imports'
 import sortExports from './rules/sort-exports'
@@ -64,6 +65,7 @@ export let rules = {
   'sort-decorators': sortDecorators,
   'sort-interfaces': sortInterfaces,
   'sort-jsx-props': sortJsxProps,
+  'import-style': importStyle,
   'sort-modules': sortModules,
   'sort-classes': sortClasses,
   'sort-imports': sortImports,

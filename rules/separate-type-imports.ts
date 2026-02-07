@@ -6,11 +6,7 @@ import { createEslintRule } from '../utils/create-eslint-rule'
 
 export type Options = [
   {
-    maxSingleLineSpecifiers?: number
-    maxSingleLineLength?: number
     blankLine?: BlankLineOption
-    singleLineSpacing?: boolean
-    forceSingleLine?: boolean
     order?: OrderOption
   },
 ]
@@ -21,10 +17,6 @@ type OrderOption = 'value-first' | 'type-first'
 type BlankLineOption = 'always' | 'never'
 
 let defaultOptions: Required<Options[number]> = {
-  maxSingleLineSpecifiers: 3,
-  maxSingleLineLength: 120,
-  singleLineSpacing: true,
-  forceSingleLine: true,
   order: 'type-first',
   blankLine: 'always',
 }
@@ -86,7 +78,6 @@ export default createEslintRule<Options, MessageId>({
       context.report({
         fix: fixer => {
           let fixText = buildTypeOnlyImport({
-            options,
             context,
             node,
           })
@@ -106,29 +97,10 @@ export default createEslintRule<Options, MessageId>({
             enum: ['type-first', 'value-first'],
             type: 'string',
           },
-          maxSingleLineSpecifiers: {
-            description:
-              'Maximum number of specifiers allowed for a single-line import.',
-            type: 'number',
-          },
-          forceSingleLine: {
-            description:
-              'Controls whether split imports are collapsed into single lines.',
-            type: 'boolean',
-          },
           blankLine: {
             description: 'Controls blank lines between split imports.',
             enum: ['always', 'never'],
             type: 'string',
-          },
-          maxSingleLineLength: {
-            description:
-              'Maximum line length allowed for a single-line import.',
-            type: 'number',
-          },
-          singleLineSpacing: {
-            description: 'Controls spacing inside braces for single-line imports.',
-            type: 'boolean',
           },
         },
         additionalProperties: false,
@@ -189,12 +161,9 @@ function buildSeparatedImportsFix({
   let valueSegments = segments
     .filter(segment => segment.specifier.importKind !== 'type')
     .map(segment => segment.text)
-  let typeSpecifiers = namedSpecifiers.filter(
-    specifier => specifier.importKind === 'type',
-  )
-  let valueNamedSpecifiers = namedSpecifiers.filter(
-    specifier => specifier.importKind !== 'type',
-  )
+
+  let typeNamedText = buildNamedListText(typeSegments)
+  let valueNamedText = buildNamedListText(valueSegments)
 
   let defaultSpecifier = node.specifiers.find(
     specifier => specifier.type === AST_NODE_TYPES.ImportDefaultSpecifier,
@@ -205,36 +174,24 @@ function buildSeparatedImportsFix({
 
   let sourceText = sourceCode.getText(node.source)
   let { attributesText, semicolon } = getImportSuffix(node, sourceCode)
-  let indentation = getImportIndentation(node, sourceCode)
-
-  let typeImportText = buildImportGroupText({
-    namedSpecifiers: typeSpecifiers,
-    namedSegments: typeSegments,
+  let typeImportText = buildImportDeclarationText({
+    namedText: typeNamedText,
     importKind: 'type',
-    stripType: true,
     attributesText,
-    indentation,
-    sourceCode,
     sourceText,
     semicolon,
-    options,
   })
 
-  let valueImportText = buildImportGroupText({
+  let valueImportText = buildImportDeclarationText({
     namespaceText:
       /* v8 ignore next -- @preserve Namespace specifiers cannot coexist with named specifiers in valid syntax. */
       namespaceSpecifier ? sourceCode.getText(namespaceSpecifier) : null,
     defaultText: defaultSpecifier ? sourceCode.getText(defaultSpecifier) : null,
-    namedSpecifiers: valueNamedSpecifiers,
-    namedSegments: valueSegments,
+    namedText: valueNamedText,
     importKind: 'value',
-    stripType: false,
     attributesText,
-    indentation,
-    sourceCode,
     sourceText,
     semicolon,
-    options,
   })
 
   let newline = sourceCode.text.includes('\r\n') ? '\r\n' : '\n'
@@ -265,130 +222,11 @@ function buildSeparatedImportsFix({
   }
 }
 
-function buildImportGroupText({
-  namedSpecifiers,
-  attributesText,
-  namespaceText,
-  namedSegments,
-  defaultText,
-  indentation,
-  importKind,
-  sourceText,
-  sourceCode,
-  semicolon,
-  stripType,
-  options,
-}: {
-  namedSpecifiers: TSESTree.ImportSpecifier[]
-  options: Required<Options[number]>
-  sourceCode: TSESLintSourceCode
-  namespaceText?: string | null
-  importKind: 'value' | 'type'
-  defaultText?: string | null
-  namedSegments: string[]
-  attributesText: string
-  indentation: string
-  sourceText: string
-  stripType: boolean
-  semicolon: string
-}): string {
-  let namedText =
-    namedSegments.length > 0 ? buildNamedListText(namedSegments) : null
-  let hasComments = hasCommentsInSegments(namedSegments)
-  let singleLineNamedText =
-    namedSpecifiers.length > 0 ?
-      buildSingleLineNamedText(namedSpecifiers, sourceCode, stripType)
-    : null
-  let totalSpecifiers =
-    namedSpecifiers.length +
-    (defaultText ? 1 : 0) +
-    Number(namespaceText !== null && namespaceText !== undefined)
-
-  let singleLineImportText =
-    singleLineNamedText ?
-      buildImportDeclarationText({
-        singleLineSpacing: options.singleLineSpacing,
-        namedText: singleLineNamedText,
-        isSingleLine: true,
-        attributesText,
-        namespaceText,
-        defaultText,
-        importKind,
-        sourceText,
-        semicolon,
-      })
-    : null
-
-  let shouldCollapse =
-    options.forceSingleLine &&
-    Boolean(singleLineImportText) &&
-    !hasComments &&
-    totalSpecifiers <= options.maxSingleLineSpecifiers &&
-    indentation.length + singleLineImportText!.length <=
-      options.maxSingleLineLength
-
-  return buildImportDeclarationText({
-    namedText: shouldCollapse ? singleLineNamedText : namedText,
-    singleLineSpacing: options.singleLineSpacing,
-    isSingleLine: shouldCollapse,
-    attributesText,
-    namespaceText,
-    defaultText,
-    importKind,
-    sourceText,
-    semicolon,
-  })
-}
-
-function buildImportDeclarationText({
-  singleLineSpacing = true,
-  isSingleLine = false,
-  attributesText,
-  namespaceText,
-  defaultText,
-  importKind,
-  sourceText,
-  namedText,
-  semicolon,
-}: {
-  namespaceText?: string | null
-  importKind: 'value' | 'type'
-  defaultText?: string | null
-  singleLineSpacing?: boolean
-  namedText?: string | null
-  attributesText: string
-  isSingleLine?: boolean
-  sourceText: string
-  semicolon: string
-}): string {
-  let namedClause = null
-  if (namedText) {
-    if (isSingleLine && !singleLineSpacing) {
-      namedClause = `{${namedText}}`
-    } else {
-      namedClause = `{ ${namedText} }`
-    }
-  }
-
-  let importClauseParts = [
-    defaultText ?? null,
-    namespaceText ?? null,
-    namedClause,
-  ].filter(Boolean)
-
-  let importClause = importClauseParts.join(', ')
-  let importKeyword = importKind === 'type' ? 'import type' : 'import'
-
-  return `${importKeyword} ${importClause} from ${sourceText}${attributesText}${semicolon}`
-}
-
 function buildTypeOnlyImport({
   context,
-  options,
   node,
 }: {
   context: Readonly<{ sourceCode: TSESLintSourceCode }>
-  options: Required<Options[number]>
   node: TSESTree.ImportDeclaration
 }): string {
   let { sourceCode } = context
@@ -398,21 +236,18 @@ function buildTypeOnlyImport({
   )
 
   let segments = buildNamedSpecifierSegments(namedSpecifiers, sourceCode)
+  let typeSegments = segments.map(segment => stripTypeKeyword(segment.text))
+  let typeNamedText = buildNamedListText(typeSegments)
 
   let sourceText = sourceCode.getText(node.source)
   let { attributesText, semicolon } = getImportSuffix(node, sourceCode)
 
-  return buildImportGroupText({
-    namedSegments: segments.map(segment => stripTypeKeyword(segment.text)),
-    indentation: getImportIndentation(node, sourceCode),
+  return buildImportDeclarationText({
+    namedText: typeNamedText,
     importKind: 'type',
-    namedSpecifiers,
-    stripType: true,
     attributesText,
-    sourceCode,
     sourceText,
     semicolon,
-    options,
   })
 }
 
@@ -447,6 +282,35 @@ function getPartitionStart(
   }
 
   return start
+}
+
+function buildImportDeclarationText({
+  attributesText,
+  namespaceText,
+  defaultText,
+  importKind,
+  sourceText,
+  namedText,
+  semicolon,
+}: {
+  namespaceText?: string | null
+  importKind: 'value' | 'type'
+  defaultText?: string | null
+  namedText?: string | null
+  attributesText: string
+  sourceText: string
+  semicolon: string
+}): string {
+  let importClauseParts = [
+    defaultText ?? null,
+    namespaceText ?? null,
+    namedText ? `{ ${namedText} }` : null,
+  ].filter(Boolean)
+
+  let importClause = importClauseParts.join(', ')
+  let importKeyword = importKind === 'type' ? 'import type' : 'import'
+
+  return `${importKeyword} ${importClause} from ${sourceText}${attributesText}${semicolon}`
 }
 
 function buildNamedSpecifierSegments(
@@ -504,28 +368,6 @@ function getClosingBraceToken(
   return token
 }
 
-function buildSingleLineNamedText(
-  specifiers: TSESTree.ImportSpecifier[],
-  sourceCode: TSESLintSourceCode,
-  stripType: boolean,
-): string {
-  return specifiers
-    .map(specifier => {
-      let text = sourceCode.getText(specifier)
-      return stripType ? stripTypeKeyword(text) : text
-    })
-    .join(', ')
-}
-
-function getImportIndentation(
-  node: TSESTree.ImportDeclaration,
-  sourceCode: TSESLintSourceCode,
-): string {
-  let lineStartIndex = sourceCode.text.lastIndexOf('\n', node.range[0] - 1)
-  let start = lineStartIndex === -1 ? 0 : lineStartIndex + 1
-  return sourceCode.text.slice(start, node.range[0])
-}
-
 function hasBlankLineBetween(
   left: TSESTree.ImportDeclaration,
   right: TSESTree.ImportDeclaration,
@@ -538,10 +380,6 @@ function hasBlankLineBetween(
 function buildNamedListText(segments: string[]): string {
   let combined = segments.join('').trim()
   return combined.replace(/,\s*$/u, '')
-}
-
-function hasCommentsInSegments(segments: string[]): boolean {
-  return segments.some(segment => /\/\*|\/\//u.test(segment))
 }
 
 function stripTypeKeyword(text: string): string {

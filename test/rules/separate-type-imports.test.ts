@@ -39,7 +39,7 @@ describe('separate-type-imports', () => {
       })
     })
 
-    it('normalizes multiline type-only imports without comments', async () => {
+    it('converts multiline type-only imports to import type', async () => {
       await invalid({
         code: dedent`
           import {
@@ -48,7 +48,8 @@ describe('separate-type-imports', () => {
           } from '@crm-ui/graphql/generated';
         `,
         output: dedent`
-          import type { CriterionConfig, CriterionOperatorEnum } from '@crm-ui/graphql/generated';
+          import type { CriterionConfig,
+            CriterionOperatorEnum } from '@crm-ui/graphql/generated';
         `,
         errors: [{ messageId: 'useImportType' }],
       })
@@ -147,41 +148,6 @@ describe('separate-type-imports', () => {
       })
     })
 
-    it('collapses split imports when they fit on a single line', async () => {
-      await invalid({
-        output: dedent`
-          import type { TypeB } from 'module';
-
-          import { valueA } from 'module';
-        `,
-        code: dedent`
-          import {
-            valueA,
-            type TypeB,
-          } from 'module';
-        `,
-        errors: [{ messageId: 'separateTypeImports' }],
-      })
-    })
-
-    it('skips collapsing when comments are present in a group', async () => {
-      await invalid({
-        output: dedent`
-          import type { Bar /* keep
-              comment */ } from './mod';
-
-          import { foo } from './mod';
-        `,
-        code: dedent`
-          import {
-            foo,
-            type Bar /* keep
-              comment */,
-          } from './mod';
-        `,
-        errors: [{ messageId: 'separateTypeImports' }],
-      })
-    })
   })
 
   describe('options', () => {
@@ -223,89 +189,6 @@ describe('separate-type-imports', () => {
       })
     })
 
-    it('keeps multiline formatting when forceSingleLine is false', async () => {
-      await invalid({
-        code: dedent`
-          import {
-            foo,
-            bar,
-            type Baz,
-            type Qux,
-          } from './mod';
-        `,
-        output: dedent`
-          import type { Baz,
-            Qux } from './mod';
-
-          import { foo,
-            bar } from './mod';
-        `,
-        errors: [{ messageId: 'separateTypeImports' }],
-        options: [{ forceSingleLine: false }],
-      })
-    })
-
-    it('keeps multiline formatting when maxSingleLineSpecifiers is exceeded', async () => {
-      await invalid({
-        code: dedent`
-          import {
-            foo,
-            bar,
-            type Baz,
-            type Qux,
-          } from './mod';
-        `,
-        output: dedent`
-          import type { Baz,
-            Qux } from './mod';
-
-          import { foo,
-            bar } from './mod';
-        `,
-        errors: [{ messageId: 'separateTypeImports' }],
-        options: [{ maxSingleLineSpecifiers: 1 }],
-      })
-    })
-
-    it('keeps multiline formatting when maxSingleLineLength is exceeded', async () => {
-      await invalid({
-        code: dedent`
-          import {
-            foo,
-            bar,
-            type Baz,
-            type Qux,
-          } from './mod';
-        `,
-        output: dedent`
-          import type { Baz,
-            Qux } from './mod';
-
-          import { foo,
-            bar } from './mod';
-        `,
-        errors: [{ messageId: 'separateTypeImports' }],
-        options: [{ maxSingleLineLength: 30 }],
-      })
-    })
-
-    it('removes brace spacing for single-line imports when configured', async () => {
-      await invalid({
-        code: dedent`
-          import {
-            valueA,
-            type TypeB,
-          } from 'module';
-        `,
-        output: dedent`
-          import type {TypeB} from 'module';
-
-          import {valueA} from 'module';
-        `,
-        errors: [{ messageId: 'separateTypeImports' }],
-        options: [{ singleLineSpacing: false }],
-      })
-    })
   })
 
   describe('valid', () => {
