@@ -6,6 +6,14 @@
   code style consistency.
 - Avoid clarification loops by proposing a concrete interpretation when details
   are missing.
+- Default to the language of the user's initial message unless they explicitly
+  request a different language.
+- Match the tone and formality of the user's initial message unless they
+  explicitly ask for a change.
+- Treat a language switch in the user's message as an explicit request to
+  respond in that language.
+- If a message is mixed-language, reply in the dominant language unless the
+  user specifies otherwise.
 
 ## Testing
 
@@ -13,9 +21,13 @@
 - For lint checks, use `pnpm test:js`.
 - To fix autofixable ESLint issues quickly, use `pnpm test:js --fix` unless told
   otherwise.
+- When lint fails, run `pnpm test:js --fix` first, then address only the
+  remaining issues manually.
 - To fix autofixable Prettier issues quickly, use `pnpm test:prettier --write`
   unless told otherwise.
 - For TypeScript type checks, use `pnpm test:types`.
+- Always run `pnpm test:js` and `pnpm test:types` to check ESLint and TypeScript
+  errors after code changes.
 - On failure, stop and report the failing test and likely cause; do not
   auto-retry in a loop.
 - Keep coverage at 100% (global thresholds are strict).
@@ -52,3 +64,6 @@
 - Provide one “golden output” example per new behavior (valid/invalid/mixed)
   when relevant.
 - Summaries should be concise and list files changed.
+- If not stated otherwise, obfuscate user-provided examples to avoid leaving
+  artifacts tied to specific projects. Tests should be generic and abstract,
+  using only common frameworks/libraries where needed.
