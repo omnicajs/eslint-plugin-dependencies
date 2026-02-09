@@ -110,6 +110,22 @@ describe('import-style', () => {
       })
     })
 
+    it('expands single-line named imports when forceSingleLine is false', async () => {
+      await invalid({
+        output: dedent`
+          import {
+            foo,
+            bar
+          } from './mod';
+        `,
+        code: dedent`
+          import { foo, bar } from './mod';
+        `,
+        errors: [{ messageId: 'formatImport' }],
+        options: [{ forceSingleLine: false }],
+      })
+    })
+
     it('does not collapse when maxSingleLineSpecifiers is exceeded', async () => {
       await valid({
         code: dedent`
@@ -122,6 +138,22 @@ describe('import-style', () => {
       })
     })
 
+    it('expands single-line imports when maxSingleLineSpecifiers is exceeded', async () => {
+      await invalid({
+        output: dedent`
+          import {
+            foo,
+            bar
+          } from './mod';
+        `,
+        code: dedent`
+          import { foo, bar } from './mod';
+        `,
+        options: [{ maxSingleLineSpecifiers: 1 }],
+        errors: [{ messageId: 'formatImport' }],
+      })
+    })
+
     it('does not collapse when maxSingleLineLength is exceeded', async () => {
       await valid({
         code: dedent`
@@ -130,6 +162,22 @@ describe('import-style', () => {
             bar,
           } from './long/module/path';
         `,
+        options: [{ maxSingleLineLength: 30 }],
+      })
+    })
+
+    it('expands single-line imports when maxSingleLineLength is exceeded', async () => {
+      await invalid({
+        output: dedent`
+          import {
+            foo,
+            bar
+          } from './long/module/path';
+        `,
+        code: dedent`
+          import { foo, bar } from './long/module/path';
+        `,
+        errors: [{ messageId: 'formatImport' }],
         options: [{ maxSingleLineLength: 30 }],
       })
     })
@@ -153,6 +201,79 @@ describe('import-style', () => {
             bar,
           } from './mod';
         `,
+      })
+    })
+  })
+
+  describe('multiline format', () => {
+    it('formats type imports with one specifier per line', async () => {
+      await invalid({
+        output: dedent`
+          import type {
+            FooType,
+            BarType
+          } from './types';
+        `,
+        code: dedent`
+          import type { FooType,
+            BarType } from './types';
+        `,
+        errors: [{ messageId: 'formatImport' }],
+        options: [{ maxSingleLineLength: 20 }],
+      })
+    })
+
+    it('removes blank lines inside named imports', async () => {
+      await invalid({
+        output: dedent`
+          import {
+            foo,
+            bar
+          } from './mod';
+        `,
+        code: dedent`
+          import {
+
+            foo,
+            bar
+          } from './mod';
+        `,
+        errors: [{ messageId: 'formatImport' }],
+        options: [{ forceSingleLine: false }],
+      })
+    })
+
+    it('uses the shortest detected indentation for multiline formatting', async () => {
+      await invalid({
+        output: dedent`
+            // four
+          // two
+              // six
+          import {
+              foo,
+              bar
+          } from './mod';
+        `,
+        code: dedent`
+            // four
+          // two
+              // six
+          import { foo, bar } from './mod';
+        `,
+        errors: [{ messageId: 'formatImport' }],
+        options: [{ forceSingleLine: false }],
+      })
+    })
+
+    it('accepts correctly formatted multiline imports', async () => {
+      await valid({
+        code: dedent`
+          import {
+            foo,
+            bar
+          } from './mod';
+        `,
+        options: [{ forceSingleLine: false }],
       })
     })
   })

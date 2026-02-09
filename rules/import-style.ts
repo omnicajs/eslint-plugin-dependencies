@@ -34,24 +34,16 @@ export default createEslintRule<Options, MessageId>({
         return
       }
 
-      let options = { ...defaultOptions, ...context.options[0] }
-      if (!options.forceSingleLine) {
-        return
-      }
-
       if (hasCommentsInNamedBlock(node, sourceCode)) {
         return
       }
 
+      let options = { ...defaultOptions, ...context.options[0] }
       let defaultSpecifier = node.specifiers.find(
         specifier => specifier.type === AST_NODE_TYPES.ImportDefaultSpecifier,
       )
       let totalSpecifiers =
         namedSpecifiers.length + (defaultSpecifier ? 1 : 0)
-
-      if (totalSpecifiers > options.maxSingleLineSpecifiers) {
-        return
-      }
 
       let sourceText = sourceCode.getText(node.source)
       let suffixText = sourceCode.text.slice(
@@ -74,20 +66,43 @@ export default createEslintRule<Options, MessageId>({
         sourceText,
       })
 
-      if (
-        indentation.length + singleLineImportText.length >
-        options.maxSingleLineLength
-      ) {
-        return
-      }
+      let shouldUseSingleLine =
+        options.forceSingleLine &&
+        totalSpecifiers <= options.maxSingleLineSpecifiers &&
+        indentation.length + singleLineImportText.length <=
+          options.maxSingleLineLength
+
+      let indentUnit = detectIndentUnit(sourceCode.text)
+      let specifierIndentation = getNamedSpecifierIndentation({
+        indentation,
+        indentUnit,
+        sourceCode,
+        node,
+      })
+      let hasTrailingComma = hasTrailingCommaInNamedBlock(node, sourceCode)
+      let multiLineImportText = buildMultiLineImportText({
+        defaultText: defaultSpecifier ? sourceCode.getText(defaultSpecifier) : null,
+        specifierIndentation,
+        hasTrailingComma,
+        namedSpecifiers,
+        indentation,
+        importKind,
+        sourceCode,
+        suffixText,
+        sourceText,
+      })
+
+      let expectedText = shouldUseSingleLine
+        ? singleLineImportText
+        : multiLineImportText
 
       let currentText = sourceCode.getText(node)
-      if (currentText === singleLineImportText) {
+      if (currentText === expectedText) {
         return
       }
 
       context.report({
-        fix: fixer => fixer.replaceText(node, singleLineImportText),
+        fix: fixer => fixer.replaceText(node, expectedText),
         messageId: 'formatImport',
         node,
       })
@@ -142,6 +157,82 @@ type TSESLintSourceCode = Readonly<{
   text: string
 }>
 
+function buildMultiLineImportText({
+  specifierIndentation,
+  hasTrailingComma,
+  namedSpecifiers,
+  defaultText,
+  indentation,
+  suffixText,
+  sourceText,
+  importKind,
+  sourceCode,
+}: {
+  namedSpecifiers: TSESTree.ImportSpecifier[]
+  sourceCode: TSESLintSourceCode
+  specifierIndentation: string
+  importKind: 'value' | 'type'
+  defaultText?: string | null
+  hasTrailingComma: boolean
+  indentation: string
+  suffixText: string
+  sourceText: string
+}): string {
+  let importKeyword = importKind === 'type' ? 'import type' : 'import'
+  let importStart = defaultText
+    ? `${importKeyword} ${defaultText}, {`
+    : `${importKeyword} {`
+
+  let lines = [importStart]
+  for (let [index, specifier] of namedSpecifiers.entries()) {
+    let specifierText = sourceCode.getText(specifier)
+    let line = `${specifierIndentation}${specifierText}`
+    if (index < namedSpecifiers.length - 1 || hasTrailingComma) {
+      line += ','
+    }
+    lines.push(line)
+  }
+
+  lines.push(`${indentation}} from ${sourceText}${suffixText}`)
+  return lines.join('\n')
+}
+
+function getNamedSpecifierIndentation({
+  indentation,
+  indentUnit,
+  sourceCode,
+  node,
+}: {
+  node: TSESTree.ImportDeclaration
+  sourceCode: TSESLintSourceCode
+  indentation: string
+  indentUnit: string
+}): string {
+  let firstSpecifier = node.specifiers.find(
+    (specifier): specifier is TSESTree.ImportSpecifier =>
+      specifier.type === AST_NODE_TYPES.ImportSpecifier,
+  )
+  /* v8 ignore next -- @preserve Named specifiers are guaranteed in this rule. */
+  if (!firstSpecifier) {
+    return `${indentation}${indentUnit}`
+  }
+
+  let textBeforeSpecifier = sourceCode.text.slice(
+    node.range[0],
+    firstSpecifier.range[0],
+  )
+  if (textBeforeSpecifier.includes('\n')) {
+    let lineStartIndex = sourceCode.text.lastIndexOf(
+      '\n',
+      firstSpecifier.range[0] - 1,
+    )
+    let start = Math.max(lineStartIndex + 1, 0)
+    return sourceCode.text.slice(start, firstSpecifier.range[0])
+  }
+
+  return `${indentation}${indentUnit}`
+}
+
 function buildImportDeclarationText({
   singleLineSpacing = true,
   defaultText,
@@ -167,6 +258,25 @@ function buildImportDeclarationText({
   return `${importKeyword} ${importClause} from ${sourceText}${suffixText}`
 }
 
+function hasTrailingCommaInNamedBlock(
+  node: TSESTree.ImportDeclaration,
+  sourceCode: TSESLintSourceCode,
+): boolean {
+  let text = sourceCode.getText(node)
+  let openIndex = text.indexOf('{')
+  /* v8 ignore next -- @preserve Named imports always include braces in valid syntax. */
+  if (openIndex === -1) {
+    return false
+  }
+  let closeIndex = text.indexOf('}', openIndex + 1)
+  /* v8 ignore next -- @preserve Named imports always include a closing brace in valid syntax. */
+  if (closeIndex === -1) {
+    return false
+  }
+  let namedBlock = text.slice(openIndex + 1, closeIndex)
+  return namedBlock.trimEnd().endsWith(',')
+}
+
 function hasCommentsInNamedBlock(
   node: TSESTree.ImportDeclaration,
   sourceCode: TSESLintSourceCode,
@@ -184,6 +294,20 @@ function hasCommentsInNamedBlock(
   }
   let namedBlock = text.slice(openIndex + 1, closeIndex)
   return /\/\*|\/\//u.test(namedBlock)
+}
+
+function detectIndentUnit(text: string): string {
+  let lines = text.split('\n')
+  let indents = lines
+    .map(line => line.match(/^[\t ]+/u)?.[0] ?? '')
+    .filter(indent => indent.length > 0)
+  if (indents.length === 0) {
+    return '  '
+  }
+  let sortedIndents = indents.toSorted(
+    (left, right) => left.length - right.length,
+  )
+  return sortedIndents[0]!
 }
 
 function getImportIndentation(
