@@ -292,7 +292,7 @@ Enables the use of comments to separate imports into logical groups.
 
 <sub>default: `false`</sub>
 
-When `true`, the rule will not sort imports if there is an empty line between them. This helps maintain the defined order of logically separated groups of members.
+When `true`, empty lines inside a group define partitions that are sorted independently. Partition boundaries are never crossed when `partitionInsideGroup` is set to `'preserve'`.
 
 ```ts
 import { b1, b2 } from 'b'
@@ -314,10 +314,10 @@ Specifies how to handle newlines between groups.
 - `0` — No newlines are allowed.
 - Any other number — Enforce this number of newlines between each group.
 
+This option controls spacing between groups only. It does not change partition boundaries.
+
 You can also enforce the newline behavior between two specific groups through the [`groups`](#newlines-between-groups)
 option.
-
-This option is only applicable when [`partitionByNewLine`](#partitionbynewline) is `false`.
 
 ### newlinesInside
 
@@ -330,12 +330,122 @@ Specifies how to handle newlines inside groups.
 
 - `'ignore'` — Do not report errors related to newlines.
 - `0` — No newlines are allowed.
-- Any other number — Enforce this number of newlines between each element of the same group.
+- Any other number — Enforce this number of newlines between partitions inside the same group.
 
 You can also enforce the newline behavior inside a given group through the [`groups`](#group-with-overridden-settings)
 or [`customGroups`](#customgroups) options.
 
-This option is only applicable when [`partitionByNewLine`](#partitionbynewline) is `false`.
+This option controls spacing between partitions inside a group only. It does not change partition boundaries.
+
+### partitionInsideGroup
+
+<sub>default: `'preserve'`</sub>
+
+Controls whether partitions are preserved or merged inside a group.
+
+- `'preserve'` — Keep partitions and sort within each partition independently.
+- `'merge'` — Merge all partitions in a group into a single partition.
+
+### partitionMaxImports
+
+<sub>default: `Infinity`</sub>
+
+Splits each partition into chunks of at most `N` imports after partitions are formed. This applies when
+`partitionInsideGroup` is `'preserve'`.
+
+#### Partition examples
+
+Preserve partitions inside groups:
+
+```ts
+// options
+{
+  groups: ['react', 'external', 'internal', 'relative'],
+  partitionByNewLine: true,
+  partitionInsideGroup: 'preserve',
+  newlinesBetween: 1,
+}
+
+// input
+import z from 'zod'
+import React from 'react'
+import fs from 'fs'
+
+import b from '@app/b'
+
+import c from './c'
+import a from './a'
+
+// output
+import React from 'react'
+
+import fs from 'fs'
+import z from 'zod'
+
+import b from '@app/b'
+
+import a from './a'
+import c from './c'
+```
+
+Merge partitions inside groups:
+
+```ts
+// options
+{
+  groups: ['external', 'internal', 'relative'],
+  partitionByNewLine: true,
+  partitionInsideGroup: 'merge',
+  newlinesBetween: 1,
+}
+
+// input
+import z from 'zod'
+import fs from 'fs'
+
+import b from '@app/b'
+
+import c from './c'
+import a from './a'
+
+// output
+import fs from 'fs'
+import z from 'zod'
+
+import b from '@app/b'
+
+import a from './a'
+import c from './c'
+```
+
+Split partitions by size:
+
+```ts
+// options
+{
+  groups: ['external'],
+  partitionInsideGroup: 'preserve',
+  partitionMaxImports: 2,
+  newlinesInside: 1,
+  newlinesBetween: 0,
+}
+
+// input
+import a from 'a'
+import b from 'b'
+import c from 'c'
+import d from 'd'
+import e from 'e'
+
+// output
+import a from 'a'
+import b from 'b'
+
+import c from 'c'
+import d from 'd'
+
+import e from 'e'
+```
 
 ### maxLineLength
 
@@ -559,8 +669,6 @@ You may directly override options for a specific group by using an object with t
 You may place `newlinesBetween` objects between your groups to enforce the newline behavior between two specific groups.
 
 See the [`newlinesBetween`](#newlinesbetween) option.
-
-This feature is only applicable when [`partitionByNewLine`](#partitionbynewline) is `false`.
 
 ```ts
 {

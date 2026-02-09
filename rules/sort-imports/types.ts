@@ -41,6 +41,13 @@ export type Options = Partial<
     useExperimentalDependencyDetection: boolean
 
     /**
+     * Controls whether partitions are preserved or merged within each group.
+     *
+     * @default 'preserve'
+     */
+    partitionInsideGroup: 'preserve' | 'merge'
+
+    /**
      * Controls partition reordering when partitionByNewLine is enabled.
      *
      * @default 'off'
@@ -67,6 +74,13 @@ export type Options = Partial<
      * are categorized as 'internal'.
      */
     internalPattern: RegexOption[]
+
+    /**
+     * Maximum number of imports per partition before splitting.
+     *
+     * @default Infinity
+     */
+    partitionMaxImports: number
 
     /**
      * Runtime environment for resolving built-in modules. Determines which

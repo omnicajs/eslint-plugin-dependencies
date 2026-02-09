@@ -76,6 +76,16 @@ describe('sort-imports', () => {
       })
     })
 
+    it('handles files without imports', async () => {
+      await valid({
+        code: dedent`
+          const value = 1
+          export { value }
+        `,
+        options: [options],
+      })
+    })
+
     it('groups and sorts imports by type and source', async () => {
       await valid({
         code: dedent`
@@ -1192,12 +1202,12 @@ describe('sort-imports', () => {
           },
         ],
         output: dedent`
-          import "./z-side-effect";
           import './b-side-effect.scss'
           import './a-side-effect.css'
 
-          import "./g-side-effect";
+          import "./z-side-effect";
           import a from "./a";
+          import "./g-side-effect";
           import b from "./b";
         `,
         code: dedent`
@@ -1619,9 +1629,7 @@ describe('sort-imports', () => {
       })
     })
 
-    it.each([
-      ['ignores newline fixes between different partitions with 0 option', 0],
-    ])('%s', async (_description, newlinesBetween) => {
+    it('ignores newline fixes between different partitions with 0 option', async () => {
       await invalid({
         options: [
           {
@@ -1634,14 +1642,21 @@ describe('sort-imports', () => {
             ],
             groups: ['a', 'unknown'],
             partitionByComment: true,
-            newlinesBetween,
+            newlinesBetween: 0,
+          },
+        ],
+        errors: [
+          {
+            messageId: 'extraSpacingBetweenImports',
+          },
+          {
+            data: { right: './b', left: './c' },
+            messageId: 'unexpectedImportsOrder',
           },
         ],
         output: dedent`
           import a from 'a';
-
           // Partition comment
-
           import { b } from './b';
           import { c } from './c';
         `,
@@ -1653,12 +1668,6 @@ describe('sort-imports', () => {
           import { c } from './c';
           import { b } from './b';
         `,
-        errors: [
-          {
-            data: { right: './b', left: './c' },
-            messageId: 'unexpectedImportsOrder',
-          },
-        ],
       })
     })
 
@@ -1738,6 +1747,563 @@ describe('sort-imports', () => {
             partitionByNewLine: true,
           },
         ],
+      })
+    })
+
+    it('preserves partitions inside groups', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            groups: ['external', 'internal', 'sibling'],
+            partitionInsideGroup: 'preserve',
+            partitionByNewLine: true,
+            newlinesBetween: 1,
+          },
+        ],
+        output: dedent`
+          import fs from 'fs';
+          import React from 'react';
+          import z from 'zod';
+
+          import b from '@/b';
+
+          import a from './a';
+          import c from './c';
+        `,
+        code: dedent`
+          import z from 'zod';
+          import React from 'react';
+          import fs from 'fs';
+
+          import b from '@/b';
+
+          import c from './c';
+          import a from './a';
+        `,
+        errors: [
+          { messageId: 'unexpectedImportsOrder' },
+          { messageId: 'unexpectedImportsOrder' },
+          { messageId: 'unexpectedImportsOrder' },
+        ],
+      })
+    })
+
+    it(
+      'preserves newlines between partitions when newlinesInside is 0',
+      async () => {
+        await invalid({
+          options: [
+            {
+              ...options,
+              partitionInsideGroup: 'preserve',
+              partitionByNewLine: true,
+              groups: ['external'],
+              newlinesBetween: 0,
+              newlinesInside: 0,
+            },
+          ],
+          output: dedent`
+            import axios from 'axios';
+            import z from 'zod';
+
+            import b from 'b';
+            import y from 'y';
+          `,
+          code: dedent`
+            import z from 'zod';
+            import axios from 'axios';
+
+            import y from 'y';
+            import b from 'b';
+          `,
+          errors: [
+            { messageId: 'unexpectedImportsOrder' },
+            { messageId: 'unexpectedImportsOrder' },
+          ],
+        })
+      },
+    )
+
+    it(
+      'does not insert newlines when newlinesInside is 0',
+      async () => {
+        await valid({
+          options: [
+            {
+              ...options,
+              partitionInsideGroup: 'preserve',
+              partitionByNewLine: true,
+              groups: ['external'],
+              newlinesBetween: 0,
+              newlinesInside: 0,
+            },
+          ],
+          code: dedent`
+            import type { Request, Response } from 'express'
+            import type { User } from '@/types/user'
+          `,
+        })
+      },
+    )
+
+    it(
+      'normalizes group overrides when preserving partitions by newline',
+      async () => {
+        await valid({
+          options: [
+            {
+              ...options,
+              customGroups: [
+                {
+                  elementNamePattern: '^a$',
+                  groupName: 'custom',
+                  newlinesInside: 0,
+                },
+              ],
+              groups: [{ newlinesInside: 0, group: 'custom' }, 'unknown'],
+              partitionInsideGroup: 'preserve',
+              partitionByNewLine: true,
+              newlinesBetween: 0,
+              newlinesInside: 0,
+            },
+          ],
+          code: dedent`
+            import a from 'a';
+            import b from 'b';
+          `,
+        })
+      },
+    )
+
+    it(
+      'keeps override values when preserving partitions by newline',
+      async () => {
+        await valid({
+          options: [
+            {
+              ...options,
+              customGroups: [
+                {
+                  elementNamePattern: '^a$',
+                  groupName: 'custom',
+                  newlinesInside: 1,
+                },
+              ],
+              groups: [{ newlinesInside: 1, group: 'custom' }, 'unknown'],
+              partitionInsideGroup: 'preserve',
+              partitionByNewLine: true,
+              newlinesBetween: 0,
+              newlinesInside: 1,
+            },
+          ],
+          code: dedent`
+            import a from 'a';
+            import b from 'b';
+          `,
+        })
+      },
+    )
+
+    it(
+      'keeps ignore override values when preserving partitions by newline',
+      async () => {
+        await valid({
+          options: [
+            {
+              ...options,
+              customGroups: [
+                {
+                  elementNamePattern: '^a$',
+                  newlinesInside: 'ignore',
+                  groupName: 'custom',
+                },
+              ],
+              groups: [{ newlinesInside: 'ignore', group: 'custom' }, 'unknown'],
+              partitionInsideGroup: 'preserve',
+              partitionByNewLine: true,
+              newlinesBetween: 0,
+              newlinesInside: 1,
+            },
+          ],
+          code: dedent`
+            import a from 'a';
+            import b from 'b';
+          `,
+        })
+      },
+    )
+
+    it('merges partitions inside groups', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            groups: ['external', 'internal', 'sibling'],
+            partitionInsideGroup: 'merge',
+            partitionByNewLine: true,
+            newlinesBetween: 1,
+          },
+        ],
+        output: dedent`
+          import fs from 'fs';
+          import z from 'zod';
+
+          import b from '@/b';
+
+          import a from './a';
+          import c from './c';
+        `,
+        code: dedent`
+          import z from 'zod';
+          import fs from 'fs';
+
+          import b from '@/b';
+
+          import c from './c';
+          import a from './a';
+        `,
+        errors: [
+          { messageId: 'unexpectedImportsOrder' },
+          { messageId: 'unexpectedImportsOrder' },
+        ],
+      })
+    })
+
+    it('splits partitions by max imports', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            partitionInsideGroup: 'preserve',
+            partitionByNewLine: false,
+            partitionMaxImports: 2,
+            groups: ['external'],
+            newlinesBetween: 0,
+            newlinesInside: 1,
+          },
+        ],
+        output: dedent`
+          import a from 'a';
+          import b from 'b';
+
+          import c from 'c';
+          import d from 'd';
+
+          import e from 'e';
+        `,
+        code: dedent`
+          import a from 'a';
+          import b from 'b';
+          import c from 'c';
+          import d from 'd';
+          import e from 'e';
+        `,
+        errors: [
+          { messageId: 'missedSpacingBetweenImports' },
+          { messageId: 'missedSpacingBetweenImports' },
+        ],
+      })
+    })
+
+    it('partitions by comments inside a group', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            partitionInsideGroup: 'preserve',
+            partitionByComment: 'Section:',
+            groups: ['external'],
+            newlinesBetween: 0,
+            newlinesInside: 0,
+          },
+        ],
+        output: dedent`
+          import fs from 'fs';
+          import z from 'zod';
+          // Section: dates
+          import dayjs from 'dayjs';
+        `,
+        code: dedent`
+          import z from 'zod';
+          import fs from 'fs';
+          // Section: dates
+          import dayjs from 'dayjs';
+        `,
+        errors: [{ messageId: 'unexpectedImportsOrder' }],
+      })
+    })
+
+    it(
+      'preserves comment partitions when newlinesInside is 0',
+      async () => {
+        await invalid({
+          options: [
+            {
+              ...options,
+              partitionInsideGroup: 'preserve',
+              partitionByComment: 'Section:',
+              groups: ['external'],
+              newlinesBetween: 0,
+              newlinesInside: 0,
+            },
+          ],
+          output: dedent`
+            import axios from 'axios';
+            import z from 'zod';
+            // Section: core
+            import dayjs from 'dayjs';
+            import lodash from 'lodash';
+          `,
+          code: dedent`
+            import z from 'zod';
+            import axios from 'axios';
+            // Section: core
+            import lodash from 'lodash';
+            import dayjs from 'dayjs';
+          `,
+          errors: [
+            { messageId: 'unexpectedImportsOrder' },
+            { messageId: 'unexpectedImportsOrder' },
+          ],
+        })
+      },
+    )
+
+    it('enforces newlines between groups with partitions', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            groups: ['external', 'internal'],
+            partitionInsideGroup: 'preserve',
+            partitionByNewLine: true,
+            newlinesBetween: 2,
+          },
+        ],
+        output: dedent`
+          import fs from 'fs';
+          import z from 'zod';
+
+
+          import a from '@/a';
+        `,
+        code: dedent`
+          import fs from 'fs';
+          import z from 'zod';
+          import a from '@/a';
+        `,
+        errors: [{ messageId: 'missedSpacingBetweenImports' }],
+      })
+    })
+
+    it('merges partitions across comment separators', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            partitionInsideGroup: 'merge',
+            partitionByComment: true,
+            groups: ['external'],
+            newlinesBetween: 0,
+          },
+        ],
+        output: dedent`
+          import a from 'a';
+          // keep
+          import fs from 'fs';
+          import z from 'zod';
+        `,
+        code: dedent`
+          import z from 'zod';
+          // keep
+          import fs from 'fs';
+          import a from 'a';
+        `,
+        errors: [
+          { messageId: 'unexpectedImportsOrder' },
+          { messageId: 'unexpectedImportsOrder' },
+        ],
+      })
+    })
+
+    it('example: preserves partitions inside groups', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            customGroups: [
+              {
+                elementNamePattern: '^react$',
+                groupName: 'react',
+              },
+            ],
+            groups: ['react', 'external', 'internal', 'sibling'],
+            partitionInsideGroup: 'preserve',
+            internalPattern: ['^@app/.+'],
+            partitionByNewLine: true,
+            newlinesBetween: 1,
+            newlinesInside: 1,
+          },
+        ],
+        output: dedent`
+          import React from 'react';
+
+          import axios from 'axios';
+          import zod from 'zod';
+
+          import dayjs from 'dayjs';
+          import lodash from 'lodash';
+
+          import b from '@app/b';
+
+          import c from './c';
+
+          import a from './a';
+        `,
+        code: dedent`
+          import React from 'react';
+
+          import zod from 'zod';
+          import axios from 'axios';
+
+          import lodash from 'lodash';
+          import dayjs from 'dayjs';
+
+          import b from '@app/b';
+
+          import c from './c';
+
+          import a from './a';
+        `,
+        errors: [
+          { messageId: 'unexpectedImportsOrder' },
+          { messageId: 'unexpectedImportsOrder' },
+        ],
+      })
+    })
+
+    it('example: merges partitions inside groups', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            groups: ['external', 'internal', 'sibling'],
+            internalPattern: ['^@app/.+'],
+            partitionInsideGroup: 'merge',
+            partitionByNewLine: true,
+            newlinesBetween: 1,
+          },
+        ],
+        errors: [
+          { messageId: 'unexpectedImportsOrder' },
+          { messageId: 'extraSpacingBetweenImports' },
+          { messageId: 'unexpectedImportsOrder' },
+          { messageId: 'unexpectedImportsOrder' },
+          { messageId: 'extraSpacingBetweenImports' },
+        ],
+        output: dedent`
+          import axios from 'axios';
+          import dayjs from 'dayjs';
+          import lodash from 'lodash';
+          import zod from 'zod';
+
+          import b from '@app/b';
+
+          import a from './a';
+          import c from './c';
+        `,
+        code: dedent`
+          import zod from 'zod';
+          import axios from 'axios';
+
+          import lodash from 'lodash';
+          import dayjs from 'dayjs';
+
+          import b from '@app/b';
+
+          import c from './c';
+
+          import a from './a';
+        `,
+      })
+    })
+
+    it('example: preserves partitions inside groups (partitionInsideGroup)', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            groups: ['external', 'internal', 'sibling'],
+            partitionInsideGroup: 'preserve',
+            internalPattern: ['^@app/.+'],
+            partitionByNewLine: true,
+            newlinesBetween: 1,
+            newlinesInside: 1,
+          },
+        ],
+        output: dedent`
+          import axios from 'axios';
+          import zod from 'zod';
+
+          import dayjs from 'dayjs';
+          import lodash from 'lodash';
+
+          import b from '@app/b';
+
+          import c from './c';
+
+          import a from './a';
+        `,
+        code: dedent`
+          import zod from 'zod';
+          import axios from 'axios';
+
+          import lodash from 'lodash';
+          import dayjs from 'dayjs';
+
+          import b from '@app/b';
+
+          import c from './c';
+
+          import a from './a';
+        `,
+        errors: [
+          { messageId: 'unexpectedImportsOrder' },
+          { messageId: 'unexpectedImportsOrder' },
+        ],
+      })
+    })
+
+    it('example: partitionMaxImports splits into single-import partitions', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            partitionInsideGroup: 'preserve',
+            partitionByNewLine: false,
+            partitionMaxImports: 1,
+            groups: ['external'],
+            newlinesBetween: 0,
+            newlinesInside: 1,
+          },
+        ],
+        errors: [
+          { messageId: 'missedSpacingBetweenImports' },
+          { messageId: 'missedSpacingBetweenImports' },
+        ],
+        output: dedent`
+          import a from 'a';
+
+          import c from 'c';
+
+          import b from 'b';
+        `,
+        code: dedent`
+          import a from 'a';
+          import c from 'c';
+          import b from 'b';
+        `,
       })
     })
 
@@ -1908,12 +2474,20 @@ describe('sort-imports', () => {
             partitionByNewLine: true,
           },
         ],
+        errors: [
+          {
+            messageId: 'unexpectedImportsGroupOrder',
+          },
+          {
+            messageId: 'unexpectedImportsGroupOrder',
+          },
+        ],
         output: dedent`
-          import type { C } from './c'
+          import type { A } from './a'
 
+          import type { C } from './c'
           import { b } from './b'
 
-          import type { A } from './a'
           import { a } from './a'
         `,
         code: dedent`
@@ -1924,11 +2498,6 @@ describe('sort-imports', () => {
 
           import type { C } from './c'
         `,
-        errors: [
-          {
-            messageId: 'unexpectedImportsGroupOrder',
-          },
-        ],
       })
     })
 
@@ -1964,6 +2533,66 @@ describe('sort-imports', () => {
             messageId: 'unexpectedImportsGroupOrder',
           },
         ],
+      })
+    })
+
+    it('preserves comment separators when reordering partitions', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            partitionSorting: 'type-first',
+            partitionByNewLine: true,
+            partitionByComment: true,
+            newlinesBetween: 1,
+            newlinesInside: 0,
+          },
+        ],
+        output: dedent`
+          import type { A } from './a'
+
+          // Section
+          import { b } from './b'
+        `,
+        code: dedent`
+          import { b } from './b'
+          // Section
+          import type { A } from './a'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsGroupOrder',
+          },
+        ],
+      })
+    })
+
+    it('applies default separators when reordering partitions without comments', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            partitionSorting: 'type-first',
+            partitionByNewLine: true,
+            newlinesBetween: 1,
+            newlinesInside: 0,
+          },
+        ],
+        output: dedent`
+          import type { A } from './a'
+
+          import { b } from './b'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsGroupOrder',
+          },
+        ],
+        code: dedent`
+          import { b } from './b'
+
+          import type { A } from './a'
+        `,
       })
     })
 
@@ -3485,9 +4114,9 @@ describe('sort-imports', () => {
               },
             ],
             output: dedent`
-              import f = fImport.f1.f2;
-
               import yImport from "z";
+
+              import f = fImport.f1.f2;
 
               import y = yImport.y1.y2;
 
@@ -3495,9 +4124,9 @@ describe('sort-imports', () => {
 
               import aImport from "b";
 
-              import a = aImport.a1.a2;
-
               import fImport from "g";
+
+              import a = aImport.a1.a2;
             `,
             code: dedent`
               import f = fImport.f1.f2;
@@ -3952,6 +4581,60 @@ describe('sort-imports', () => {
         code: dedent`
           import { a, z } from 'alphabet'
           import { m } from 'middle'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+
+      await invalid({
+        options: [
+          {
+            ...options,
+            partitionImportsSplitOnSort: true,
+            partitionMaxImports: 2,
+            sortBy: 'specifier',
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import { a } from 'alphabet'
+          import { m } from 'middle'
+          import { z } from 'alphabet'
+        `,
+        code: dedent`
+          import { a, z } from 'alphabet'
+          import { m } from 'middle'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+
+      await invalid({
+        options: [
+          {
+            ...options,
+            partitionImportsSplitOnSort: true,
+            newlinesInside: 'newlinesBetween',
+            partitionInsideGroup: 'preserve',
+            partitionByNewLine: true,
+            sortBy: 'specifier',
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import { a } from 'alpha'
+          import { m } from 'beta'
+          import { z } from 'alpha'
+        `,
+        code: dedent`
+          import { a, z } from 'alpha'
+          import { m } from 'beta'
         `,
         errors: [
           {
@@ -5686,12 +6369,12 @@ describe('sort-imports', () => {
           },
         ],
         output: dedent`
-          import "./z-side-effect";
           import './b-side-effect.scss'
           import './a-side-effect.css'
 
-          import "./g-side-effect";
+          import "./z-side-effect";
           import a from "./a";
+          import "./g-side-effect";
           import b from "./b";
         `,
         code: dedent`
@@ -6085,11 +6768,18 @@ describe('sort-imports', () => {
             newlinesBetween,
           },
         ],
+        errors: [
+          {
+            messageId: 'extraSpacingBetweenImports',
+          },
+          {
+            data: { right: './b', left: './c' },
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
         output: dedent`
           import a from 'a';
-
           // Partition comment
-
           import { b } from './b';
           import { c } from './c';
         `,
@@ -6101,12 +6791,6 @@ describe('sort-imports', () => {
           import { c } from './c';
           import { b } from './b';
         `,
-        errors: [
-          {
-            data: { right: './b', left: './c' },
-            messageId: 'unexpectedImportsOrder',
-          },
-        ],
       })
     })
 
@@ -7436,9 +8120,9 @@ describe('sort-imports', () => {
           },
         ],
         output: dedent`
-          import f = fImport.f1.f2;
-
           import yImport from "z";
+
+          import f = fImport.f1.f2;
 
           import y = yImport.y1.y2;
 
@@ -7446,9 +8130,9 @@ describe('sort-imports', () => {
 
           import aImport from "b";
 
-          import a = aImport.a1.a2;
-
           import fImport from "g";
+
+          import a = aImport.a1.a2;
         `,
         code: dedent`
           import f = fImport.f1.f2;
@@ -8010,13 +8694,9 @@ describe('sort-imports', () => {
           },
           {
             data: {
-              left: './style.css',
-              right: '../j',
+              right: '../k',
+              left: '../j',
             },
-            messageId: 'unexpectedImportsOrder',
-          },
-          {
-            data: { right: '../k', left: '../j' },
             messageId: 'unexpectedImportsOrder',
           },
         ],
@@ -9100,12 +9780,12 @@ describe('sort-imports', () => {
           },
         ],
         output: dedent`
-          import "./z-side-effect";
           import './b-side-effect.scss'
           import './a-side-effect.css'
 
-          import "./g-side-effect";
+          import "./z-side-effect";
           import b from "./b";
+          import "./g-side-effect";
           import a from "./a";
         `,
         code: dedent`
@@ -9499,11 +10179,18 @@ describe('sort-imports', () => {
             newlinesBetween,
           },
         ],
+        errors: [
+          {
+            messageId: 'extraSpacingBetweenImports',
+          },
+          {
+            data: { right: './bb', left: './c' },
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
         output: dedent`
           import a from 'a';
-
           // Partition comment
-
           import { b } from './bb';
           import { c } from './c';
         `,
@@ -9515,12 +10202,6 @@ describe('sort-imports', () => {
           import { c } from './c';
           import { b } from './bb';
         `,
-        errors: [
-          {
-            data: { right: './bb', left: './c' },
-            messageId: 'unexpectedImportsOrder',
-          },
-        ],
       })
     })
 
@@ -10855,9 +11536,9 @@ describe('sort-imports', () => {
           },
         ],
         output: dedent`
-          import f = fImport.f1.f2;
-
           import yImport from "z";
+
+          import f = fImport.f1.f2;
 
           import y = yImport.y1.y2;
 
@@ -10865,9 +11546,9 @@ describe('sort-imports', () => {
 
           import aImport from "b";
 
-          import a = aImport.a1.a2;
-
           import fImport from "g";
+
+          import a = aImport.a1.a2;
         `,
         code: dedent`
           import f = fImport.f1.f2;
@@ -12286,6 +12967,25 @@ describe('sort-imports', () => {
             true,
           ),
         ).not.toThrowError(expectedThrownError)
+      })
+    })
+
+    describe('validates partitionInsideGroup configuration', () => {
+      function createRule(partitionInsideGroup: string): RuleListener {
+        return rule.create({
+          options: [
+            {
+              partitionInsideGroup:
+                partitionInsideGroup as Options[number]['partitionInsideGroup'],
+            },
+          ],
+        } as Readonly<RuleContext<MessageId, Options>>)
+      }
+
+      it('throws error when partitionInsideGroup is invalid', () => {
+        expect(() => createRule('invalid')).toThrowError(
+          "The 'partitionInsideGroup' option must be 'preserve' or 'merge'.",
+        )
       })
     })
 
