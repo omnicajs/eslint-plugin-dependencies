@@ -94,7 +94,7 @@ Add `perfectionist` to the plugins section of your ESLint configuration. Then co
     {
       source: dedent`
         // eslint.config.js
-        import perfectionist from 'eslint-plugin-perfectionist'
+        import dependencies from '@omnicajs/eslint-plugin-dependencies'
 
         export default [
           {
@@ -164,16 +164,16 @@ Example:
         export default [
           {
             plugins: {
-              perfectionist,
+              dependencies,
             },
             rules: {
-              'perfectionist/sort-objects': ['error', {
+              'dependencies/sort-imports': ['error', {
                 type: 'alphabetical',
               }],
-              'perfectionist/sort-interfaces': ['error'],
+              'dependencies/sort-exports': ['error'],
             },
             settings: {
-              perfectionist: {
+              dependencies: {
                 type: 'line-length',
                 partitionByComment: true,
               },
@@ -189,16 +189,16 @@ Example:
         // .eslintrc.js
         module.exports = {
           plugins: [
-            'perfectionist',
+            '@omnicajs/dependencies',
           ],
           rules: {
-            'perfectionist/sort-objects': ['error', {
+            '@omnicajs/dependencies/sort-imports': ['error', {
               type: 'alphabetical',
             }],
-            'perfectionist/sort-interfaces': ['error'],
+            '@omnicajs/dependencies/sort-exports': ['error'],
           },
           settings: {
-            perfectionist: {
+            dependencies: {
               type: 'line-length',
               partitionByComment: true,
             },

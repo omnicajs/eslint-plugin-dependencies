@@ -189,28 +189,15 @@ module.exports = {
 
 | Name                                                                                     | Description                                   | 🔧  |
 | :--------------------------------------------------------------------------------------- | :-------------------------------------------- | :-- |
-| [sort-array-includes](https://perfectionist.dev/rules/sort-array-includes)               | Enforce sorted arrays before include method   | 🔧  |
-| [sort-classes](https://perfectionist.dev/rules/sort-classes)                             | Enforce sorted classes                        | 🔧  |
-| [sort-decorators](https://perfectionist.dev/rules/sort-decorators)                       | Enforce sorted decorators                     | 🔧  |
-| [sort-enums](https://perfectionist.dev/rules/sort-enums)                                 | Enforce sorted TypeScript enums               | 🔧  |
 | [sort-export-attributes](https://perfectionist.dev/rules/sort-export-attributes)         | Enforce sorted export attributes              | 🔧  |
 | [sort-exports](https://perfectionist.dev/rules/sort-exports)                             | Enforce sorted exports                        | 🔧  |
-| [sort-heritage-clauses](https://perfectionist.dev/rules/sort-heritage-clauses)           | Enforce sorted `implements`/`extends` clauses | 🔧  |
 | [sort-import-attributes](https://perfectionist.dev/rules/sort-import-attributes)         | Enforce sorted import attributes              | 🔧  |
 | [sort-imports](https://perfectionist.dev/rules/sort-imports)                             | Enforce sorted imports                        | 🔧  |
-| [sort-interfaces](https://perfectionist.dev/rules/sort-interfaces)                       | Enforce sorted interface properties           | 🔧  |
-| [sort-intersection-types](https://perfectionist.dev/rules/sort-intersection-types)       | Enforce sorted intersection types             | 🔧  |
-| [sort-jsx-props](https://perfectionist.dev/rules/sort-jsx-props)                         | Enforce sorted JSX props                      | 🔧  |
-| [sort-maps](https://perfectionist.dev/rules/sort-maps)                                   | Enforce sorted Map elements                   | 🔧  |
-| [sort-modules](https://perfectionist.dev/rules/sort-modules)                             | Enforce sorted modules                        | 🔧  |
 | [sort-named-exports](https://perfectionist.dev/rules/sort-named-exports)                 | Enforce sorted named exports                  | 🔧  |
 | [sort-named-imports](https://perfectionist.dev/rules/sort-named-imports)                 | Enforce sorted named imports                  | 🔧  |
-| [sort-object-types](https://perfectionist.dev/rules/sort-object-types)                   | Enforce sorted object types                   | 🔧  |
-| [sort-objects](https://perfectionist.dev/rules/sort-objects)                             | Enforce sorted objects                        | 🔧  |
-| [sort-sets](https://perfectionist.dev/rules/sort-sets)                                   | Enforce sorted Set elements                   | 🔧  |
-| [sort-switch-case](https://perfectionist.dev/rules/sort-switch-case)                     | Enforce sorted switch case statements         | 🔧  |
-| [sort-union-types](https://perfectionist.dev/rules/sort-union-types)                     | Enforce sorted union types                    | 🔧  |
-| [sort-variable-declarations](https://perfectionist.dev/rules/sort-variable-declarations) | Enforce sorted variable declarations          | 🔧  |
+| [import-style](https://perfectionist.dev/rules/import-style)                             | Enforce explicit module import style          | 🔧  |
+| separate-type-imports                                                                      | Enforce dedicated type import declarations    | 🔧  |
+| separate-type-partitions                                                                    | Enforce partitions for type-only imports      | 🔧  |
 
 <!-- end auto-generated rules list -->
 

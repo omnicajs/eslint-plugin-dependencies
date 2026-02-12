@@ -1,31 +1,15 @@
 import type { ESLint, Linter } from 'eslint'
 
 import { version as packageVersion, name as packageName } from './package.json'
-import sortVariableDeclarations from './rules/sort-variable-declarations'
 import separateTypePartitions from './rules/separate-type-partitions'
-import sortIntersectionTypes from './rules/sort-intersection-types'
 import sortImportAttributes from './rules/sort-import-attributes'
 import sortExportAttributes from './rules/sort-export-attributes'
-import sortHeritageClauses from './rules/sort-heritage-clauses'
 import separateTypeImports from './rules/separate-type-imports'
-import sortArrayIncludes from './rules/sort-array-includes'
 import sortNamedImports from './rules/sort-named-imports'
 import sortNamedExports from './rules/sort-named-exports'
-import sortObjectTypes from './rules/sort-object-types'
-import sortSwitchCase from './rules/sort-switch-case'
-import sortUnionTypes from './rules/sort-union-types'
-import sortInterfaces from './rules/sort-interfaces'
-import sortDecorators from './rules/sort-decorators'
-import sortJsxProps from './rules/sort-jsx-props'
 import importStyle from './rules/import-style'
-import sortClasses from './rules/sort-classes'
 import sortImports from './rules/sort-imports'
 import sortExports from './rules/sort-exports'
-import sortObjects from './rules/sort-objects'
-import sortModules from './rules/sort-modules'
-import sortEnums from './rules/sort-enums'
-import sortMaps from './rules/sort-maps'
-import sortSets from './rules/sort-sets'
 
 interface PluginConfigs extends Record<
   string,
@@ -46,34 +30,18 @@ interface BaseOptions {
   order: 'desc' | 'asc'
 }
 
-let pluginName = 'perfectionist'
+let pluginName = 'dependencies'
 
 export let rules = {
-  'sort-variable-declarations': sortVariableDeclarations,
   'separate-type-partitions': separateTypePartitions,
-  'sort-intersection-types': sortIntersectionTypes,
   'sort-import-attributes': sortImportAttributes,
   'sort-export-attributes': sortExportAttributes,
-  'sort-heritage-clauses': sortHeritageClauses,
   'separate-type-imports': separateTypeImports,
-  'sort-array-includes': sortArrayIncludes,
   'sort-named-imports': sortNamedImports,
   'sort-named-exports': sortNamedExports,
-  'sort-object-types': sortObjectTypes,
-  'sort-union-types': sortUnionTypes,
-  'sort-switch-case': sortSwitchCase,
-  'sort-decorators': sortDecorators,
-  'sort-interfaces': sortInterfaces,
-  'sort-jsx-props': sortJsxProps,
   'import-style': importStyle,
-  'sort-modules': sortModules,
-  'sort-classes': sortClasses,
   'sort-imports': sortImports,
   'sort-exports': sortExports,
-  'sort-objects': sortObjects,
-  'sort-enums': sortEnums,
-  'sort-sets': sortSets,
-  'sort-maps': sortMaps,
 } as unknown as ESLint.Plugin['rules']
 
 let plugin = {
