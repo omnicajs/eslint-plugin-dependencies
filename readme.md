@@ -1,23 +1,22 @@
-# ESLint Plugin Perfectionist
+# ESLint Plugin Dependencies
 
 <img
-  src="https://raw.githubusercontent.com/azat-io/eslint-plugin-perfectionist/main/docs/public/logo.svg"
-  alt="ESLint Plugin Perfectionist logo"
+  src="https://raw.githubusercontent.com/omnicajs/eslint-plugin-dependencies/main/docs/public/logo.svg"
+  alt="ESLint Plugin Dependencies logo"
   align="right"
   height="160"
   width="160"
 />
 
-[![Version](https://img.shields.io/npm/v/eslint-plugin-perfectionist.svg?color=4a32c3&labelColor=26272b)](https://npmjs.com/package/eslint-plugin-perfectionist)
-[![Monthly Download](https://img.shields.io/npm/dm/eslint-plugin-perfectionist.svg?color=4a32c3&labelColor=26272b)](https://npmjs.com/package/eslint-plugin-perfectionist)
-[![Code Coverage](https://img.shields.io/codecov/c/github/azat-io/eslint-plugin-perfectionist.svg?color=4a32c3&labelColor=26272b)](https://npmjs.com/package/eslint-plugin-perfectionist)
-[![GitHub License](https://img.shields.io/badge/license-MIT-232428.svg?color=4a32c3&labelColor=26272b)](https://github.com/azat-io/eslint-plugin-perfectionist/blob/main/license.md)
+[![Version](https://img.shields.io/npm/v/%40omnicajs%2Feslint-plugin-dependencies.svg?color=4a32c3&labelColor=26272b)](https://npmjs.com/package/@omnicajs/eslint-plugin-dependencies)
+[![Monthly Download](https://img.shields.io/npm/dm/%40omnicajs%2Feslint-plugin-dependencies.svg?color=4a32c3&labelColor=26272b)](https://npmjs.com/package/@omnicajs/eslint-plugin-dependencies)
+[![Code Coverage](https://img.shields.io/codecov/c/github/omnicajs/eslint-plugin-dependencies.svg?color=4a32c3&labelColor=26272b)](https://npmjs.com/package/@omnicajs/eslint-plugin-dependencies)
+[![GitHub License](https://img.shields.io/badge/license-MIT-232428.svg?color=4a32c3&labelColor=26272b)](https://github.com/omnicajs/eslint-plugin-dependencies/blob/main/license.md)
 
 An ESLint plugin that sets rules to format your code and make it consistent.
 
-This plugin defines rules for sorting various data, such as objects, imports,
-TypeScript types, enums, JSX props, Svelte attributes, etc. alphabetically,
-naturally, or by line length.
+This plugin defines rules for sorting and structuring `import` and `export`
+declarations.
 
 All rules are automatically fixable. It's safe!
 
@@ -51,16 +50,16 @@ See [docs](https://perfectionist.dev).
 
 <picture>
   <source
-    srcset="https://raw.githubusercontent.com/azat-io/eslint-plugin-perfectionist/main/docs/public/examples/example-alphabetical-light.webp"
+    srcset="https://raw.githubusercontent.com/omnicajs/eslint-plugin-dependencies/main/docs/public/examples/example-alphabetical-light.webp"
     media="(prefers-color-scheme: light)"
   />
   <source
-    srcset="https://raw.githubusercontent.com/azat-io/eslint-plugin-perfectionist/main/docs/public/examples/example-alphabetical-dark.webp"
+    srcset="https://raw.githubusercontent.com/omnicajs/eslint-plugin-dependencies/main/docs/public/examples/example-alphabetical-dark.webp"
     media="(prefers-color-scheme: dark)"
   />
   <img
-    src="https://raw.githubusercontent.com/azat-io/eslint-plugin-perfectionist/main/docs/public/examples/example-alphabetical-light.webp"
-    alt="ESLint Plugin Perfectionist alphabetical usage example"
+    src="https://raw.githubusercontent.com/omnicajs/eslint-plugin-dependencies/main/docs/public/examples/example-alphabetical-light.webp"
+    alt="ESLint Plugin Dependencies alphabetical usage example"
   />
 </picture>
 
@@ -68,16 +67,16 @@ See [docs](https://perfectionist.dev).
 
 <picture>
   <source
-    srcset="https://raw.githubusercontent.com/azat-io/eslint-plugin-perfectionist/main/docs/public/examples/example-line-length-light.webp"
+    srcset="https://raw.githubusercontent.com/omnicajs/eslint-plugin-dependencies/main/docs/public/examples/example-line-length-light.webp"
     media="(prefers-color-scheme: light)"
   />
   <source
-    srcset="https://raw.githubusercontent.com/azat-io/eslint-plugin-perfectionist/main/docs/public/examples/example-line-length-dark.webp"
+    srcset="https://raw.githubusercontent.com/omnicajs/eslint-plugin-dependencies/main/docs/public/examples/example-line-length-dark.webp"
     media="(prefers-color-scheme: dark)"
   />
   <img
-    src="https://raw.githubusercontent.com/azat-io/eslint-plugin-perfectionist/main/docs/public/examples/example-line-length-light.webp"
-    alt="ESLint Plugin Perfectionist line length usage example"
+    src="https://raw.githubusercontent.com/omnicajs/eslint-plugin-dependencies/main/docs/public/examples/example-line-length-light.webp"
+    alt="ESLint Plugin Dependencies line length usage example"
   />
 </picture>
 
@@ -89,29 +88,29 @@ You'll first need to install [ESLint](https://eslint.org) v8.45.0 or greater:
 npm install --save-dev eslint
 ```
 
-Next, install `eslint-plugin-perfectionist`:
+Next, install `@omnicajs/eslint-plugin-dependencies`:
 
 ```sh
-npm install --save-dev eslint-plugin-perfectionist
+npm install --save-dev @omnicajs/eslint-plugin-dependencies
 ```
 
 ## Usage
 
-Add `eslint-plugin-perfectionist` to the plugins section of the ESLint
+Add `@omnicajs/eslint-plugin-dependencies` to the plugins section of the ESLint
 configuration file and define the list of rules you will use.
 
 ### Flat Config ([`eslint.config.js`](https://eslint.org/docs/latest/use/configure/configuration-files))
 
 ```js
-import perfectionist from 'eslint-plugin-perfectionist'
+import dependencies from '@omnicajs/eslint-plugin-dependencies'
 
 export default [
   {
     plugins: {
-      perfectionist,
+      dependencies,
     },
     rules: {
-      'perfectionist/sort-imports': [
+      'dependencies/sort-imports': [
         'error',
         {
           type: 'natural',
@@ -129,10 +128,10 @@ export default [
 ```js
 module.exports = {
   plugins: [
-    'perfectionist',
+    '@omnicajs/dependencies',
   ],
   rules: {
-    'perfectionist/sort-imports': [
+    '@omnicajs/dependencies/sort-imports': [
       'error',
       {
         type: 'natural',
@@ -145,7 +144,8 @@ module.exports = {
 
 ## Configs
 
-The easiest way to use `eslint-plugin-perfectionist` is to use ready-made
+The easiest way to use `@omnicajs/eslint-plugin-dependencies` is to use
+ready-made
 configs. Config files use all the rules of the current plugin, but you can
 override them.
 
@@ -153,10 +153,10 @@ override them.
 
 <!-- prettier-ignore -->
 ```js
-import perfectionist from 'eslint-plugin-perfectionist'
+import dependencies from '@omnicajs/eslint-plugin-dependencies'
 
 export default [
-  perfectionist.configs['recommended-natural'],
+  dependencies.configs['recommended-natural'],
 ]
 ```
 
@@ -166,7 +166,7 @@ export default [
 ```js
 module.exports = {
   extends: [
-    'plugin:perfectionist/recommended-natural-legacy',
+    'plugin:@omnicajs/dependencies/recommended-natural-legacy',
   ],
 }
 ```
@@ -228,7 +228,7 @@ Overall, yes. We want to make sure that the work of the plugin does not
 negatively affect the behavior of the code. For example, the plugin takes into
 account spread operators in JSX and objects, comments to the code. Safety is our
 priority. If you encounter any problem, you can create an
-[issue](https://github.com/azat-io/eslint-plugin-perfectionist/issues/new/choose).
+[issue](https://github.com/omnicajs/eslint-plugin-dependencies/issues/new/choose).
 
 ### Why not use Prettier?
 
@@ -247,7 +247,7 @@ This plugin is following [Semantic Versioning](https://semver.org/) and
 ## Contributing
 
 See
-[Contributing Guide](https://github.com/azat-io/eslint-plugin-perfectionist/blob/main/contributing.md).
+[Contributing Guide](https://github.com/omnicajs/eslint-plugin-dependencies/blob/main/contributing.md).
 
 ## License
 

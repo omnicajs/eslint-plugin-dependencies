@@ -26,4 +26,4 @@
 - [ ] Ideally, include relevant tests that fail without this PR but pass with
       it.
 - [ ] Read
-      [contribution guidelines](https://github.com/azat-io/eslint-plugin-perfectionist/blob/main/contributing.md).
+      [contribution guidelines](https://github.com/omnicajs/eslint-plugin-dependencies/blob/main/contributing.md).
