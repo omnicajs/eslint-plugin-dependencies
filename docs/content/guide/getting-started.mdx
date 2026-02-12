@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-description: Get started with our ESLint Plugin Perfectionist by following this comprehensive guide. Learn how to install, configure, and use our tool to maintain a consistent and high-quality codebase
+description: Get started with our ESLint Plugin Dependencies by following this comprehensive guide. Learn how to install, configure, and use our tool to maintain a consistent and high-quality codebase
 keywords:
   - eslint
   - introduction
@@ -19,7 +19,7 @@ import dedent from 'dedent'
 
 # Getting Started
 
-Before you start, take a moment to support the project by giving us a star on [GitHub](https://github.com/azat-io/eslint-plugin-perfectionist).
+Before you start, take a moment to support the project by giving us a star on [GitHub](https://github.com/omnicajs/eslint-plugin-dependencies).
 
 Your support helps the continued development and improvement of this project.
 
@@ -55,27 +55,27 @@ Let's get started. You'll need to install [ESLint](https://eslint.org/) v8.45.0 
   lang="bash"
 />
 
-Next, install `eslint-plugin-perfectionist`:
+Next, install `@omnicajs/eslint-plugin-dependencies`:
 
 <CodeTabs
   code={[
     {
-      source: 'npm install --save-dev eslint-plugin-perfectionist',
+      source: 'npm install --save-dev @omnicajs/eslint-plugin-dependencies',
       name: 'npm',
       value: 'npm',
     },
     {
-      source: 'pnpm add --save-dev eslint-plugin-perfectionist',
+      source: 'pnpm add --save-dev @omnicajs/eslint-plugin-dependencies',
       name: 'pnpm',
       value: 'pnpm',
     },
     {
-      source: 'yarn add --dev eslint-plugin-perfectionist',
+      source: 'yarn add --dev @omnicajs/eslint-plugin-dependencies',
       name: 'yarn',
       value: 'yarn',
     },
     {
-      source: 'bun install --dev eslint-plugin-perfectionist',
+      source: 'bun install --dev @omnicajs/eslint-plugin-dependencies',
       name: 'bun',
       value: 'bun',
     },
@@ -87,7 +87,7 @@ Next, install `eslint-plugin-perfectionist`:
 
 ## Usage
 
-Add `perfectionist` to the plugins section of your ESLint configuration. Then configure the rules you want to use under the rules section.
+Add `dependencies` to the plugins section of your ESLint configuration. Then configure the rules you want to use under the rules section.
 
 <CodeTabs
   code={[
@@ -99,10 +99,10 @@ Add `perfectionist` to the plugins section of your ESLint configuration. Then co
         export default [
           {
             plugins: {
-              perfectionist,
+              dependencies,
             },
             rules: {
-              'perfectionist/sort-imports': 'error',
+              'dependencies/sort-imports': 'error',
             },
           },
         ]
@@ -115,10 +115,10 @@ Add `perfectionist` to the plugins section of your ESLint configuration. Then co
         // .eslintrc.js
         module.exports = {
           plugins: [
-            'perfectionist',
+            '@omnicajs/dependencies',
           ],
           rules: {
-            'perfectionist/sort-imports': 'error',
+            '@omnicajs/dependencies/sort-imports': 'error',
           },
         }
       `,
@@ -159,7 +159,7 @@ Example:
     {
       source: dedent`
         // eslint.config.js
-        import perfectionist from 'eslint-plugin-perfectionist'
+        import dependencies from '@omnicajs/eslint-plugin-dependencies'
 
         export default [
           {
