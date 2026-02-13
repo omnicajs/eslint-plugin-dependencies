@@ -1,6 +1,6 @@
 {
-  "name": "ESLint Plugin Perfectionist",
-  "short_name": "Perfectionist.",
+  "name": "ESLint Plugin Dependencies",
+  "short_name": "Dependencies.",
   "description": "ESLint plugin for sorting various data such as objects, imports, types, enums, JSX props, etc.",
   "display": "standalone",
   "start_url": "/",

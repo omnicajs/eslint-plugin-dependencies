@@ -86,7 +86,7 @@ function scheduleNext(): void {
   )
 }
 
-let marker = '__perfectionistTocInitialized__'
+let marker = '__dependenciesTocInitialized__'
 
 export function setupTableOfContents(): void {
   if (typeof document === 'undefined') {

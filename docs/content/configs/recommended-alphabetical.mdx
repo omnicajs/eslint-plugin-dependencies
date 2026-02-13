@@ -1,6 +1,6 @@
 ---
 title: recommended-alphabetical
-description: Explore the recommended alphabetical ESLint Plugin Perfectionist configuration for sorting and organizing your code. Improve code readability and maintain a consistent coding style with this setup
+description: Explore the recommended alphabetical ESLint Plugin Dependencies configuration for sorting and organizing your code. Improve code readability and maintain a consistent coding style with this setup
 shortDescription: All plugin rules with alphabetical sorting in ascending order
 keywords:
   - eslint
@@ -10,13 +10,13 @@ keywords:
   - code quality
   - javascript linting
   - alphabetical sorting
-  - eslint-plugin-perfectionist
+  - @omnicajs/eslint-plugin-dependencies
 ---
 
 import CodeTabs from '../../components/CodeTabs.svelte'
 import dedent from 'dedent'
 
-Configuration for the `eslint-plugin-perfectionist` plugin, which provides all plugin rules with predefined options: alphabetical sorting in ascending order.
+Configuration for the `@omnicajs/eslint-plugin-dependencies` plugin, which provides all plugin rules with predefined options: alphabetical sorting in ascending order.
 
 Uses [localeCompare](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare) to sort elements.
 
@@ -37,10 +37,10 @@ It helps quickly locate declarations and ensures that similar elements are group
     {
       source: dedent`
         // eslint.config.js
-        import perfectionist from 'eslint-plugin-perfectionist'
+        import dependencies from '@omnicajs/eslint-plugin-dependencies'
 
         export default [
-          perfectionist.configs['recommended-alphabetical'],
+          dependencies.configs['recommended-alphabetical'],
         ]
       `,
       name: 'Flat Config',
@@ -51,7 +51,7 @@ It helps quickly locate declarations and ensures that similar elements are group
         // .eslintrc.js
         module.exports = {
           extends: [
-            'plugin:perfectionist/recommended-alphabetical-legacy',
+            'plugin:dependencies/recommended-alphabetical-legacy',
           ],
         }
       `,

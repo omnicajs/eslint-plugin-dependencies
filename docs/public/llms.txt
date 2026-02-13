@@ -17,29 +17,29 @@ Key features:
 
 ## Getting Started
 
-- [Introduction](https://perfectionist.dev/guide/introduction): Learn about ESLint Plugin Dependencies and how it can help maintain a consistent and high-quality codebase
-- [Getting Started](https://perfectionist.dev/guide/getting-started): Installation and basic configuration guide
-- [Integrations](https://perfectionist.dev/guide/integrations): Set up automatic formatting on save in popular code editors
+- [Introduction](https://dependencies.omnicajs.dev/guide/introduction): Learn about ESLint Plugin Dependencies and how it can help maintain a consistent and high-quality codebase
+- [Getting Started](https://dependencies.omnicajs.dev/guide/getting-started): Installation and basic configuration guide
+- [Integrations](https://dependencies.omnicajs.dev/guide/integrations): Set up automatic formatting on save in popular code editors
 
 ## Configurations
 
-- [Recommended Alphabetical](https://perfectionist.dev/configs/recommended-alphabetical): All plugin rules with alphabetical sorting in ascending order
-- [Recommended Natural](https://perfectionist.dev/configs/recommended-natural): Natural sorting that handles numbers intuitively (e.g., item-1, item-2, item-10)
-- [Recommended Line Length](https://perfectionist.dev/configs/recommended-line-length): Sort by code line length (shorter lines first)
-- [Recommended Custom](https://perfectionist.dev/configs/recommended-custom): Define your own custom alphabet for sorting
+- [Recommended Alphabetical](https://dependencies.omnicajs.dev/configs/recommended-alphabetical): All plugin rules with alphabetical sorting in ascending order
+- [Recommended Natural](https://dependencies.omnicajs.dev/configs/recommended-natural): Natural sorting that handles numbers intuitively (e.g., item-1, item-2, item-10)
+- [Recommended Line Length](https://dependencies.omnicajs.dev/configs/recommended-line-length): Sort by code line length (shorter lines first)
+- [Recommended Custom](https://dependencies.omnicajs.dev/configs/recommended-custom): Define your own custom alphabet for sorting
 
 ## Rules
 
-- [import-style](https://perfectionist.dev/rules/import-style): Enforce explicit
+- [import-style](https://dependencies.omnicajs.dev/rules/import-style): Enforce explicit
   module import style
-- [separate-type-imports](https://perfectionist.dev/rules/separate-type-imports): Split type-only imports from runtime imports
-- [separate-type-partitions](https://perfectionist.dev/rules/separate-type-partitions): Partition type-only imports into dedicated blocks
-- [sort-export-attributes](https://perfectionist.dev/rules/sort-export-attributes): Sort export attributes
-- [sort-exports](https://perfectionist.dev/rules/sort-exports): Sort export statements
-- [sort-import-attributes](https://perfectionist.dev/rules/sort-import-attributes): Sort import attributes
-- [sort-imports](https://perfectionist.dev/rules/sort-imports): Sort import declarations
-- [sort-named-exports](https://perfectionist.dev/rules/sort-named-exports): Sort named exports
-- [sort-named-imports](https://perfectionist.dev/rules/sort-named-imports): Sort named imports
+- [separate-type-imports](https://dependencies.omnicajs.dev/rules/separate-type-imports): Split type-only imports from runtime imports
+- [separate-type-partitions](https://dependencies.omnicajs.dev/rules/separate-type-partitions): Partition type-only imports into dedicated blocks
+- [sort-export-attributes](https://dependencies.omnicajs.dev/rules/sort-export-attributes): Sort export attributes
+- [sort-exports](https://dependencies.omnicajs.dev/rules/sort-exports): Sort export statements
+- [sort-import-attributes](https://dependencies.omnicajs.dev/rules/sort-import-attributes): Sort import attributes
+- [sort-imports](https://dependencies.omnicajs.dev/rules/sort-imports): Sort import declarations
+- [sort-named-exports](https://dependencies.omnicajs.dev/rules/sort-named-exports): Sort named exports
+- [sort-named-imports](https://dependencies.omnicajs.dev/rules/sort-named-imports): Sort named imports
 
 ## Optional
 

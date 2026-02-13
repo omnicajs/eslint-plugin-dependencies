@@ -1,5 +1,5 @@
 name: "\U0001F4A1 Propose a new rule"
-description: Propose a new rule to be added to the ESLint Plugin Perfectionist
+description: Propose a new rule to be added to the ESLint Plugin Dependencies
 
 title: 'Feature: (fill in)'
 labels:
@@ -34,10 +34,10 @@ body:
       description:
         Before submitting the issue, please make sure you do the following
       options:
-        - label: Read the [docs](https://perfectionist.dev).
+        - label: Read the [docs](https://dependencies.omnicajs.dev).
           required: true
         - label:
             Check that there isn't [already an
-            issue](https://github.com/azat-io/eslint-plugin-perfectionist/issues)
+            issue](https://github.com/omnicajs/eslint-plugin-dependencies/issues)
             that reports the same bug to avoid creating a duplicate.
           required: true

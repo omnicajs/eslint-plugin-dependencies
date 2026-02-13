@@ -156,7 +156,7 @@ Example: enforce alphabetical sort between two elements with the same length.
 
 Used only when the [`type`](#type) option is set to `'custom'`. Specifies the custom alphabet for sorting.
 
-Use the `Alphabet` utility class from `eslint-plugin-perfectionist/alphabet` to quickly generate a custom alphabet.
+Use the `Alphabet` utility class from `@omnicajs/eslint-plugin-dependencies/alphabet` to quickly generate a custom alphabet.
 
 Example: `0123456789abcdef...`
 
@@ -429,15 +429,15 @@ Custom groups have a higher priority than any predefined group.
     {
       source: dedent`
         // eslint.config.js
-        import perfectionist from 'eslint-plugin-perfectionist'
+        import dependencies from '@omnicajs/eslint-plugin-dependencies'
 
         export default [
           {
             plugins: {
-              perfectionist,
+              dependencies,
             },
             rules: {
-              'perfectionist/sort-named-exports': [
+              'dependencies/sort-named-exports': [
                 'error',
                 {
                   type: 'alphabetical',
@@ -466,10 +466,10 @@ Custom groups have a higher priority than any predefined group.
         // .eslintrc.js
         module.exports = {
           plugins: [
-            'perfectionist',
+            'dependencies',
           ],
           rules: {
-            'perfectionist/sort-named-exports': [
+            'dependencies/sort-named-exports': [
               'error',
               {
                 type: 'alphabetical',
@@ -500,9 +500,9 @@ Custom groups have a higher priority than any predefined group.
 
 ## Version
 
-This rule was introduced in [v0.4.0](https://github.com/azat-io/eslint-plugin-perfectionist/releases/tag/v0.4.0).
+This rule was introduced in [v0.4.0](https://github.com/omnicajs/eslint-plugin-dependencies/releases/tag/v0.4.0).
 
 ## Resources
 
-- [Rule source](https://github.com/azat-io/eslint-plugin-perfectionist/blob/main/rules/sort-named-exports.ts)
-- [Test source](https://github.com/azat-io/eslint-plugin-perfectionist/blob/main/test/rules/sort-named-exports.test.ts)
+- [Rule source](https://github.com/omnicajs/eslint-plugin-dependencies/blob/main/rules/sort-named-exports.ts)
+- [Test source](https://github.com/omnicajs/eslint-plugin-dependencies/blob/main/test/rules/sort-named-exports.test.ts)

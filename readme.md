@@ -44,7 +44,7 @@ Sorting imports and properties in software development offers numerous benefits:
 
 ## Documentation
 
-See [docs](https://perfectionist.dev).
+See [docs](https://dependencies.omnicajs.dev).
 
 ### Alphabetical Sorting
 
@@ -128,10 +128,10 @@ export default [
 ```js
 module.exports = {
   plugins: [
-    '@omnicajs/dependencies',
+    'dependencies',
   ],
   rules: {
-    '@omnicajs/dependencies/sort-imports': [
+    'dependencies/sort-imports': [
       'error',
       {
         type: 'natural',
@@ -166,7 +166,7 @@ export default [
 ```js
 module.exports = {
   extends: [
-    'plugin:@omnicajs/dependencies/recommended-natural-legacy',
+    'plugin:dependencies/recommended-natural-legacy',
   ],
 }
 ```
@@ -175,10 +175,10 @@ module.exports = {
 
 | Name                                                                                   | Description                                                      |
 | :------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
-| [recommended-alphabetical](https://perfectionist.dev/configs/recommended-alphabetical) | All plugin rules with alphabetical sorting in ascending order    |
-| [recommended-natural](https://perfectionist.dev/configs/recommended-natural)           | All plugin rules with natural sorting in ascending order         |
-| [recommended-line-length](https://perfectionist.dev/configs/recommended-line-length)   | All plugin rules with sorting by line length in descending order |
-| [recommended-custom](https://perfectionist.dev/configs/recommended-custom)             | All plugin rules with sorting by your own custom order           |
+| [recommended-alphabetical](https://dependencies.omnicajs.dev/configs/recommended-alphabetical) | All plugin rules with alphabetical sorting in ascending order    |
+| [recommended-natural](https://dependencies.omnicajs.dev/configs/recommended-natural)           | All plugin rules with natural sorting in ascending order         |
+| [recommended-line-length](https://dependencies.omnicajs.dev/configs/recommended-line-length)   | All plugin rules with sorting by line length in descending order |
+| [recommended-custom](https://dependencies.omnicajs.dev/configs/recommended-custom)             | All plugin rules with sorting by your own custom order           |
 
 ## Rules
 
@@ -189,13 +189,13 @@ module.exports = {
 
 | Name                                                                                     | Description                                   | 🔧  |
 | :--------------------------------------------------------------------------------------- | :-------------------------------------------- | :-- |
-| [sort-export-attributes](https://perfectionist.dev/rules/sort-export-attributes)         | Enforce sorted export attributes              | 🔧  |
-| [sort-exports](https://perfectionist.dev/rules/sort-exports)                             | Enforce sorted exports                        | 🔧  |
-| [sort-import-attributes](https://perfectionist.dev/rules/sort-import-attributes)         | Enforce sorted import attributes              | 🔧  |
-| [sort-imports](https://perfectionist.dev/rules/sort-imports)                             | Enforce sorted imports                        | 🔧  |
-| [sort-named-exports](https://perfectionist.dev/rules/sort-named-exports)                 | Enforce sorted named exports                  | 🔧  |
-| [sort-named-imports](https://perfectionist.dev/rules/sort-named-imports)                 | Enforce sorted named imports                  | 🔧  |
-| [import-style](https://perfectionist.dev/rules/import-style)                             | Enforce explicit module import style          | 🔧  |
+| [sort-export-attributes](https://dependencies.omnicajs.dev/rules/sort-export-attributes)         | Enforce sorted export attributes              | 🔧  |
+| [sort-exports](https://dependencies.omnicajs.dev/rules/sort-exports)                             | Enforce sorted exports                        | 🔧  |
+| [sort-import-attributes](https://dependencies.omnicajs.dev/rules/sort-import-attributes)         | Enforce sorted import attributes              | 🔧  |
+| [sort-imports](https://dependencies.omnicajs.dev/rules/sort-imports)                             | Enforce sorted imports                        | 🔧  |
+| [sort-named-exports](https://dependencies.omnicajs.dev/rules/sort-named-exports)                 | Enforce sorted named exports                  | 🔧  |
+| [sort-named-imports](https://dependencies.omnicajs.dev/rules/sort-named-imports)                 | Enforce sorted named imports                  | 🔧  |
+| [import-style](https://dependencies.omnicajs.dev/rules/import-style)                             | Enforce explicit module import style          | 🔧  |
 | separate-type-imports                                                                      | Enforce dedicated type import declarations    | 🔧  |
 | separate-type-partitions                                                                    | Enforce partitions for type-only imports      | 🔧  |
 
@@ -207,7 +207,7 @@ module.exports = {
 
 Yes. To do this, you need to enable autofix in ESLint when you save the file in
 your editor. You may find instructions for your editor
-[here](https://perfectionist.dev/guide/integrations).
+[here](https://dependencies.omnicajs.dev/guide/integrations).
 
 ### Is it safe?
 

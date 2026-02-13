@@ -24,18 +24,18 @@ import { UnreachableCaseError } from './unreachable-case-error'
  *
  * ```ts
  * // Source code with disable comments:
- * // eslint-disable-next-line perfectionist/sort-imports
+ * // eslint-disable-next-line dependencies/sort-imports
  * import { z } from 'zod'
  * import { a } from 'a'
  *
- * // eslint-disable perfectionist/sort-imports
+ * // eslint-disable dependencies/sort-imports
  * import { y } from 'y'
  * import { b } from 'b'
- * // eslint-enable perfectionist/sort-imports
+ * // eslint-enable dependencies/sort-imports
  *
  * getEslintDisabledLines({
  *   sourceCode,
- *   ruleName: 'perfectionist/sort-imports',
+ *   ruleName: 'dependencies/sort-imports',
  * })
  * // Returns: [2, 5, 6] (lines where the rule is disabled)
  * ```

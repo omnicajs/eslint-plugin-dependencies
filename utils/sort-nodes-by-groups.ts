@@ -34,7 +34,7 @@ interface SortNodesByGroupsParameters<Node extends SortingNode, Options> {
  * Sorts nodes by distributing them into groups and sorting each group
  * independently.
  *
- * This is the core sorting function used by all Perfectionist rules. It
+ * This is the core sorting function used by all Dependencies rules. It
  * implements a two-phase sorting strategy:
  *
  * 1. Distribute nodes into their respective groups based on group configuration

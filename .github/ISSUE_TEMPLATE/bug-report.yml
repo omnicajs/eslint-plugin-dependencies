@@ -1,5 +1,5 @@
 name: "\U0001F41E Bug report"
-description: Report an issue with ESLint Plugin Perfectionist
+description: Report an issue with ESLint Plugin Dependencies
 
 title: 'Bug: (fill in)'
 labels:
@@ -34,10 +34,10 @@ body:
       required: true
 
   - type: input
-    id: eslint-plugin-perfectionist-version
+    id: eslint-plugin-dependencies-version
     attributes:
-      label: ESLint Plugin Perfectionist version
-      description: Please provide ESLint Plugin Perfectionist version.
+      label: ESLint Plugin Dependencies version
+      description: Please provide ESLint Plugin Dependencies version.
       placeholder: v1.0.0
     validations:
       required: true
@@ -54,10 +54,10 @@ body:
       description:
         Before submitting the issue, please make sure you do the following
       options:
-        - label: Read the [docs](https://perfectionist.dev).
+        - label: Read the [docs](https://dependencies.omnicajs.dev).
           required: true
         - label:
             Check that there isn't [already an
-            issue](https://github.com/azat-io/eslint-plugin-perfectionist/issues)
+            issue](https://github.com/omnicajs/eslint-plugin-dependencies/issues)
             that reports the same bug to avoid creating a duplicate.
           required: true

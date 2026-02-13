@@ -289,13 +289,13 @@ An attribute matches a custom group when its name satisfies `elementNamePattern`
     {
       source: dedent`
         // eslint.config.js
-        import perfectionist from 'eslint-plugin-perfectionist'
+        import dependencies from '@omnicajs/eslint-plugin-dependencies'
 
         export default [
           {
-            plugins: { perfectionist },
+            plugins: { dependencies },
             rules: {
-              'perfectionist/sort-export-attributes': [
+              'dependencies/sort-export-attributes': [
                 'error',
                 {
                   type: 'alphabetical',
@@ -324,9 +324,9 @@ An attribute matches a custom group when its name satisfies `elementNamePattern`
       source: dedent`
         // .eslintrc.js
         module.exports = {
-          plugins: ['perfectionist'],
+          plugins: ['dependencies'],
           rules: {
-            'perfectionist/sort-export-attributes': [
+            'dependencies/sort-export-attributes': [
               'error',
               {
                 type: 'alphabetical',
@@ -358,9 +358,9 @@ An attribute matches a custom group when its name satisfies `elementNamePattern`
 
 ## Version
 
-This rule was introduced in [v5.0.0](https://github.com/azat-io/eslint-plugin-perfectionist/releases/tag/v5.0.0).
+This rule was introduced in [v5.0.0](https://github.com/omnicajs/eslint-plugin-dependencies/releases/tag/v5.0.0).
 
 ## Resources
 
-- [Rule source](https://github.com/azat-io/eslint-plugin-perfectionist/blob/main/rules/sort-export-attributes.ts)
-- [Test source](https://github.com/azat-io/eslint-plugin-perfectionist/blob/main/test/rules/sort-export-attributes.test.ts)
+- [Rule source](https://github.com/omnicajs/eslint-plugin-dependencies/blob/main/rules/sort-export-attributes.ts)
+- [Test source](https://github.com/omnicajs/eslint-plugin-dependencies/blob/main/test/rules/sort-export-attributes.test.ts)

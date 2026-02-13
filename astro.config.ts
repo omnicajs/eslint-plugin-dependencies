@@ -15,7 +15,7 @@ import { remarkHeadings } from './docs/plugins/remark-headings'
 import { colorTheme } from './docs/utils/shiki-theme'
 
 let dirname = fileURLToPath(path.dirname(import.meta.url))
-let site = 'https://perfectionist.dev'
+let site = 'https://dependencies.omnicajs.dev'
 
 export default defineConfig({
   markdown: {

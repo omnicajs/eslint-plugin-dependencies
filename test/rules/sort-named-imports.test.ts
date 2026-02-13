@@ -4611,7 +4611,7 @@ describe('sort-named-imports', () => {
 
     it('respects the global settings configuration', async () => {
       let settings = {
-        perfectionist: {
+        dependencies: {
           type: 'line-length',
           order: 'desc',
         },

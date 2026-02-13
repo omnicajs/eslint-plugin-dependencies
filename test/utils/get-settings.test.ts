@@ -8,13 +8,13 @@ describe('get-settings', () => {
   it('throws an error when an invalid setting is provided', () => {
     expect(() => {
       getSettings({
-        perfectionist: {
+        dependencies: {
           invalidOption1: 'value',
           invalidOption2: 'value',
         },
       })
     }).toThrowError(
-      'Invalid Perfectionist setting(s): invalidOption1, invalidOption2',
+      'Invalid Dependencies setting(s): invalidOption1, invalidOption2',
     )
   })
 
@@ -34,7 +34,7 @@ describe('get-settings', () => {
     }
     expect(() => {
       getSettings({
-        perfectionist: allowedOptions,
+        dependencies: allowedOptions,
       })
     }).not.toThrowError()
   })

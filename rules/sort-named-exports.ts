@@ -214,7 +214,7 @@ export default createEslintRule<Options, MessageId>({
       [ORDER_ERROR_ID]: ORDER_ERROR,
     },
     docs: {
-      url: 'https://perfectionist.dev/rules/sort-named-exports',
+      url: 'https://dependencies.omnicajs.dev/rules/sort-named-exports',
       description: 'Enforce sorted named exports.',
       recommended: true,
     },

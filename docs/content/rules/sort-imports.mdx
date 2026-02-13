@@ -33,7 +33,7 @@ If you use the [`prettier-plugin-sort-imports`](https://github.com/trivago/prett
 
 </Important>
 
-Rule `perfectionist/sort-imports` works in a similar way to rule `import/order`, but with some differences:
+Rule `dependencies/sort-imports` works in a similar way to rule `import/order`, but with some differences:
 
 1. Supporting for new import types:
   - `'side-effect'`
@@ -200,7 +200,7 @@ Example: When two imports tie on the primary sort key, sort type imports before 
 
 Used only when the [`type`](#type) option is set to `'custom'`. Specifies the custom alphabet for sorting.
 
-Use the `Alphabet` utility class from `eslint-plugin-perfectionist/alphabet` to quickly generate a custom alphabet.
+Use the `Alphabet` utility class from `@omnicajs/eslint-plugin-dependencies/alphabet` to quickly generate a custom alphabet.
 
 #### Example: Sort subpaths before hyphenated packages
 
@@ -838,15 +838,15 @@ Specifies whether to use a new experimental dependency detection logic, with red
     {
       source: dedent`
         // eslint.config.js
-        import perfectionist from 'eslint-plugin-perfectionist'
+        import dependencies from '@omnicajs/eslint-plugin-dependencies'
 
         export default [
           {
             plugins: {
-              perfectionist,
+              dependencies,
             },
             rules: {
-              'perfectionist/sort-imports': [
+              'dependencies/sort-imports': [
                 'error',
                 {
                   type: 'alphabetical',
@@ -888,10 +888,10 @@ Specifies whether to use a new experimental dependency detection logic, with red
         // .eslintrc.js
         module.exports = {
           plugins: [
-            'perfectionist',
+            'dependencies',
           ],
           rules: {
-            'perfectionist/sort-imports': [
+            'dependencies/sort-imports': [
               'error',
               {
                 type: 'alphabetical',
@@ -935,9 +935,9 @@ Specifies whether to use a new experimental dependency detection logic, with red
 
 ## Version
 
-This rule was introduced in [v0.9.0](https://github.com/azat-io/eslint-plugin-perfectionist/releases/tag/v0.9.0).
+This rule was introduced in [v0.9.0](https://github.com/omnicajs/eslint-plugin-dependencies/releases/tag/v0.9.0).
 
 ## Resources
 
-- [Rule source](https://github.com/azat-io/eslint-plugin-perfectionist/blob/main/rules/sort-imports.ts)
-- [Test source](https://github.com/azat-io/eslint-plugin-perfectionist/blob/main/test/rules/sort-imports.test.ts)
+- [Rule source](https://github.com/omnicajs/eslint-plugin-dependencies/blob/main/rules/sort-imports.ts)
+- [Test source](https://github.com/omnicajs/eslint-plugin-dependencies/blob/main/test/rules/sort-imports.test.ts)

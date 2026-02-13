@@ -41,7 +41,7 @@ export default defineConfig({
         path.resolve(import.meta.dirname, 'utils', 'alphabet.ts'),
       ],
       fileName: (_format, entryName) => `${entryName}.js`,
-      name: 'eslint-plugin-perfectionist',
+      name: 'eslint-plugin-dependencies',
       formats: ['es'],
     },
     rollupOptions: {

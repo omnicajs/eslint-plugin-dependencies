@@ -19,7 +19,7 @@ interface Props {
 let canonicalURL = new URL(Astro.url.pathname, Astro.site)
 
 let { type = 'website', description, keywords, title } = Astro.props
-let websiteName = 'ESLint Plugin Perfectionist'
+let websiteName = 'ESLint Plugin Dependencies'
 
 let pageTitle = title ? `${title} | ${websiteName}` : websiteName
 
@@ -232,7 +232,7 @@ let isProduction = import.meta.env.PROD
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('theme', theme)
 
-    let handlerKey = '__perfectionistThemeBeforeSwap__'
+    let handlerKey = '__dependenciesThemeBeforeSwap__'
     if (!globalThis[handlerKey]) {
       document.addEventListener('astro:before-swap', event => {
         let theme = getTheme()

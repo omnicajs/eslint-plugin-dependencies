@@ -5,7 +5,7 @@
   "keywords": [
     "eslint",
     "eslint-plugin",
-    "perfectionist"
+    "dependencies"
   ],
   "homepage": "https://github.com/omnicajs/eslint-plugin-dependencies",
   "repository": "omnicajs/eslint-plugin-dependencies",

@@ -90,7 +90,7 @@ export async function openGraph(title: string): Promise<ImageResponse> {
                       color: '#fff',
                       margin: '0',
                     },
-                    children: 'Perfectionist',
+                    children: 'Dependencies',
                   },
                   type: 'h1',
                 },

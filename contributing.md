@@ -109,7 +109,7 @@ source repository name in the path.
 Example:
 
 ```txt
-vendor/@azat-io/eslint-plugin-perfectionist/<copied-files>
+vendor/@omnicajs/eslint-plugin-dependencies/<copied-files>
 ```
 
 Rules:

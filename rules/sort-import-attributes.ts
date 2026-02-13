@@ -192,7 +192,7 @@ export default createEslintRule<Options, MessageId>({
       [ORDER_ERROR_ID]: ORDER_ERROR,
     },
     docs: {
-      url: 'https://perfectionist.dev/rules/sort-import-attributes',
+      url: 'https://dependencies.omnicajs.dev/rules/sort-import-attributes',
       description: 'Enforce sorted import attributes.',
       recommended: true,
     },

@@ -23,13 +23,13 @@ export interface ESLintPluginDocumentation {
  *
  * Wraps the ESLintUtils.RuleCreator to automatically generate documentation
  * URLs for each rule based on its name. All rules created with this function
- * will have their documentation hosted at perfectionist.dev.
+ * will have their documentation hosted at dependencies.omnicajs.dev.
  *
  * @see {@link https://typescript-eslint.io/packages/utils/} - TypeScript ESLint
  * Utils documentation
- * @see {@link https://perfectionist.dev/} - Perfectionist plugin documentation
+ * @see {@link https://dependencies.omnicajs.dev/} - Dependencies plugin documentation
  */
 export let createEslintRule =
   ESLintUtils.RuleCreator<ESLintPluginDocumentation>(
-    ruleName => `https://perfectionist.dev/rules/${ruleName}`,
+    ruleName => `https://dependencies.omnicajs.dev/rules/${ruleName}`,
   )

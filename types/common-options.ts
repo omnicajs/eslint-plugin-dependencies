@@ -1,5 +1,5 @@
 /**
- * Core sorting configuration options used across all Perfectionist rules.
+ * Core sorting configuration options used across all Dependencies rules.
  *
  * Provides a comprehensive set of options to control how elements are sorted,
  * including the sorting algorithm, character handling, locale settings, and

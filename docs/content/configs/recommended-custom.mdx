@@ -1,6 +1,6 @@
 ---
 title: recommended-custom
-description: Learn more about the recommended custom ESLint Plugin Perfectionist configuration for sorting and organizing your code. Take customization to new levels while maintaining a consistent coding style with this setup
+description: Learn more about the recommended custom ESLint Plugin Dependencies configuration for sorting and organizing your code. Take customization to new levels while maintaining a consistent coding style with this setup
 shortDescription: All plugin rules with your own custom sorting
 keywords:
   - eslint
@@ -10,19 +10,19 @@ keywords:
   - code quality
   - javascript linting
   - custom sorting
-  - eslint-plugin-perfectionist
+  - @omnicajs/eslint-plugin-dependencies
 ---
 
 import CodeTabs from '../../components/CodeTabs.svelte'
 import dedent from 'dedent'
 
-Configuration for the `eslint-plugin-perfectionist` plugin, which provides all plugin rules with your predefined custom ordered alphabet.
+Configuration for the `@omnicajs/eslint-plugin-dependencies` plugin, which provides all plugin rules with your predefined custom ordered alphabet.
 
 This configuration allows you to define your own custom order for sorting elements in your codebase as you desire.
 
 ## When to Use
 
-Each rule in `eslint-plugin-perfectionist` offers many options that should suit most use cases.
+Each rule in `@omnicajs/eslint-plugin-dependencies` offers many options that should suit most use cases.
 
 If this is not enough, you may define your own alphabet and use the `recommended-custom` configuration to enforce a consistent custom order across various data structures in your codebase.
 
@@ -30,20 +30,20 @@ Use this configuration to precisely tune how elements should be sorted while kee
 
 ## Usage
 
-You must provide an `alphabet` option in the `perfectionist` settings object or for each rule individually.
+You must provide an `alphabet` option in the `dependencies` settings object or for each rule individually.
 This option should be a string that represents an ordered alphabet.
 
 Example: `01234564789abcdef...`
 
-Use the `Alphabet` utility class from `eslint-plugin-perfectionist/alphabet` to quickly generate a custom alphabet.
+Use the `Alphabet` utility class from `@omnicajs/eslint-plugin-dependencies/alphabet` to quickly generate a custom alphabet.
 
 <CodeTabs
   code={[
     {
       source: dedent`
         // eslint.config.js
-        import { Alphabet } from 'eslint-plugin-perfectionist/alphabet'
-        import perfectionist from 'eslint-plugin-perfectionist'
+        import { Alphabet } from '@omnicajs/eslint-plugin-dependencies/alphabet'
+        import dependencies from '@omnicajs/eslint-plugin-dependencies'
         import naturalCompare from 'natural-compare-lite';
 
         const myCustomAlphabet = Alphabet
@@ -53,9 +53,9 @@ Use the `Alphabet` utility class from `eslint-plugin-perfectionist/alphabet` to 
 
         export default [
           {
-            ...perfectionist.configs['recommended-custom'],
+            ...dependencies.configs['recommended-custom'],
             settings: {
-              perfectionist: {
+              dependencies: {
                   alphabet: myCustomAlphabet
               }
             }
@@ -68,8 +68,8 @@ Use the `Alphabet` utility class from `eslint-plugin-perfectionist/alphabet` to 
     {
       source: dedent`
         // .eslintrc.js
-        import { Alphabet } from 'eslint-plugin-perfectionist/alphabet'
-        import perfectionist from 'eslint-plugin-perfectionist'
+        import { Alphabet } from '@omnicajs/eslint-plugin-dependencies/alphabet'
+        import dependencies from '@omnicajs/eslint-plugin-dependencies'
         import naturalCompare from 'natural-compare-lite';
 
         const myCustomAlphabet = Alphabet
@@ -79,10 +79,10 @@ Use the `Alphabet` utility class from `eslint-plugin-perfectionist/alphabet` to 
 
         module.exports = {
           extends: [
-            'plugin:perfectionist/recommended-custom-legacy',
+            'plugin:dependencies/recommended-custom-legacy',
           ],
           settings: {
-            perfectionist: {
+            dependencies: {
                 alphabet: myCustomAlphabet
             }
           }
@@ -99,7 +99,7 @@ lang="tsx"
 
 ## Alphabet class
 
-The `Alphabet` class from `eslint-plugin-perfectionist/alphabet` provides a set of methods to generate and manipulate alphabets.
+The `Alphabet` class from `@omnicajs/eslint-plugin-dependencies/alphabet` provides a set of methods to generate and manipulate alphabets.
 
 ### Static generators
 

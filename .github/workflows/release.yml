@@ -56,9 +56,9 @@ jobs:
         continue-on-error: true
         run: |
           pnpm social-changelog \
-            --org azat-io \
-            --repo eslint-plugin-perfectionist \
-            --name "ESLint Plugin Perfectionist" \
+            --org omnicajs \
+            --repo eslint-plugin-dependencies \
+            --name "ESLint Plugin Dependencies" \
             > social-post.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

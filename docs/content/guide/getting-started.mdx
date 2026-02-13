@@ -115,10 +115,10 @@ Add `dependencies` to the plugins section of your ESLint configuration. Then con
         // .eslintrc.js
         module.exports = {
           plugins: [
-            '@omnicajs/dependencies',
+            'dependencies',
           ],
           rules: {
-            '@omnicajs/dependencies/sort-imports': 'error',
+            'dependencies/sort-imports': 'error',
           },
         }
       `,
@@ -189,13 +189,13 @@ Example:
         // .eslintrc.js
         module.exports = {
           plugins: [
-            '@omnicajs/dependencies',
+            'dependencies',
           ],
           rules: {
-            '@omnicajs/dependencies/sort-imports': ['error', {
+            'dependencies/sort-imports': ['error', {
               type: 'alphabetical',
             }],
-            '@omnicajs/dependencies/sort-exports': ['error'],
+            'dependencies/sort-exports': ['error'],
           },
           settings: {
             dependencies: {

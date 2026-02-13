@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 
-Host: perfectionist.dev
-Sitemap: https://perfectionist.dev/sitemap-index.xml
+Host: dependencies.omnicajs.dev
+Sitemap: https://dependencies.omnicajs.dev/sitemap-index.xml

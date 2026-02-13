@@ -219,7 +219,7 @@ export default createEslintRule<Options, MessageId>({
       [ORDER_ERROR_ID]: ORDER_ERROR,
     },
     docs: {
-      url: 'https://perfectionist.dev/rules/sort-named-imports',
+      url: 'https://dependencies.omnicajs.dev/rules/sort-named-imports',
       description: 'Enforce sorted named imports.',
       recommended: true,
     },
