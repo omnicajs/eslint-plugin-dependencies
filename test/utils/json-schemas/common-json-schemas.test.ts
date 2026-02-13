@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import Ajv from 'ajv-draft-04'
 
 import {
+  buildUseConfigurationIfJsonSchema,
   buildCommonJsonSchemas,
   buildRegexJsonSchema,
 } from '../../../utils/json-schemas/common-json-schemas'
@@ -248,6 +249,16 @@ describe('common-json-schemas', () => {
 
     it('should not allow the empty object', () => {
       expect(regexJsonSchemaValidator({})).toBeFalsy()
+    })
+  })
+
+  describe('useConfigurationIf', () => {
+    it('should build a valid schema without arguments', () => {
+      let useConfigurationIfValidator = new Ajv().compile(
+        buildUseConfigurationIfJsonSchema(),
+      )
+
+      expect(useConfigurationIfValidator({})).toBeTruthy()
     })
   })
 

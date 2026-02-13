@@ -123,4 +123,45 @@ describe('does-custom-group-match', () => {
       ).toBeTruthy()
     },
   )
+
+  it('returns true for empty element value when elementValuePattern allows it', () => {
+    expect(
+      doesCustomGroupMatch({
+        customGroup: {
+          elementValuePattern: '^$',
+        },
+        elementName: '',
+        modifiers: [],
+        selectors: [],
+      }),
+    ).toBeTruthy()
+  })
+
+  it('returns false if custom group does not match elementValuePattern', () => {
+    expect(
+      doesCustomGroupMatch({
+        customGroup: {
+          elementValuePattern: '^world$',
+        },
+        elementValue: 'hello',
+        elementName: '',
+        modifiers: [],
+        selectors: [],
+      }),
+    ).toBeFalsy()
+  })
+
+  it('returns false if custom group does not match decoratorNamePattern', () => {
+    expect(
+      doesCustomGroupMatch({
+        customGroup: {
+          decoratorNamePattern: '^controller$',
+        },
+        decorators: ['service'],
+        elementName: '',
+        modifiers: [],
+        selectors: [],
+      }),
+    ).toBeFalsy()
+  })
 })

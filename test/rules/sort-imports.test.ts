@@ -4101,6 +4101,25 @@ describe('sort-imports', () => {
           })
         })
 
+        it('ignores eslint-disabled dependent imports in dependency sorting', async () => {
+          await valid({
+            code: dedent`
+              import { z } from "z";
+              // eslint-disable-next-line rule-to-test/sort-imports
+              import a = aImport.a1.a2;
+              // eslint-disable-next-line rule-to-test/sort-imports
+              import { aImport } from "b";
+            `,
+            options: [
+              {
+                ...options,
+                useExperimentalDependencyDetection,
+                groups: ['unknown'],
+              },
+            ],
+          })
+        })
+
         it('prioritizes content separation over dependencies', async () => {
           await invalid({
             errors: [
@@ -6825,6 +6844,32 @@ describe('sort-imports', () => {
           import { b } from "b"; import { a } from "a";
         `,
         options: [options],
+      })
+    })
+
+    it('adds required spacing for inline imports on the same line', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            groups: ['external', 'sibling'],
+            newlinesBetween: 1,
+          },
+        ],
+        errors: [
+          {
+            messageId: 'missedSpacingBetweenImports',
+            data: { right: './b', left: 'a' },
+          },
+        ],
+        output: dedent`
+          import { a } from 'a';
+
+          import { b } from './b';
+        `,
+        code: dedent`
+          import { a } from 'a';import { b } from './b';
+        `,
       })
     })
 
