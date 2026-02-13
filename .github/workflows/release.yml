@@ -44,24 +44,26 @@ jobs:
       - name: Create GitHub Release
         run: pnpm run ci:changelog
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Clear Package JSON
         run: pnpm run ci:clear
 
       - name: Publish Root Package to NPM
         run: npm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Generate Social Changelog
         continue-on-error: true
         run: |
           pnpm social-changelog \
-            --org omnicajs \
-            --repo eslint-plugin-dependencies \
+            --org ${{ github.repository_owner }} \
+            --repo ${{ github.event.repository.name }} \
             --name "ESLint Plugin Dependencies" \
             > social-post.txt
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Post to Social Media
         continue-on-error: true
