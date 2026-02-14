@@ -1,6 +1,6 @@
 {
   "name": "@omnicajs/eslint-plugin-dependencies",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "ESLint plugin for sorting and structuring import and export declarations.",
   "keywords": [
     "eslint",
