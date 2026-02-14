@@ -1,4 +1,23 @@
 {
   "version": 1,
-  "borrowedModules": []
+  "borrowedModules": [
+    {
+      "id": "sort-imports-core-and-tests",
+      "repository": "azat-io/eslint-plugin-perfectionist",
+      "sourceUrl": "https://github.com/azat-io/eslint-plugin-perfectionist",
+      "commit": "1c5682b5ee2fd855b4f5176991366dd894f750bb",
+      "license": "MIT",
+      "licenseFiles": [
+        "vendor/azat-io/eslint-plugin-perfectionist/license.md"
+      ],
+      "snapshotRoot": "vendor/azat-io/eslint-plugin-perfectionist",
+      "files": [
+        "rules/sort-imports.ts",
+        "rules/sort-imports/types.ts",
+        "rules/sort-imports/comparator-by-options-computer.ts",
+        "test/rules/sort-imports.test.ts"
+      ],
+      "notes": "Fork-specific vNext options migration and casingPriority behavior were implemented on top of these borrowed modules."
+    }
+  ]
 }

@@ -1,14 +1,10 @@
-/**
- * Borrowed/adapted from: azat-io/eslint-plugin-perfectionist Source: https://github.com/azat-io/eslint-plugin-perfectionist
- * Commit: 1c5682b5ee2fd855b4f5176991366dd894f750bb License: MIT Local changes: fork-specific options typing, vNext imports/partitions schema, and casingPriority contract.
- */
+/* Authorship: Hugo (https://github.com/hugop95). Source history: https://github.com/azat-io/eslint-plugin-perfectionist/commits/main/rules/sort-imports/types.ts */
 import type { JSONSchema4 } from '@typescript-eslint/utils/json-schema'
 import type { TSESTree } from '@typescript-eslint/types'
 
 import type { SortingNodeWithDependencies } from '../../utils/sort-nodes-by-dependencies'
-import type { CommonOptions, RegexOption, TypeOption } from '../../types/common-options'
-import type { PartitionByCommentOption } from '../../types/common-partition-options'
-import type { CommonGroupsOptions } from '../../types/common-groups-options'
+import type { RegexOption, TypeOption } from '../../types/common-options'
+import type { AllCommonOptions } from '../../types/all-common-options'
 
 import {
   buildCustomGroupModifiersJsonSchema,
@@ -46,13 +42,26 @@ export type Options = Partial<
     useExperimentalDependencyDetection: boolean
 
     /**
-     * VNext partition configuration.
+     * Controls partition reordering when partitionByNewLine is enabled.
      *
-     * - `'merge'` merges partitions inside every group.
-     * - object configuration preserves partitions and controls how they are
-     *   built/reordered.
+     * @default 'off'
      */
-    partitions: PartitionsOptions | 'merge'
+    partitionSorting: 'type-first' | 'off'
+
+    /**
+     * Whether to split import declarations when specifier sorting interleaves
+     * sources.
+     *
+     * @default false
+     */
+    partitionImportsSplitOnSort: boolean
+
+    /**
+     * Whether to keep partition order stable within the same category.
+     *
+     * @default true
+     */
+    partitionSortingStable: boolean
 
     /**
      * Patterns to identify internal imports. Imports matching these patterns
@@ -69,11 +78,23 @@ export type Options = Partial<
     environment: 'node' | 'bun'
 
     /**
-     * VNext import node sorting configuration.
+     * Controls whether side-effect imports should be sorted. When false,
+     * side-effect imports remain in their original positions.
+     *
+     * @default false
      */
-    imports: ImportsOptions
-  } & CommonGroupsOptions<CustomTypeOption, object, CustomGroupMatchOptions> &
-    CommonOptions<CustomTypeOption>
+    sortSideEffects: boolean
+
+    /**
+     * Maximum line length for imports. When exceeded, import names are used for
+     * sorting instead of the entire line.
+     */
+    maxLineLength: number
+  } & AllCommonOptions<
+    CustomTypeOption,
+    AdditionalSortOptions,
+    CustomGroupMatchOptions
+  >
 >[]
 
 /**
@@ -81,11 +102,6 @@ export type Options = Partial<
  * node with dependency information and ignore flag.
  */
 export interface SortImportsSortingNode extends SortingNodeWithDependencies<SortImportsNode> {
-  /**
-   * Source-side imported name for sorting by imported specifier.
-   */
-  sourceSpecifierName: string | null
-
   /**
    * The name of the import specifier for sorting purposes.
    */
@@ -146,6 +162,10 @@ interface CustomGroupMatchOptions {
   selector?: Selector
 }
 
+interface AdditionalSortOptions {
+  sortBy: SortByOption
+}
+
 /**
  * Complete list of available active import selectors. Used for validation and
  * JSON schema generation.
@@ -195,107 +215,14 @@ export let additionalCustomGroupMatchOptionsJsonSchema: Record<
   selector: buildCustomGroupSelectorJsonSchema(allSelectors),
 }
 
-const IMPORTS_ORDER_BY_OPTION = ['path', 'alias', 'specifier'] as const
-const IMPORTS_CASING_PRIORITY_OPTION = [
-  'camelCase',
-  'snake_case',
-  'UPPER_CASE',
-  'PascalCase',
-  'kebab-case',
-] as const
-const PARTITIONS_ORDER_BY_OPTION = ['source', 'type-first'] as const
-const PARTITIONS_ORDER_STABILITY_OPTION = ['stable', 'unstable'] as const
+const SORT_BY_OPTION = ['specifier', 'path'] as const
+type SortByOption = (typeof SORT_BY_OPTION)[number]
 
-export interface ImportsOptions {
-  /**
-   * Optional priority of casing styles used as a pre-sort key before the
-   * configured sort comparator.
-   */
-  casingPriority: ImportsCasingPriorityOption[]
-
-  /**
-   * Primary key for sorting imports.
-   *
-   * - `'path'`: module source path.
-   * - `'alias'`: first local binding identifier.
-   * - `'specifier'`: first imported (source-side) identifier with alias
-   *   fallback.
-   */
-  orderBy: ImportsOrderByOption
-
-  /**
-   * Maximum line length threshold for name-based sorting fallback.
-   * `null` disables the threshold.
-   */
-  maxLineLength: number | null
-
-  /**
-   * Whether import declarations may be split when specifier sorting interleaves
-   * sources.
-   */
-  splitDeclarations: boolean
-
-  /**
-   * Whether side-effect imports are sortable.
-   */
-  sortSideEffects: boolean
-}
-export interface PartitionsOptions {
-  /**
-   * Partition split signals.
-   */
-  splitBy: {
-    comments: PartitionByCommentOption
-    newlines: boolean
-  }
-
-  /**
-   * Stability mode for partition reordering.
-   */
-  orderStability: PartitionsOrderStabilityOption
-
-  /**
-   * Partition ordering strategy within a group.
-   */
-  orderBy: PartitionsOrderByOption
-
-  /**
-   * Maximum imports per partition.
-   * `null` disables size-based splitting.
-   */
-  maxImports: number | null
-}
-export type PartitionsOrderStabilityOption =
-  (typeof PARTITIONS_ORDER_STABILITY_OPTION)[number]
-
-export type ImportsCasingPriorityOption =
-  (typeof IMPORTS_CASING_PRIORITY_OPTION)[number]
-
-export type PartitionsOrderByOption = (typeof PARTITIONS_ORDER_BY_OPTION)[number]
-export type ImportsOrderByOption = (typeof IMPORTS_ORDER_BY_OPTION)[number]
-
-export let importsOrderByJsonSchema: JSONSchema4 = {
-  enum: [...IMPORTS_ORDER_BY_OPTION],
-  type: 'string',
-}
-
-export let importsCasingPriorityJsonSchema: JSONSchema4 = {
-  items: {
-    enum: [...IMPORTS_CASING_PRIORITY_OPTION],
+export let additionalSortOptionsJsonSchema: Record<string, JSONSchema4> = {
+  sortBy: {
+    enum: [...SORT_BY_OPTION],
     type: 'string',
   },
-  uniqueItems: true,
-  type: 'array',
-}
-
-export let partitionsOrderByJsonSchema: JSONSchema4 = {
-  enum: [...PARTITIONS_ORDER_BY_OPTION],
-  type: 'string',
-}
-
-export let partitionsOrderStabilityJsonSchema: JSONSchema4 = {
-  enum: [...PARTITIONS_ORDER_STABILITY_OPTION],
-  type: 'string',
 }
 
 export const TYPE_IMPORT_FIRST_TYPE_OPTION = 'type-import-first'

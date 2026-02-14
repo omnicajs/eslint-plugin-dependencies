@@ -1,5 +1,5 @@
 {
   "include": ["**/*.ts"],
-  "exclude": ["node_modules", "coverage"],
+  "exclude": ["node_modules", "coverage", "vendor"],
   "extends": "@azat-io/typescript-config"
 }

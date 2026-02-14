@@ -2,8 +2,9 @@ import type { Linter } from 'eslint'
 
 import eslintPlugin from 'eslint-plugin-eslint-plugin'
 import eslintConfig from '@azat-io/eslint-config'
+import { globalIgnores } from 'eslint/config'
 
-export default eslintConfig({
+let configs = await eslintConfig({
   extends: [
     eslintPlugin.configs.recommended,
     {
@@ -28,4 +29,6 @@ export default eslintConfig({
   typescript: true,
   vitest: true,
   node: true,
-}) satisfies Promise<Linter.Config[]>
+})
+
+export default [globalIgnores(['vendor/**']), ...configs] satisfies Linter.Config[]
