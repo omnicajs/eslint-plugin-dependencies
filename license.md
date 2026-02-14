@@ -1,6 +1,7 @@
 # The MIT License (MIT)
 
 Copyright 2023 Azat S. <to@azat.io>
+Copyright 2026 OmnicaJS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
