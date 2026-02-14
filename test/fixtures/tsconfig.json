@@ -9,8 +9,6 @@
     "strict": true
   },
   "include": [
-    "../fixtures/file.svelte",
-    "../fixtures/file.astro",
     "../fixtures/react.tsx",
     "../fixtures/file.vue",
     "../fixtures/file.ts"

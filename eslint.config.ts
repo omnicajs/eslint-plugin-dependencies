@@ -26,8 +26,6 @@ export default eslintConfig({
   ],
   perfectionist: true,
   typescript: true,
-  svelte: true,
   vitest: true,
-  astro: true,
   node: true,
 }) satisfies Promise<Linter.Config[]>

@@ -7,31 +7,6 @@ on:
   pull_request:
 
 jobs:
-  astro:
-    name: Astro
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
-        with:
-          egress-policy: block
-          allowed-endpoints: >
-            api.github.com:443 github.com:443 registry.npmjs.org:443
-            release-assets.githubusercontent.com:443
-
-      - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-
-      - name: Install Tools
-        uses: ./.github/actions/install-tools
-
-      - name: Install Dependencies
-        uses: ./.github/actions/install-dependencies
-
-      - name: Test
-        run: pnpm test:astro
-
   css:
     name: CSS
     runs-on: ubuntu-latest
@@ -156,31 +131,6 @@ jobs:
 
       - name: Test
         run: pnpm test:spelling
-
-  svelte:
-    name: Svelte
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
-        with:
-          egress-policy: block
-          allowed-endpoints: >
-            api.github.com:443 github.com:443 registry.npmjs.org:443
-            release-assets.githubusercontent.com:443
-
-      - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-
-      - name: Install Tools
-        uses: ./.github/actions/install-tools
-
-      - name: Install Dependencies
-        uses: ./.github/actions/install-dependencies
-
-      - name: Test
-        run: pnpm test:svelte
 
   types:
     name: Types

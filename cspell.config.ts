@@ -2,8 +2,6 @@ import { defineConfig } from 'cspell'
 
 export default defineConfig({
   words: [
-    'astro',
-    'astrojs',
     'azat',
     'browserslistrc',
     'changelogen',

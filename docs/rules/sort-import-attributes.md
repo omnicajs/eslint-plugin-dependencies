@@ -1,0 +1,353 @@
+---
+title: sort-import-attributes
+description: Keep import attributes consistently ordered for clearer, more maintainable imports. This rule sorts attributes defined with the import attributes syntax
+shortDescription: Enforce sorted import attributes
+keywords:
+  - eslint
+  - sort import attributes
+  - import attributes
+  - eslint rule
+  - coding standards
+  - code quality
+  - javascript linting
+---
+Enforce sorted import attributes.
+
+This rule keeps attributes inside `import ... with { ... }` consistently ordered. It improves readability, makes diffs smaller, and keeps attribute groups tidy in larger files.
+
+## Try it out
+
+### Before
+
+```tsx
+import data from 'lib' with {
+  mode: 'no-cors',
+  type: 'json',
+  integrity: 'sha256-...',
+}
+```
+### After (Alphabetical)
+
+```tsx
+import data from 'lib' with {
+  integrity: 'sha256-...',
+  mode: 'no-cors',
+  type: 'json',
+}
+```
+### After (Line Length)
+
+```tsx
+import data from 'lib' with {
+  integrity: 'sha256-...',
+  mode: 'no-cors',
+  type: 'json',
+}
+```
+
+## Options
+
+This rule accepts an options object with the following properties:
+
+### type
+
+<sub>default: `'alphabetical'`</sub>
+
+Specifies the sorting method.
+
+- `'alphabetical'` — Sort attributes alphabetically using [localeCompare](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare).
+- `'natural'` — Sort by [natural](https://github.com/yobacca/natural-orderby) order (e.g., `link2` < `link10`).
+- `'line-length'` — Sort by attribute name length (shorter first by default).
+- `'custom'` — Sort using a custom alphabet specified in [`alphabet`](#alphabet).
+- `'unsorted'` — Do not sort items. [`grouping`](#groups) and [`newlines behavior`](#newlinesbetween) are still enforced.
+
+### order
+
+<sub>default: `'asc'`</sub>
+
+Sort direction.
+
+- `'asc'` — Ascending (A→Z, short→long).
+- `'desc'` — Descending (Z→A, long→short).
+
+### fallbackSort
+
+<sub>
+  type:
+  ```ts
+  {
+    type:
+      | 'alphabetical'
+      | 'natural'
+      | 'line-length'
+      | 'custom'
+      | 'subgroup-order'
+      | 'unsorted'
+    order?: 'asc' | 'desc'
+  }
+  ```
+</sub>
+<sub>default: `{ type: 'unsorted' }`</sub>
+
+Specifies fallback sort options for elements that are equal according to the primary sort [`type`](#type).
+
+You can also sort by subgroup order (nested groups in the [`groups`](#groups) option) using `subgroup-order`.
+
+Example: enforce alphabetical sort between two elements with the same length.
+```ts
+{
+  type: 'line-length',
+  order: 'desc',
+  fallbackSort: { type: 'alphabetical', order: 'asc' }
+}
+```
+
+### alphabet
+
+<sub>default: `''`</sub>
+
+Used only when [`type`](#type) is `'custom'`. Defines the custom character order.
+
+### ignoreCase
+
+<sub>default: `true`</sub>
+
+Whether to perform case-insensitive comparison for string-based sorts.
+
+### specialCharacters
+
+<sub>default: `'keep'`</sub>
+
+How to handle special characters before comparison.
+
+- `'keep'` — Keep as-is.
+- `'trim'` — Trim leading special characters.
+- `'remove'` — Remove all special characters.
+
+### locales
+
+<sub>default: `'en-US'`</sub>
+
+Locales passed to `localeCompare` for alphabetical/natural sorts.
+
+### partitionByComment
+
+<sub>default: `false`</sub>
+
+Use comments to split attributes into independent partitions that are sorted separately.
+
+- `true` — Any non-ESLint comment creates a partition.
+- `false` — Ignore comments for partitioning.
+- `RegExpPattern = string | { pattern: string; flags?: string }` — Pattern for matching comments.
+- `RegExpPattern[]` — List of patterns.
+- `{ block: boolean | RegExpPattern | RegExpPattern[]; line: boolean | RegExpPattern | RegExpPattern[] }` — Separate settings for block/line comments.
+
+### partitionByNewLine
+
+<sub>default: `false`</sub>
+
+When `true`, an empty line between attributes creates a partition. Each partition is sorted independently.
+
+### newlinesBetween
+
+<sub>
+  type: `number | 'ignore'`
+</sub>
+<sub>default: `'ignore'`</sub>
+
+Specifies how to handle newlines between groups.
+
+- `'ignore'` — Do not report errors related to newlines.
+- `0` — No newlines are allowed.
+- Any other number — Enforce this number of newlines between each group.
+
+You can also enforce the newline behavior between two specific groups through the [`groups`](#newlines-between-groups)
+option.
+
+This option is only applicable when [`partitionByNewLine`](#partitionbynewline) is `false`.
+
+### newlinesInside
+
+<sub>
+  type: `number | 'ignore' | 'newlinesBetween'`
+</sub>
+<sub>default: `'newlinesBetween'`</sub>
+
+Specifies how to handle newlines inside groups.
+
+- `'ignore'` — Do not report errors related to newlines.
+- `'newlinesBetween'` — [DEPRECATED] If [`newlinesBetween`](#newlinesbetween) is `'ignore'`, then `'ignore'`, otherwise `0`.
+- `0` — No newlines are allowed.
+- Any other number — Enforce this number of newlines between each element of the same group.
+
+You can also enforce the newline behavior inside a given group through the [`groups`](#group-with-overridden-settings)
+or [`customGroups`](#customgroups) options.
+
+This option is only applicable when [`partitionByNewLine`](#partitionbynewline) is `false`.
+
+### groups
+
+<sub>
+  type:
+  ```ts
+    Array<
+      | string
+      | string[]
+      | { newlinesBetween: number | 'ignore' }
+      | {
+          group: string | string[];
+          type?: 'alphabetical' | 'natural' | 'line-length' | 'custom' | 'unsorted';
+          order?: 'asc' | 'desc';
+          fallbackSort?: { type: string; order?: 'asc' | 'desc' };
+          newlinesInside?: number | 'ignore';
+        }
+    >
+  ```
+</sub>
+<sub>default: `[]`</sub>
+
+Defines the order of attribute groups. Unknown attributes are placed after the last group.
+
+You can mix predefined (none for this rule) and custom groups. Typical usage is with custom groups declared via `elementNamePattern`.
+
+Example: put any attribute starting with `type` before others, and require a newline between groups.
+
+```ts
+{
+  groups: ['type-attrs', 'unknown'],
+  customGroups: [
+    { groupName: 'type-attrs', elementNamePattern: '^type' },
+  ],
+  newlinesBetween: 1
+}
+```
+
+#### Group with overridden settings
+
+You may directly override options for a specific group by using an object with the `group` property and other option overrides.
+
+- `type` — Overrides the [`type`](#type) option for that group.
+- `order` — Overrides the [`order`](#order) option for that group.
+- `fallbackSort` — Overrides the [`fallbackSort`](#fallbacksort) option for that group.
+- `newlinesInside` — Overrides the [`newlinesInside`](#newlinesinside) option for that group.
+
+```ts
+{
+  groups: [
+    'myCustomGroup1',
+    { group: 'myCustomGroup2', type: 'unsorted' }, // Elements from this group will not be sorted
+  ]
+}
+```
+
+#### Newlines between groups
+
+You may place `newlinesBetween` objects between your groups to enforce the newline behavior between two specific groups.
+
+See the [`newlinesBetween`](#newlinesbetween) option.
+
+This feature is only applicable when [`partitionByNewLine`](#partitionbynewline) is `false`.
+
+```ts
+{
+  newlinesBetween: 1,
+  groups: [
+    'a',
+    { newlinesBetween: 0 }, // Overrides the global newlinesBetween option
+    'b',
+  ]
+}
+```
+
+### customGroups
+
+Define custom attribute groups with optional per-group sort overrides.
+
+```ts
+type CustomGroup = {
+  groupName: string
+  // Match by attribute name
+  elementNamePattern?: string | string[] | { pattern: string; flags?: string } | { pattern: string; flags?: string }[]
+
+  // Optional per-group overrides:
+  type?: 'alphabetical' | 'natural' | 'line-length' | 'custom' | 'unsorted'
+  order?: 'asc' | 'desc'
+  fallbackSort?: { type: string; order?: 'asc' | 'desc' }
+  newlinesInside?: number | 'ignore'
+}[]
+```
+
+An attribute matches a custom group when its name satisfies `elementNamePattern`. The first matching definition wins.
+
+## Usage
+
+### Flat Config
+
+```tsx
+// eslint.config.js
+import dependencies from '@omnicajs/eslint-plugin-dependencies'
+
+export default [
+  {
+    plugins: { dependencies },
+    rules: {
+      'dependencies/sort-import-attributes': [
+        'error',
+        {
+          type: 'alphabetical',
+          order: 'asc',
+          fallbackSort: { type: 'unsorted' },
+          ignoreCase: true,
+          specialCharacters: 'keep',
+          locales: 'en-US',
+          alphabet: '',
+          partitionByComment: false,
+          partitionByNewLine: false,
+          newlinesBetween: 'ignore',
+          newlinesInside: 'ignore',
+          groups: [],
+          customGroups: [],
+        },
+      ],
+    },
+  },
+]
+```
+
+### Legacy Config
+
+```tsx
+// .eslintrc.js
+module.exports = {
+  plugins: ['dependencies'],
+  rules: {
+    'dependencies/sort-import-attributes': [
+      'error',
+      {
+        type: 'alphabetical',
+        order: 'asc',
+        fallbackSort: { type: 'unsorted' },
+        ignoreCase: true,
+        specialCharacters: 'keep',
+        locales: 'en-US',
+        alphabet: '',
+        partitionByComment: false,
+        partitionByNewLine: false,
+        newlinesBetween: 'ignore',
+        newlinesInside: 'ignore',
+        groups: [],
+        customGroups: [],
+      },
+    ],
+  },
+}
+```
+
+## Version
+
+This rule was introduced in an earlier release.
+
+## Resources
+
+- [Rule source](../../rules/sort-import-attributes.ts)
+- [Test source](../../test/rules/sort-import-attributes.test.ts)

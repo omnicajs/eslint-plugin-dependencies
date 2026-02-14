@@ -1,5 +1,0 @@
-User-agent: *
-Allow: /
-
-Host: dependencies.omnicajs.dev
-Sitemap: https://dependencies.omnicajs.dev/sitemap-index.xml

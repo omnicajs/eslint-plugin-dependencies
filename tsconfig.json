@@ -1,5 +1,5 @@
 {
-  "include": ["**/*.svelte", "**/*.astro", "**/*.ts"],
+  "include": ["**/*.ts"],
   "exclude": ["node_modules", "coverage"],
   "extends": "@azat-io/typescript-config"
 }
