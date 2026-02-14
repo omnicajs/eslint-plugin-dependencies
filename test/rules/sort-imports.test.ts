@@ -4691,6 +4691,198 @@ describe('sort-imports', () => {
       })
     })
 
+    it('applies imports.casingPriority before alias sorting', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: [
+                'camelCase',
+                'snake_case',
+                'UPPER_CASE',
+                'PascalCase',
+              ],
+              orderBy: 'alias',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import camelCase from 'alpha'
+          import snake_case from 'beta'
+          import UPPER_CASE from 'gamma'
+          import PascalCase from 'delta'
+        `,
+        code: dedent`
+          import PascalCase from 'delta'
+          import snake_case from 'beta'
+          import camelCase from 'alpha'
+          import UPPER_CASE from 'gamma'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('applies imports.casingPriority before source-side specifier sorting', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: [
+                'camelCase',
+                'snake_case',
+                'UPPER_CASE',
+                'PascalCase',
+              ],
+              orderBy: 'specifier',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import { sourceName as camelCase } from 'alpha'
+          import { source_name as snake_case } from 'beta'
+          import { SOURCE_NAME as UPPER_CASE } from 'gamma'
+          import { SourceName as PascalCase } from 'delta'
+        `,
+        code: dedent`
+          import { SourceName as PascalCase } from 'delta'
+          import { source_name as snake_case } from 'beta'
+          import { sourceName as camelCase } from 'alpha'
+          import { SOURCE_NAME as UPPER_CASE } from 'gamma'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('falls back to regular sorting inside the same casing bucket', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['camelCase'],
+              orderBy: 'alias',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import alphaValue from 'alpha'
+          import betaValue from 'beta'
+        `,
+        code: dedent`
+          import betaValue from 'beta'
+          import alphaValue from 'alpha'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('supports kebab-case in imports.casingPriority when sorting by path', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['kebab-case', 'camelCase'],
+              orderBy: 'path',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import kebabValue from 'kebab-case'
+          import camelValue from 'camelCase'
+        `,
+        code: dedent`
+          import camelValue from 'camelCase'
+          import kebabValue from 'kebab-case'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('places unknown casing values after configured casing priorities', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['camelCase'],
+              orderBy: 'path',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import camelValue from 'camelCase'
+          import scopedValue from '@scope/pkg'
+        `,
+        code: dedent`
+          import scopedValue from '@scope/pkg'
+          import camelValue from 'camelCase'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('treats known but non-prioritized casing as a fallback bucket', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['camelCase'],
+              orderBy: 'alias',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import camelCase from 'alpha'
+          import snake_case from 'beta'
+        `,
+        code: dedent`
+          import snake_case from 'beta'
+          import camelCase from 'alpha'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
     it('sorts imports by specifier names when sortBy is "specifier"', async () => {
       await invalid({
         errors: [
@@ -13395,6 +13587,50 @@ describe('sort-imports', () => {
           rule.create({
             options: [
               { imports: { sortSideEffects: 'false' as unknown as boolean } },
+            ],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError(
+          "The 'imports' option must be an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when imports.casingPriority is not an array', () => {
+        expect(() =>
+          rule.create({
+            options: [
+              { imports: { casingPriority: 'camelCase' as unknown as string[] } },
+            ],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError(
+          "The 'imports' option must be an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when imports.casingPriority has unknown values', () => {
+        expect(() =>
+          rule.create({
+            options: [
+              {
+                imports: {
+                  casingPriority: ['camelCase', 'mixedCase' as 'camelCase'],
+                },
+              },
+            ],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError(
+          "The 'imports' option must be an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when imports.casingPriority has duplicate values', () => {
+        expect(() =>
+          rule.create({
+            options: [
+              {
+                imports: {
+                  casingPriority: ['camelCase', 'camelCase'],
+                },
+              },
             ],
           } as unknown as Readonly<RuleContext<MessageId, Options>>),
         ).toThrowError(

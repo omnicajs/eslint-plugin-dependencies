@@ -18,6 +18,7 @@ import type { CustomOrderFixesParameters } from '../utils/make-fixes'
 import {
   additionalCustomGroupMatchOptionsJsonSchema,
   partitionsOrderStabilityJsonSchema,
+  importsCasingPriorityJsonSchema,
   TYPE_IMPORT_FIRST_TYPE_OPTION,
   partitionsOrderByJsonSchema,
   importsOrderByJsonSchema,
@@ -127,6 +128,7 @@ let defaultOptions: Required<Options[number]> = {
     splitDeclarations: false,
     sortSideEffects: false,
     maxLineLength: null,
+    casingPriority: [],
     orderBy: 'path',
   },
   useExperimentalDependencyDetection: true,
@@ -426,6 +428,7 @@ export default createEslintRule<Options, MessageId>({
               sortSideEffects: {
                 type: 'boolean',
               },
+              casingPriority: importsCasingPriorityJsonSchema,
               orderBy: importsOrderByJsonSchema,
             },
             description: 'vNext import sorting configuration.',
@@ -758,6 +761,81 @@ function sortImportNodes({
     )
   }
 }
+function isValidImportsOption(imports: unknown): boolean {
+  if (!isObjectRecord(imports)) {
+    return false
+  }
+  assertNoUnknownKeys(imports, [
+    'casingPriority',
+    'maxLineLength',
+    'orderBy',
+    'sortSideEffects',
+    'splitDeclarations',
+  ])
+
+  let { splitDeclarations, sortSideEffects, casingPriority, maxLineLength, orderBy } =
+    imports
+
+  if (casingPriority !== undefined) {
+    if (!Array.isArray(casingPriority)) {
+      return false
+    }
+
+    let allowedValues = new Set([
+      'snake_case',
+      'UPPER_CASE',
+      'PascalCase',
+      'kebab-case',
+      'camelCase',
+    ])
+
+    let uniqueCasingPriority = new Set<string>()
+    for (let casingOption of casingPriority) {
+      if (
+        typeof casingOption !== 'string' ||
+        !allowedValues.has(casingOption)
+      ) {
+        return false
+      }
+
+      if (uniqueCasingPriority.has(casingOption)) {
+        return false
+      }
+      uniqueCasingPriority.add(casingOption)
+    }
+  }
+
+  if (
+    orderBy !== undefined &&
+    orderBy !== 'path' &&
+    orderBy !== 'alias' &&
+    orderBy !== 'specifier'
+  ) {
+    return false
+  }
+
+  if (
+    splitDeclarations !== undefined &&
+    typeof splitDeclarations !== 'boolean'
+  ) {
+    return false
+  }
+
+  if (sortSideEffects !== undefined && typeof sortSideEffects !== 'boolean') {
+    return false
+  }
+
+  if (
+    maxLineLength !== undefined &&
+    maxLineLength !== null &&
+    !isPositiveInteger(maxLineLength)
+  ) {
+    return false
+  }
+
+  return true
+}
+
 function isValidPartitionsOption(partitions: unknown): boolean {
   if (partitions === 'merge') {
     return true
@@ -842,6 +920,7 @@ function normalizeSortImportsOptions(
       maxLineLength: importsOption.maxLineLength ?? Infinity,
       splitDeclarations: importsOption.splitDeclarations,
       sortSideEffects: importsOption.sortSideEffects,
+      casingPriority: importsOption.casingPriority,
       orderBy: importsOption.orderBy,
     },
     partitions: normalizedPartitions,
@@ -1007,50 +1086,6 @@ function isValidPartitionByCommentOption(
     return false
   }
   return Object.keys(value).length > 0
-}
-
-function isValidImportsOption(imports: unknown): boolean {
-  if (!isObjectRecord(imports)) {
-    return false
-  }
-  assertNoUnknownKeys(imports, [
-    'maxLineLength',
-    'orderBy',
-    'sortSideEffects',
-    'splitDeclarations',
-  ])
-
-  let { splitDeclarations, sortSideEffects, maxLineLength, orderBy } = imports
-
-  if (
-    orderBy !== undefined &&
-    orderBy !== 'path' &&
-    orderBy !== 'alias' &&
-    orderBy !== 'specifier'
-  ) {
-    return false
-  }
-
-  if (
-    splitDeclarations !== undefined &&
-    typeof splitDeclarations !== 'boolean'
-  ) {
-    return false
-  }
-
-  if (sortSideEffects !== undefined && typeof sortSideEffects !== 'boolean') {
-    return false
-  }
-
-  if (
-    maxLineLength !== undefined &&
-    maxLineLength !== null &&
-    !isPositiveInteger(maxLineLength)
-  ) {
-    return false
-  }
-
-  return true
 }
 
 function isValidRegexOptionValue(value: unknown): boolean {

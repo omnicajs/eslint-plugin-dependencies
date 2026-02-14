@@ -192,10 +192,23 @@ export let additionalCustomGroupMatchOptionsJsonSchema: Record<
 }
 
 const IMPORTS_ORDER_BY_OPTION = ['path', 'alias', 'specifier'] as const
+const IMPORTS_CASING_PRIORITY_OPTION = [
+  'camelCase',
+  'snake_case',
+  'UPPER_CASE',
+  'PascalCase',
+  'kebab-case',
+] as const
 const PARTITIONS_ORDER_BY_OPTION = ['source', 'type-first'] as const
 const PARTITIONS_ORDER_STABILITY_OPTION = ['stable', 'unstable'] as const
 
 export interface ImportsOptions {
+  /**
+   * Optional priority of casing styles used as a pre-sort key before the
+   * configured sort comparator.
+   */
+  casingPriority: ImportsCasingPriorityOption[]
+
   /**
    * Primary key for sorting imports.
    *
@@ -251,13 +264,24 @@ export interface PartitionsOptions {
 export type PartitionsOrderStabilityOption =
   (typeof PARTITIONS_ORDER_STABILITY_OPTION)[number]
 
-export type PartitionsOrderByOption = (typeof PARTITIONS_ORDER_BY_OPTION)[number]
+export type ImportsCasingPriorityOption =
+  (typeof IMPORTS_CASING_PRIORITY_OPTION)[number]
 
+export type PartitionsOrderByOption = (typeof PARTITIONS_ORDER_BY_OPTION)[number]
 export type ImportsOrderByOption = (typeof IMPORTS_ORDER_BY_OPTION)[number]
 
 export let importsOrderByJsonSchema: JSONSchema4 = {
   enum: [...IMPORTS_ORDER_BY_OPTION],
   type: 'string',
+}
+
+export let importsCasingPriorityJsonSchema: JSONSchema4 = {
+  items: {
+    enum: [...IMPORTS_CASING_PRIORITY_OPTION],
+    type: 'string',
+  },
+  uniqueItems: true,
+  type: 'array',
 }
 
 export let partitionsOrderByJsonSchema: JSONSchema4 = {

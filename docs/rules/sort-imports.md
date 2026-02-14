@@ -294,6 +294,13 @@ Specifies the sorting locales. Refer To
   ```ts
   {
     orderBy?: 'path' | 'alias' | 'specifier'
+    casingPriority?: (
+      | 'camelCase'
+      | 'snake_case'
+      | 'UPPER_CASE'
+      | 'PascalCase'
+      | 'kebab-case'
+    )[]
     splitDeclarations?: boolean
     sortSideEffects?: boolean
     maxLineLength?: number | null
@@ -305,6 +312,7 @@ Specifies the sorting locales. Refer To
   ```ts
   {
     orderBy: 'path',
+    casingPriority: [],
     splitDeclarations: false,
     sortSideEffects: false,
     maxLineLength: null,
@@ -318,6 +326,30 @@ Specifies the sorting locales. Refer To
 - `'alias'` — Sort by the first local binding.
 - `'specifier'` — Sort by the first source-side imported name, with alias
   fallback when source-side name is not applicable.
+
+#### imports.casingPriority
+
+Optional pre-sort priority for casing styles. When set, imports are sorted by
+casing first, then by the configured rule [`type`](#type) and [`order`](#order)
+within the same casing bucket.
+
+- `'camelCase'`
+- `'snake_case'`
+- `'UPPER_CASE'`
+- `'PascalCase'`
+- `'kebab-case'`
+
+Example:
+
+```ts
+{
+  type: 'alphabetical',
+  imports: {
+    orderBy: 'alias',
+    casingPriority: ['camelCase', 'snake_case', 'UPPER_CASE', 'PascalCase'],
+  },
+}
+```
 
 #### imports.splitDeclarations
 

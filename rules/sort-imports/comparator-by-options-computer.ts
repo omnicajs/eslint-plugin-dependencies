@@ -1,5 +1,13 @@
-import type { ComparatorByOptionsComputer } from '../../utils/compare/default-comparator-by-options-computer'
-import type { SortImportsSortingNode, ImportsOrderByOption, Options } from './types'
+import type {
+  ComparatorByOptionsComputer,
+  Comparator,
+} from '../../utils/compare/default-comparator-by-options-computer'
+import type {
+  ImportsCasingPriorityOption,
+  SortImportsSortingNode,
+  ImportsOrderByOption,
+  Options,
+} from './types'
 import type { CommonOptions, TypeOption } from '../../types/common-options'
 
 import { defaultComparatorByOptionsComputer } from '../../utils/compare/default-comparator-by-options-computer'
@@ -10,6 +18,14 @@ import { computeOrderedValue } from '../../utils/compare/compute-ordered-value'
 import { unsortedComparator } from '../../utils/compare/unsorted-comparator'
 import { UnreachableCaseError } from '../../utils/unreachable-case-error'
 import { compareNaturally } from '../../utils/compare/compare-naturally'
+
+type SpecifierOrderByOption = Exclude<ImportsOrderByOption, 'path'>
+
+let CAMEL_CASE_PATTERN = /^[a-z][\dA-Za-z]*$/u
+let SNAKE_CASE_PATTERN = /^[\da-z]+(?:_[\da-z]+)+$/u
+let UPPER_CASE_PATTERN = /^[\dA-Z]+(?:_[\dA-Z]+)*$/u
+let PASCAL_CASE_PATTERN = /^[A-Z][\dA-Za-z]*$/u
+let KEBAB_CASE_PATTERN = /^[\da-z]+(?:-[\da-z]+)+$/u
 
 export let comparatorByOptionsComputer: ComparatorByOptionsComputer<
   Required<Options[number]>,
@@ -26,16 +42,27 @@ export let comparatorByOptionsComputer: ComparatorByOptionsComputer<
     case 'custom':
       switch (options.imports.orderBy) {
         case 'specifier':
-        case 'alias':
-          return bySpecifierComparatorByOptionsComputer({
-            ...options,
-            orderBy: options.imports.orderBy,
-            type: options.type,
+        case 'alias': {
+          let orderBy = options.imports.orderBy as SpecifierOrderByOption
+
+          return buildComparatorWithCasingPriority({
+            comparator: bySpecifierComparatorByOptionsComputer({
+              ...options,
+              type: options.type,
+              orderBy,
+            }),
+            getSortValue: node => getSpecifierNameByOrderBy(node, orderBy),
+            casingPriority: options.imports.casingPriority,
           })
+        }
         case 'path':
-          return defaultComparatorByOptionsComputer({
-            ...options,
-            type: options.type,
+          return buildComparatorWithCasingPriority({
+            comparator: defaultComparatorByOptionsComputer({
+              ...options,
+              type: options.type,
+            }),
+            casingPriority: options.imports.casingPriority,
+            getSortValue: node => node.name,
           })
         /* v8 ignore next 2 -- @preserve Exhaustive guard. */
         default:
@@ -75,35 +102,120 @@ function compareTypeImportFirst(
 
 let bySpecifierComparatorByOptionsComputer: ComparatorByOptionsComputer<
   {
-    orderBy: ImportsOrderByOption
+    orderBy: SpecifierOrderByOption
     type: TypeOption
   } & Omit<Required<Options[number]>, 'type'>,
   SortImportsSortingNode
 > = options => {
-  function getSpecifierName(node: SortImportsSortingNode): string {
-    return options.orderBy === 'specifier' ?
-        (node.sourceSpecifierName ?? node.specifierName ?? '')
-      : (node.specifierName ?? '')
-  }
-
   switch (options.type) {
     /* v8 ignore next 2 -- @preserve Untested for now as not a relevant sort for this rule. */
     case 'subgroup-order':
       return defaultComparatorByOptionsComputer(options)
     case 'alphabetical':
       return (a, b) =>
-        compareAlphabetically(getSpecifierName(a), getSpecifierName(b), options)
+        compareAlphabetically(
+          getSpecifierNameByOrderBy(a, options.orderBy),
+          getSpecifierNameByOrderBy(b, options.orderBy),
+          options,
+        )
     case 'line-length':
       return buildLineLengthComparator(options)
     case 'unsorted':
       return unsortedComparator
     case 'natural':
-      return (a, b) => compareNaturally(getSpecifierName(a), getSpecifierName(b), options)
+      return (a, b) =>
+        compareNaturally(
+          getSpecifierNameByOrderBy(a, options.orderBy),
+          getSpecifierNameByOrderBy(b, options.orderBy),
+          options,
+        )
     case 'custom':
       return (a, b) =>
-        compareByCustomSort(getSpecifierName(a), getSpecifierName(b), options)
+        compareByCustomSort(
+          getSpecifierNameByOrderBy(a, options.orderBy),
+          getSpecifierNameByOrderBy(b, options.orderBy),
+          options,
+        )
     /* v8 ignore next 2 -- @preserve Exhaustive guard. */
     default:
       throw new UnreachableCaseError(options.type)
   }
+}
+
+function buildComparatorWithCasingPriority({
+  casingPriority,
+  getSortValue,
+  comparator,
+}: {
+  getSortValue(node: SortImportsSortingNode): string
+  comparator: Comparator<SortImportsSortingNode>
+  casingPriority?: ImportsCasingPriorityOption[]
+}): Comparator<SortImportsSortingNode> {
+  let normalizedCasingPriority = casingPriority ?? []
+
+  if (normalizedCasingPriority.length === 0) {
+    return comparator
+  }
+
+  let priorityByCasing = new Map(
+    normalizedCasingPriority.map((casing, index) => [casing, index]),
+  )
+
+  return (a, b) => {
+    let leftPriority = getCasingPriorityRank(
+      getSortValue(a),
+      priorityByCasing,
+      normalizedCasingPriority.length,
+    )
+    let rightPriority = getCasingPriorityRank(
+      getSortValue(b),
+      priorityByCasing,
+      normalizedCasingPriority.length,
+    )
+    if (leftPriority !== rightPriority) {
+      return leftPriority - rightPriority
+    }
+
+    return comparator(a, b)
+  }
+}
+
+function getCasingKind(value: string): ImportsCasingPriorityOption | null {
+  if (SNAKE_CASE_PATTERN.test(value)) {
+    return 'snake_case'
+  }
+  if (KEBAB_CASE_PATTERN.test(value)) {
+    return 'kebab-case'
+  }
+  if (UPPER_CASE_PATTERN.test(value) && /[A-Z]/u.test(value)) {
+    return 'UPPER_CASE'
+  }
+  if (CAMEL_CASE_PATTERN.test(value) && /[A-Z]/u.test(value)) {
+    return 'camelCase'
+  }
+  if (PASCAL_CASE_PATTERN.test(value) && /[a-z]/u.test(value)) {
+    return 'PascalCase'
+  }
+  return null
+}
+
+function getCasingPriorityRank(
+  value: string,
+  priorityByCasing: Map<ImportsCasingPriorityOption, number>,
+  fallbackPriority: number,
+): number {
+  let casing = getCasingKind(value)
+  if (!casing) {
+    return fallbackPriority
+  }
+  return priorityByCasing.get(casing) ?? fallbackPriority
+}
+
+function getSpecifierNameByOrderBy(
+  node: SortImportsSortingNode,
+  orderBy: SpecifierOrderByOption,
+): string {
+  return orderBy === 'specifier' ?
+      (node.sourceSpecifierName ?? node.specifierName ?? '')
+    : (node.specifierName ?? '')
 }
