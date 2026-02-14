@@ -202,24 +202,31 @@ Specifies the sorting locales. Refer To
 - `string` — A BCP 47 language tag (e.g. `'en'`, `'en-US'`, `'zh-CN'`).
 - `string[]` — An array of BCP 47 language tags.
 
-### partitionByComment
+### partitions
+
+<sub>default: `{ splitBy: { comments: false, newlines: false } }`</sub>
+
+Controls partitioning behavior for exports.
+
+- `'merge'` — Treat all exports as a single partition.
+- `{ splitBy: ... }` — Preserve partition boundaries based on configured
+  delimiters.
+
+### partitions.splitBy.comments
 
 <sub>default: `false`</sub>
 
-Enables the use of comments to separate the exports into logical groups. This
-can help in organizing and maintaining large export blocks by creating
-partitions based on comments.
+Enables the use of comments to separate exports into logical partitions.
 
-- `true` — All comments will be treated as delimiters, creating partitions.
-- `false` — Comments will not be used as delimiters.
-- `RegExpPattern = string | { pattern: string; flags: string}` — A regexp
-  pattern to specify which comments should act as delimiters.
-- `RegExpPattern[]` — A list of regexp patterns to specify which comments should
-  act as delimiters.
+- `true` — All comments are treated as partition delimiters.
+- `false` — Comments are ignored for partitioning.
+- `RegExpPattern = string | { pattern: string; flags: string }` — A regexp
+  pattern for partition comments.
+- `RegExpPattern[]` — A list of regexp patterns for partition comments.
 - `{ block: boolean | RegExpPattern | RegExpPattern[]; line: boolean | RegExpPattern | RegExpPattern[] }`
-  — Specify which block and line comments should act as delimiters.
+  — Separate rules for block and line comments.
 
-### partitionByNewLine
+### partitions.splitBy.newlines
 
 <sub>default: `false`</sub>
 
@@ -238,8 +245,7 @@ export { Named } from './folder'
 export { AnotherNamed } from './second-folder'
 ```
 
-Each group of exports (separated by empty lines) is treated independently, and
-the order within each group is preserved.
+Each group of exports (separated by empty lines) is treated independently.
 
 ### newlinesBetween
 
@@ -257,8 +263,8 @@ Specifies how to handle newlines between groups.
 You can also enforce the newline behavior between two specific groups through
 the [`groups`](#newlines-between-groups) option.
 
-This option is only applicable when [`partitionByNewLine`](#partitionbynewline)
-is `false`.
+This option is only applicable when
+[`partitions.splitBy.newlines`](#partitionssplitbynewlines) is `false`.
 
 ### newlinesInside
 
@@ -280,8 +286,8 @@ You can also enforce the newline behavior inside a given group through the
 [`groups`](#group-with-overridden-settings) or [`customGroups`](#customgroups)
 options.
 
-This option is only applicable when [`partitionByNewLine`](#partitionbynewline)
-is `false`.
+This option is only applicable when
+[`partitions.splitBy.newlines`](#partitionssplitbynewlines) is `false`.
 
 ### groups
 
@@ -385,8 +391,8 @@ newline behavior between two specific groups.
 
 See the [`newlinesBetween`](#newlinesbetween) option.
 
-This feature is only applicable when [`partitionByNewLine`](#partitionbynewline)
-is `false`.
+This feature is only applicable when
+[`partitions.splitBy.newlines`](#partitionssplitbynewlines) is `false`.
 
 ```ts
 {
@@ -495,8 +501,12 @@ export default [
           fallbackSort: { type: 'unsorted' },
           ignoreCase: true,
           specialCharacters: 'keep',
-          partitionByComment: false,
-          partitionByNewLine: false,
+          partitions: {
+            splitBy: {
+              comments: false,
+              newlines: false,
+            },
+          },
           newlinesBetween: 'ignore',
           newlinesInside: 'ignore',
           groups: [],
@@ -523,8 +533,12 @@ module.exports = {
         fallbackSort: { type: 'unsorted' },
         ignoreCase: true,
         specialCharacters: 'keep',
-        partitionByComment: false,
-        partitionByNewLine: false,
+        partitions: {
+          splitBy: {
+            comments: false,
+            newlines: false,
+          },
+        },
         newlinesBetween: 'ignore',
         newlinesInside: 'ignore',
         groups: [],

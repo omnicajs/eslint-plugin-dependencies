@@ -1,7 +1,8 @@
 import type { JSONSchema4 } from '@typescript-eslint/utils/json-schema'
 
-import type { AllCommonOptions } from '../../types/all-common-options'
-import type { TypeOption } from '../../types/common-options'
+import type { PartitionByCommentOption } from '../../types/common-partition-options'
+import type { CommonGroupsOptions } from '../../types/common-groups-options'
+import type { CommonOptions, TypeOption } from '../../types/common-options'
 
 import {
   buildCustomGroupModifiersJsonSchema,
@@ -15,8 +16,31 @@ import {
  * From '...'`) to improve code organization and maintainability.
  */
 export type Options = Partial<
-  AllCommonOptions<TypeOption, AdditionalSortOptions, CustomGroupMatchOptions>
+  {
+    /**
+     * VNext partition configuration.
+     *
+     * - `'merge'` disables partition boundaries and sorts as a single block.
+     * - object configuration controls how partitions are detected.
+     */
+    partitions: PartitionsOptions | 'merge'
+  } & CommonGroupsOptions<
+    TypeOption,
+    AdditionalSortOptions,
+    CustomGroupMatchOptions
+  > &
+    CommonOptions<TypeOption>
 >[]
+
+export interface PartitionsOptions {
+  /**
+   * Partition split signals.
+   */
+  splitBy: {
+    comments: PartitionByCommentOption
+    newlines: boolean
+  }
+}
 
 /**
  * Union type of available export modifiers. Distinguishes between value exports

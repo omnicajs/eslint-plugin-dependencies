@@ -3,7 +3,12 @@ import type { TSESTree } from '@typescript-eslint/types'
 
 import { AST_NODE_TYPES } from '@typescript-eslint/utils'
 
-import type { Modifier, Selector, Options } from './sort-exports/types'
+import type {
+  PartitionsOptions,
+  Modifier,
+  Selector,
+  Options,
+} from './sort-exports/types'
 import type { SortingNode } from '../types/sorting-node'
 
 import {
@@ -67,12 +72,16 @@ type SortExportsSortingNode = SortingNode<
 >
 
 let defaultOptions: Required<Options[number]> = {
+  partitions: {
+    splitBy: {
+      comments: false,
+      newlines: false,
+    },
+  },
   fallbackSort: { type: 'unsorted' },
   newlinesInside: 'newlinesBetween',
   specialCharacters: 'keep',
-  partitionByComment: false,
   newlinesBetween: 'ignore',
-  partitionByNewLine: false,
   type: 'alphabetical',
   customGroups: [],
   ignoreCase: true,
@@ -87,13 +96,18 @@ export default createEslintRule<Options, MessageId>({
     let settings = getSettings(context.settings)
 
     let options = complete(context.options.at(0), settings, defaultOptions)
+    let partitionSplitByOptions = getPartitionSplitByOptions(options.partitions)
+
     validateCustomSortConfiguration(options)
     validateGroupsConfiguration({
       modifiers: allModifiers,
       selectors: allSelectors,
       options,
     })
-    validateNewlinesAndPartitionConfiguration(options)
+    validateNewlinesAndPartitionConfiguration({
+      ...options,
+      partitionByNewLine: partitionSplitByOptions.newlines,
+    })
 
     let { sourceCode, id } = context
     let eslintDisabledLines = getEslintDisabledLines({
@@ -148,10 +162,13 @@ export default createEslintRule<Options, MessageId>({
 
       if (
         shouldPartition({
+          options: {
+            partitionByComment: partitionSplitByOptions.comments,
+            partitionByNewLine: partitionSplitByOptions.newlines,
+          },
           lastSortingNode,
           sortingNode,
           sourceCode,
-          options,
         })
       ) {
         formattedMembers.push([])
@@ -184,8 +201,28 @@ export default createEslintRule<Options, MessageId>({
             additionalCustomGroupMatchProperties:
               additionalCustomGroupMatchOptionsJsonSchema,
           }),
-          partitionByComment: partitionByCommentJsonSchema,
-          partitionByNewLine: partitionByNewLineJsonSchema,
+          partitions: {
+            oneOf: [
+              {
+                enum: ['merge'],
+                type: 'string',
+              },
+              {
+                properties: {
+                  splitBy: {
+                    properties: {
+                      comments: partitionByCommentJsonSchema,
+                      newlines: partitionByNewLineJsonSchema,
+                    },
+                    additionalProperties: false,
+                    type: 'object',
+                  },
+                },
+                additionalProperties: false,
+                type: 'object',
+              },
+            ],
+          },
         },
         additionalProperties: false,
         type: 'object',
@@ -221,6 +258,7 @@ function sortExportNodes({
   formattedMembers: SortExportsSortingNode[][]
   options: Required<Options[number]>
 }): void {
+  let partitionSplitByOptions = getPartitionSplitByOptions(options.partitions)
   let optionsByGroupIndexComputer = buildOptionsByGroupIndexComputer(options)
 
   let nodes = formattedMembers.flat()
@@ -232,8 +270,11 @@ function sortExportNodes({
       unexpectedGroupOrder: GROUP_ORDER_ERROR_ID,
       unexpectedOrder: ORDER_ERROR_ID,
     },
+    options: {
+      ...options,
+      partitionByComment: partitionSplitByOptions.comments,
+    },
     sortNodesExcludingEslintDisabled,
-    options,
     context,
     nodes,
   })
@@ -282,6 +323,19 @@ function computeExportTypeModifier(
     default:
       throw new UnreachableCaseError(node)
   }
+}
+
+function getPartitionSplitByOptions(
+  partitions: Required<Options[number]>['partitions'],
+): PartitionsOptions['splitBy'] {
+  if (partitions === 'merge') {
+    return {
+      comments: false,
+      newlines: false,
+    }
+  }
+
+  return partitions.splitBy
 }
 
 function computeLineCountModifier(

@@ -1,8 +1,9 @@
 import type { JSONSchema4 } from '@typescript-eslint/utils/json-schema'
 import type { TSESTree } from '@typescript-eslint/types'
 
-import type { AllCommonOptions } from '../../types/all-common-options'
-import type { TypeOption } from '../../types/common-options'
+import type { PartitionByCommentOption } from '../../types/common-partition-options'
+import type { CommonGroupsOptions } from '../../types/common-groups-options'
+import type { CommonOptions, TypeOption } from '../../types/common-options'
 import type { SortingNode } from '../../types/sorting-node'
 
 import {
@@ -18,18 +19,36 @@ import {
 export type Options = Partial<
   {
     /**
+     * VNext partition configuration.
+     *
+     * - `'merge'` disables partition boundaries and sorts as a single block.
+     * - object configuration controls how partitions are detected.
+     */
+    partitions: PartitionsOptions | 'merge'
+    /**
      * Whether to ignore import aliases when sorting. When true, sorts by the
      * original name rather than the alias.
      *
      * @default false
      */
     ignoreAlias: boolean
-  } & AllCommonOptions<
+  } & CommonGroupsOptions<
     TypeOption,
     AdditionalSortOptions,
     CustomGroupMatchOptions
-  >
+  > &
+    CommonOptions<TypeOption>
 >[]
+
+export interface PartitionsOptions {
+  /**
+   * Partition split signals.
+   */
+  splitBy: {
+    comments: PartitionByCommentOption
+    newlines: boolean
+  }
+}
 
 /**
  * Extended sorting node for named import specifiers.

@@ -4,6 +4,7 @@ import { AST_NODE_TYPES } from '@typescript-eslint/utils'
 
 import type {
   SortNamedImportsSortingNode,
+  PartitionsOptions,
   Modifier,
   Selector,
   Options,
@@ -64,11 +65,15 @@ type MessageId =
 let cachedGroupsByModifiersAndSelectors = new Map<string, string[]>()
 
 let defaultOptions: Required<Options[number]> = {
+  partitions: {
+    splitBy: {
+      comments: false,
+      newlines: false,
+    },
+  },
   fallbackSort: { type: 'unsorted' },
   newlinesInside: 'newlinesBetween',
   specialCharacters: 'keep',
-  partitionByNewLine: false,
-  partitionByComment: false,
   newlinesBetween: 'ignore',
   type: 'alphabetical',
   ignoreAlias: false,
@@ -92,13 +97,17 @@ export default createEslintRule<Options, MessageId>({
 
       let settings = getSettings(context.settings)
       let options = complete(context.options.at(0), settings, defaultOptions)
+      let partitionSplitByOptions = getPartitionSplitByOptions(options.partitions)
       validateCustomSortConfiguration(options)
       validateGroupsConfiguration({
         modifiers: allModifiers,
         selectors: allSelectors,
         options,
       })
-      validateNewlinesAndPartitionConfiguration(options)
+      validateNewlinesAndPartitionConfiguration({
+        ...options,
+        partitionByNewLine: partitionSplitByOptions.newlines,
+      })
 
       let { sourceCode, id } = context
       let eslintDisabledLines = getEslintDisabledLines({
@@ -146,10 +155,13 @@ export default createEslintRule<Options, MessageId>({
         let lastSortingNode = formattedMembers.at(-1)?.at(-1)
         if (
           shouldPartition({
+            options: {
+              partitionByComment: partitionSplitByOptions.comments,
+              partitionByNewLine: partitionSplitByOptions.newlines,
+            },
             lastSortingNode,
             sortingNode,
             sourceCode,
-            options,
           })
         ) {
           formattedMembers.push([])
@@ -183,8 +195,11 @@ export default createEslintRule<Options, MessageId>({
           unexpectedGroupOrder: GROUP_ORDER_ERROR_ID,
           unexpectedOrder: ORDER_ERROR_ID,
         },
+        options: {
+          ...options,
+          partitionByComment: partitionSplitByOptions.comments,
+        },
         sortNodesExcludingEslintDisabled,
-        options,
         context,
         nodes,
       })
@@ -199,12 +214,32 @@ export default createEslintRule<Options, MessageId>({
             additionalCustomGroupMatchProperties:
               additionalCustomGroupMatchOptionsJsonSchema,
           }),
+          partitions: {
+            oneOf: [
+              {
+                enum: ['merge'],
+                type: 'string',
+              },
+              {
+                properties: {
+                  splitBy: {
+                    properties: {
+                      comments: partitionByCommentJsonSchema,
+                      newlines: partitionByNewLineJsonSchema,
+                    },
+                    additionalProperties: false,
+                    type: 'object',
+                  },
+                },
+                additionalProperties: false,
+                type: 'object',
+              },
+            ],
+          },
           ignoreAlias: {
             description: 'Controls whether to ignore alias names.',
             type: 'boolean',
           },
-          partitionByComment: partitionByCommentJsonSchema,
-          partitionByNewLine: partitionByNewLineJsonSchema,
         },
         additionalProperties: false,
         type: 'object',
@@ -244,4 +279,17 @@ function computeImportKindModifier(
     default:
       throw new UnreachableCaseError(importKind)
   }
+}
+
+function getPartitionSplitByOptions(
+  partitions: Required<Options[number]>['partitions'],
+): PartitionsOptions['splitBy'] {
+  if (partitions === 'merge') {
+    return {
+      comments: false,
+      newlines: false,
+    }
+  }
+
+  return partitions.splitBy
 }

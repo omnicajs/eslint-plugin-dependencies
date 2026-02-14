@@ -225,24 +225,31 @@ exported name.
 - `true` — Use the import alias for sorting.
 - `false` — Use the exported name for sorting.
 
-### partitionByComment
+### partitions
+
+<sub>default: `{ splitBy: { comments: false, newlines: false } }`</sub>
+
+Controls partitioning behavior for named imports.
+
+- `'merge'` — Treat all named imports as a single partition.
+- `{ splitBy: ... }` — Preserve partition boundaries based on configured
+  delimiters.
+
+### partitions.splitBy.comments
 
 <sub>default: `false`</sub>
 
-Enables the use of comments to separate the members of named imports into
-logical groups. This can help in organizing and maintaining large named imports
-by creating partitions based on comments.
+Enables comments as partition delimiters for named imports.
 
-- `true` — All comments will be treated as delimiters, creating partitions.
-- `false` — Comments will not be used as delimiters.
-- `RegExpPattern = string | { pattern: string; flags: string}` — A regexp
-  pattern to specify which comments should act as delimiters.
-- `RegExpPattern[]` — A list of regexp patterns to specify which comments should
-  act as delimiters.
+- `true` — All comments are treated as partition delimiters.
+- `false` — Comments are ignored for partitioning.
+- `RegExpPattern = string | { pattern: string; flags: string }` — A regexp
+  pattern for partition comments.
+- `RegExpPattern[]` — A list of regexp patterns for partition comments.
 - `{ block: boolean | RegExpPattern | RegExpPattern[]; line: boolean | RegExpPattern | RegExpPattern[] }`
-  — Specify which block and line comments should act as delimiters.
+  — Separate rules for block and line comments.
 
-### partitionByNewLine
+### partitions.splitBy.newlines
 
 <sub>default: `false`</sub>
 
@@ -286,8 +293,8 @@ Specifies how to handle newlines between groups.
 You can also enforce the newline behavior between two specific groups through
 the [`groups`](#newlines-between-groups) option.
 
-This option is only applicable when [`partitionByNewLine`](#partitionbynewline)
-is `false`.
+This option is only applicable when
+[`partitions.splitBy.newlines`](#partitionssplitbynewlines) is `false`.
 
 ### newlinesInside
 
@@ -309,8 +316,8 @@ You can also enforce the newline behavior inside a given group through the
 [`groups`](#group-with-overridden-settings) or [`customGroups`](#customgroups)
 options.
 
-This option is only applicable when [`partitionByNewLine`](#partitionbynewline)
-is `false`.
+This option is only applicable when
+[`partitions.splitBy.newlines`](#partitionssplitbynewlines) is `false`.
 
 ### groups
 
@@ -398,8 +405,8 @@ newline behavior between two specific groups.
 
 See the [`newlinesBetween`](#newlinesbetween) option.
 
-This feature is only applicable when [`partitionByNewLine`](#partitionbynewline)
-is `false`.
+This feature is only applicable when
+[`partitions.splitBy.newlines`](#partitionssplitbynewlines) is `false`.
 
 ```ts
 {
@@ -509,8 +516,12 @@ export default [
           ignoreAlias: false,
           ignoreCase: true,
           specialCharacters: 'keep',
-          partitionByNewLine: false,
-          partitionByComment: false,
+          partitions: {
+            splitBy: {
+              comments: false,
+              newlines: false,
+            },
+          },
           newlinesBetween: 'ignore',
           newlinesInside: 'ignore',
           groups: [],
@@ -538,8 +549,12 @@ module.exports = {
         ignoreAlias: false,
         ignoreCase: true,
         specialCharacters: 'keep',
-        partitionByNewLine: false,
-        partitionByComment: false,
+        partitions: {
+          splitBy: {
+            comments: false,
+            newlines: false,
+          },
+        },
         newlinesBetween: 'ignore',
         newlinesInside: 'ignore',
         groups: [],
