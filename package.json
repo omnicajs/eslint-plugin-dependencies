@@ -47,7 +47,7 @@
     "release:version": "changelogen --output changelog.md --release --no-commit --no-tag",
     "test": "pnpm run /^test:/",
     "test:css": "stylelint --allow-empty-input \"docs/**/*.{css}\"",
-    "test:format": "prettier --check \"**/*.{js,ts,json,md,yml}\"",
+    "test:format": "prettier --check \"**/*.{js,ts,json,md,yml}\" \"!vendor/**/*\"",
     "test:js": "eslint --concurrency auto .",
     "test:packages": "CI=true pnpm dedupe --check",
     "test:spelling": "cspell \"**/*\"",

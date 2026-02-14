@@ -1160,14 +1160,14 @@ function getPartitionByCommentOption(
     : options.partitions.splitBy.comments
 }
 
-function isPartitionByNewLineEnabled(options: SortImportsOptions): boolean {
-  return options.partitions !== 'merge' && options.partitions.splitBy.newlines
-}
-
 function getPartitionMaxImports(options: SortImportsOptions): number {
   return options.partitions === 'merge' ?
       Infinity
     : options.partitions.maxImports
+}
+
+function isPartitionByNewLineEnabled(options: SortImportsOptions): boolean {
+  return options.partitions !== 'merge' && options.partitions.splitBy.newlines
 }
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
