@@ -20,11 +20,133 @@ import { Alphabet } from '../../utils/alphabet'
 import rule from '../../rules/sort-imports'
 
 describe('sort-imports', () => {
-  let { invalid, valid } = createRuleTester({
+  let { invalid: baseInvalid, valid: baseValid } = createRuleTester({
     parser: typescriptParser,
     name: 'sort-imports',
     rule,
   })
+
+  function normalizeTestCaseOptions<T>(testCase: T): T {
+    if (!testCase || typeof testCase !== 'object') {
+      return testCase
+    }
+
+    if (!('options' in testCase)) {
+      return testCase
+    }
+
+    let typedTestCase = testCase as {
+      options?: unknown[]
+    } & T
+    if (!Array.isArray(typedTestCase.options)) {
+      return testCase
+    }
+
+    return {
+      ...typedTestCase,
+      options: typedTestCase.options.map(option =>
+        normalizeSortImportsOptions(option),
+      ),
+    }
+  }
+
+  function normalizeSortImportsOptions(option: unknown): unknown {
+    if (!option || typeof option !== 'object' || Array.isArray(option)) {
+      return option
+    }
+
+    let {
+      partitionImportsSplitOnSort,
+      partitionSortingStable,
+      partitionInsideGroup,
+      partitionMaxImports,
+      partitionByComment,
+      partitionByNewLine,
+      partitionSorting,
+      sortSideEffects,
+      maxLineLength,
+      partitions,
+      imports,
+      sortBy,
+      ...rest
+    } = option as Record<string, unknown>
+
+    let normalizedImports: Record<string, unknown> =
+      imports && typeof imports === 'object' && !Array.isArray(imports) ?
+        { ...imports }
+      : {}
+    if (!('orderBy' in normalizedImports)) {
+      normalizedImports['orderBy'] = sortBy === 'specifier' ? 'alias' : 'path'
+    }
+    if (!('splitDeclarations' in normalizedImports)) {
+      normalizedImports['splitDeclarations'] = partitionImportsSplitOnSort ?? false
+    }
+    if (!('sortSideEffects' in normalizedImports)) {
+      normalizedImports['sortSideEffects'] = sortSideEffects ?? false
+    }
+    if (!('maxLineLength' in normalizedImports)) {
+      normalizedImports['maxLineLength'] =
+        typeof maxLineLength === 'number' ? maxLineLength : null
+    }
+
+    let normalizedPartitions: Record<string, unknown> | 'merge'
+    if (partitions === 'merge') {
+      normalizedPartitions = 'merge'
+    } else {
+      let partitionsObject: Record<string, unknown> =
+        partitions && typeof partitions === 'object' && !Array.isArray(partitions) ?
+          { ...partitions }
+        : {}
+      if (partitionInsideGroup === 'merge') {
+        normalizedPartitions = 'merge'
+      } else {
+        let splitBy: Record<string, unknown> =
+          partitionsObject['splitBy'] &&
+            typeof partitionsObject['splitBy'] === 'object' &&
+            !Array.isArray(partitionsObject['splitBy']) ?
+            { ...(partitionsObject['splitBy'] as Record<string, unknown>) }
+          : {}
+        if (!('newlines' in splitBy)) {
+          splitBy['newlines'] = partitionByNewLine ?? false
+        }
+        if (!('comments' in splitBy)) {
+          splitBy['comments'] = partitionByComment ?? false
+        }
+
+        let { orderStability } = partitionsObject
+        let { maxImports } = partitionsObject
+        let { orderBy } = partitionsObject
+        if (!('orderStability' in partitionsObject)) {
+          orderStability = partitionSortingStable === false ? 'unstable' : 'stable'
+        }
+        if (!('maxImports' in partitionsObject)) {
+          maxImports = typeof partitionMaxImports === 'number' ? partitionMaxImports : null
+        }
+        if (!('orderBy' in partitionsObject)) {
+          orderBy = partitionSorting === 'type-first' ? 'type-first' : 'source'
+        }
+
+        normalizedPartitions = {
+          ...partitionsObject,
+          orderStability,
+          maxImports,
+          orderBy,
+          splitBy,
+        }
+      }
+    }
+
+    return {
+      ...rest,
+      partitions: normalizedPartitions,
+      imports: normalizedImports,
+    }
+  }
+
+  let valid: typeof baseValid = testCase =>
+    baseValid(normalizeTestCaseOptions(testCase))
+  let invalid: typeof baseInvalid = testCase =>
+    baseInvalid(normalizeTestCaseOptions(testCase))
 
   function mockReadClosestTsConfigByPathWith(
     compilerOptions: CompilerOptions,
@@ -4487,6 +4609,88 @@ describe('sort-imports', () => {
       })
     })
 
+    it('sorts imports by source-side names when imports.orderBy is "specifier"', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              orderBy: 'specifier',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import { a as z } from 'beta'
+          import { z as a } from 'alpha'
+        `,
+        code: dedent`
+          import { z as a } from 'alpha'
+          import { a as z } from 'beta'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('falls back to alias when source-side name is unavailable', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              orderBy: 'specifier',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          const { a } = require('alpha')
+          const { ...z } = require('zeta')
+        `,
+        code: dedent`
+          const { ...z } = require('zeta')
+          const { a } = require('alpha')
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('falls back to empty string for side-effect imports in source-side mode', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              sortSideEffects: true,
+              orderBy: 'specifier',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+        output: dedent`
+          import 'alpha'
+          import z from 'zeta'
+        `,
+        code: dedent`
+          import z from 'zeta'
+          import 'alpha'
+        `,
+      })
+    })
+
     it('sorts imports by specifier names when sortBy is "specifier"', async () => {
       await invalid({
         errors: [
@@ -4565,6 +4769,33 @@ describe('sort-imports', () => {
     })
 
     it('splits imports when specifier order interleaves sources', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              splitDeclarations: true,
+              orderBy: 'specifier',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import { "alpha" as alpha } from 'alpha'
+          import { "beta" as beta } from 'beta'
+          import { "zeta" as zeta } from 'alpha'
+        `,
+        code: dedent`
+          import { "zeta" as zeta, "alpha" as alpha } from 'alpha'
+          import { "beta" as beta } from 'beta'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+
       await invalid({
         options: [
           {
@@ -12950,7 +13181,7 @@ describe('sort-imports', () => {
         return rule.create({
           options: [
             {
-              sortSideEffects,
+              imports: { sortSideEffects },
               groups,
             },
           ],
@@ -12997,22 +13228,297 @@ describe('sort-imports', () => {
       })
     })
 
-    describe('validates partitionInsideGroup configuration', () => {
-      function createRule(partitionInsideGroup: string): RuleListener {
+    describe('validates partitions configuration', () => {
+      function createRule(partitions: unknown): RuleListener {
         return rule.create({
           options: [
             {
-              partitionInsideGroup:
-                partitionInsideGroup as Options[number]['partitionInsideGroup'],
+              partitions: partitions as Options[number]['partitions'],
             },
           ],
-        } as Readonly<RuleContext<MessageId, Options>>)
+          sourceCode: {
+            getAllComments: () => [],
+          },
+        } as unknown as Readonly<RuleContext<MessageId, Options>>)
       }
 
-      it('throws error when partitionInsideGroup is invalid', () => {
+      it('throws error when partitions is invalid', () => {
         expect(() => createRule('invalid')).toThrowError(
-          "The 'partitionInsideGroup' option must be 'preserve' or 'merge'.",
+          "The 'partitions' option must be 'merge' or an object with valid vNext fields.",
         )
+      })
+
+      it('throws error when partitions.splitBy is not an object', () => {
+        expect(() =>
+          createRule({
+            splitBy: true as unknown as NonNullable<
+              Exclude<Options[number]['partitions'], 'merge'>
+            >['splitBy'],
+          }),
+        ).toThrowError(
+          "The 'partitions' option must be 'merge' or an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when partitions.splitBy.newlines is invalid', () => {
+        expect(() =>
+          createRule({
+            splitBy: {
+              newlines: 1 as unknown as boolean,
+            },
+          }),
+        ).toThrowError(
+          "The 'partitions' option must be 'merge' or an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when partitions.orderBy is invalid', () => {
+        expect(() =>
+          createRule({
+            orderBy: 'unknown' as 'source',
+          }),
+        ).toThrowError(
+          "The 'partitions' option must be 'merge' or an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when partitions.orderStability is invalid', () => {
+        expect(() =>
+          createRule({
+            orderStability: 'random' as 'stable',
+          }),
+        ).toThrowError(
+          "The 'partitions' option must be 'merge' or an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when partitions.maxImports is invalid', () => {
+        expect(() =>
+          createRule({
+            maxImports: 0,
+          }),
+        ).toThrowError(
+          "The 'partitions' option must be 'merge' or an object with valid vNext fields.",
+        )
+      })
+
+      it('accepts partitions without splitBy', () => {
+        expect(() =>
+          createRule({
+            orderBy: 'source',
+          }),
+        ).not.toThrowError()
+      })
+
+      it('accepts partitions.splitBy without comments', () => {
+        expect(() =>
+          createRule({
+            splitBy: {
+              newlines: true,
+            },
+          }),
+        ).not.toThrowError()
+      })
+
+      it('throws error when legacy sortBy is passed directly', () => {
+        expect(() =>
+          rule.create({
+            options: [{ sortBy: 'specifier' }],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError("Unknown option 'sortBy' in sort-imports configuration.")
+      })
+
+      it('throws error when tsconfig is not an object', () => {
+        expect(() =>
+          rule.create({
+            options: [{ tsconfig: null }],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError(
+          "The 'tsconfig' option must be an object with { rootDir, filename? }.",
+        )
+      })
+
+      it('throws error when tsconfig.rootDir is not a string', () => {
+        expect(() =>
+          rule.create({
+            options: [{ tsconfig: { rootDir: 1 } }],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError(
+          "The 'tsconfig' option must be an object with { rootDir, filename? }.",
+        )
+      })
+
+      it('throws error when imports.maxLineLength is invalid', () => {
+        expect(() =>
+          rule.create({
+            options: [{ imports: { maxLineLength: 0 } }],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError(
+          "The 'imports' option must be an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when imports is not an object', () => {
+        expect(() =>
+          rule.create({
+            options: [{ imports: null as unknown as Options[number]['imports'] }],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError(
+          "The 'imports' option must be an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when imports.orderBy is invalid', () => {
+        expect(() =>
+          rule.create({
+            options: [{ imports: { orderBy: 'unknown' } }],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError(
+          "The 'imports' option must be an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when imports.splitDeclarations is invalid', () => {
+        expect(() =>
+          rule.create({
+            options: [
+              { imports: { splitDeclarations: 'true' as unknown as boolean } },
+            ],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError(
+          "The 'imports' option must be an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when imports.sortSideEffects is invalid', () => {
+        expect(() =>
+          rule.create({
+            options: [
+              { imports: { sortSideEffects: 'false' as unknown as boolean } },
+            ],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError(
+          "The 'imports' option must be an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when partitions.splitBy.comments contains invalid regex value', () => {
+        expect(() =>
+          rule.create({
+            options: [
+              {
+                partitions: {
+                  splitBy: {
+                    comments: [1 as unknown as string],
+                  },
+                },
+              },
+            ],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError(
+          "The 'partitions' option must be 'merge' or an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when partitions.splitBy.comments.block is invalid', () => {
+        expect(() =>
+          rule.create({
+            options: [
+              {
+                partitions: {
+                  splitBy: {
+                    comments: {
+                      block: 1 as unknown as string,
+                    },
+                  },
+                },
+              },
+            ],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError(
+          "The 'partitions' option must be 'merge' or an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when partitions.splitBy.comments.line is invalid', () => {
+        expect(() =>
+          rule.create({
+            options: [
+              {
+                partitions: {
+                  splitBy: {
+                    comments: {
+                      line: 1 as unknown as string,
+                    },
+                  },
+                },
+              },
+            ],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError(
+          "The 'partitions' option must be 'merge' or an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when partitions.splitBy.comments.pattern is invalid', () => {
+        expect(() =>
+          rule.create({
+            options: [
+              {
+                partitions: {
+                  splitBy: {
+                    comments: {
+                      pattern: 1 as unknown as string,
+                    },
+                  },
+                },
+              },
+            ],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError(
+          "The 'partitions' option must be 'merge' or an object with valid vNext fields.",
+        )
+      })
+
+      it('throws error when partitions.splitBy.comments.flags is invalid', () => {
+        expect(() =>
+          rule.create({
+            options: [
+              {
+                partitions: {
+                  splitBy: {
+                    comments: {
+                      flags: 1 as unknown as string,
+                      pattern: '^Section:',
+                    },
+                  },
+                },
+              },
+            ],
+          } as unknown as Readonly<RuleContext<MessageId, Options>>),
+        ).toThrowError(
+          "The 'partitions' option must be 'merge' or an object with valid vNext fields.",
+        )
+      })
+
+      it('accepts partitions.splitBy.comments object regex form', () => {
+        expect(() =>
+          createRule({
+            splitBy: {
+              comments: { pattern: '^Section:', flags: 'i' },
+            },
+          }),
+        ).not.toThrowError()
+      })
+
+      it('accepts partitions.splitBy.comments regex object', () => {
+        expect(() =>
+          createRule({
+            splitBy: {
+              comments: [{ pattern: '^Section:', flags: 'i' }],
+            },
+          }),
+        ).not.toThrowError()
       })
     })
 

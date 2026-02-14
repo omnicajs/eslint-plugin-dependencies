@@ -2,8 +2,9 @@ import type { JSONSchema4 } from '@typescript-eslint/utils/json-schema'
 import type { TSESTree } from '@typescript-eslint/types'
 
 import type { SortingNodeWithDependencies } from '../../utils/sort-nodes-by-dependencies'
-import type { RegexOption, TypeOption } from '../../types/common-options'
-import type { AllCommonOptions } from '../../types/all-common-options'
+import type { CommonOptions, RegexOption, TypeOption } from '../../types/common-options'
+import type { PartitionByCommentOption } from '../../types/common-partition-options'
+import type { CommonGroupsOptions } from '../../types/common-groups-options'
 
 import {
   buildCustomGroupModifiersJsonSchema,
@@ -41,46 +42,19 @@ export type Options = Partial<
     useExperimentalDependencyDetection: boolean
 
     /**
-     * Controls whether partitions are preserved or merged within each group.
+     * VNext partition configuration.
      *
-     * @default 'preserve'
+     * - `'merge'` merges partitions inside every group.
+     * - object configuration preserves partitions and controls how they are
+     *   built/reordered.
      */
-    partitionInsideGroup: 'preserve' | 'merge'
-
-    /**
-     * Controls partition reordering when partitionByNewLine is enabled.
-     *
-     * @default 'off'
-     */
-    partitionSorting: 'type-first' | 'off'
-
-    /**
-     * Whether to split import declarations when specifier sorting interleaves
-     * sources.
-     *
-     * @default false
-     */
-    partitionImportsSplitOnSort: boolean
-
-    /**
-     * Whether to keep partition order stable within the same category.
-     *
-     * @default true
-     */
-    partitionSortingStable: boolean
+    partitions: PartitionsOptions | 'merge'
 
     /**
      * Patterns to identify internal imports. Imports matching these patterns
      * are categorized as 'internal'.
      */
     internalPattern: RegexOption[]
-
-    /**
-     * Maximum number of imports per partition before splitting.
-     *
-     * @default Infinity
-     */
-    partitionMaxImports: number
 
     /**
      * Runtime environment for resolving built-in modules. Determines which
@@ -91,23 +65,11 @@ export type Options = Partial<
     environment: 'node' | 'bun'
 
     /**
-     * Controls whether side-effect imports should be sorted. When false,
-     * side-effect imports remain in their original positions.
-     *
-     * @default false
+     * VNext import node sorting configuration.
      */
-    sortSideEffects: boolean
-
-    /**
-     * Maximum line length for imports. When exceeded, import names are used for
-     * sorting instead of the entire line.
-     */
-    maxLineLength: number
-  } & AllCommonOptions<
-    CustomTypeOption,
-    AdditionalSortOptions,
-    CustomGroupMatchOptions
-  >
+    imports: ImportsOptions
+  } & CommonGroupsOptions<CustomTypeOption, object, CustomGroupMatchOptions> &
+    CommonOptions<CustomTypeOption>
 >[]
 
 /**
@@ -115,6 +77,11 @@ export type Options = Partial<
  * node with dependency information and ignore flag.
  */
 export interface SortImportsSortingNode extends SortingNodeWithDependencies<SortImportsNode> {
+  /**
+   * Source-side imported name for sorting by imported specifier.
+   */
+  sourceSpecifierName: string | null
+
   /**
    * The name of the import specifier for sorting purposes.
    */
@@ -175,10 +142,6 @@ interface CustomGroupMatchOptions {
   selector?: Selector
 }
 
-interface AdditionalSortOptions {
-  sortBy: SortByOption
-}
-
 /**
  * Complete list of available active import selectors. Used for validation and
  * JSON schema generation.
@@ -228,14 +191,83 @@ export let additionalCustomGroupMatchOptionsJsonSchema: Record<
   selector: buildCustomGroupSelectorJsonSchema(allSelectors),
 }
 
-const SORT_BY_OPTION = ['specifier', 'path'] as const
-type SortByOption = (typeof SORT_BY_OPTION)[number]
+const IMPORTS_ORDER_BY_OPTION = ['path', 'alias', 'specifier'] as const
+const PARTITIONS_ORDER_BY_OPTION = ['source', 'type-first'] as const
+const PARTITIONS_ORDER_STABILITY_OPTION = ['stable', 'unstable'] as const
 
-export let additionalSortOptionsJsonSchema: Record<string, JSONSchema4> = {
-  sortBy: {
-    enum: [...SORT_BY_OPTION],
-    type: 'string',
-  },
+export interface ImportsOptions {
+  /**
+   * Primary key for sorting imports.
+   *
+   * - `'path'`: module source path.
+   * - `'alias'`: first local binding identifier.
+   * - `'specifier'`: first imported (source-side) identifier with alias
+   *   fallback.
+   */
+  orderBy: ImportsOrderByOption
+
+  /**
+   * Maximum line length threshold for name-based sorting fallback.
+   * `null` disables the threshold.
+   */
+  maxLineLength: number | null
+
+  /**
+   * Whether import declarations may be split when specifier sorting interleaves
+   * sources.
+   */
+  splitDeclarations: boolean
+
+  /**
+   * Whether side-effect imports are sortable.
+   */
+  sortSideEffects: boolean
+}
+export interface PartitionsOptions {
+  /**
+   * Partition split signals.
+   */
+  splitBy: {
+    comments: PartitionByCommentOption
+    newlines: boolean
+  }
+
+  /**
+   * Stability mode for partition reordering.
+   */
+  orderStability: PartitionsOrderStabilityOption
+
+  /**
+   * Partition ordering strategy within a group.
+   */
+  orderBy: PartitionsOrderByOption
+
+  /**
+   * Maximum imports per partition.
+   * `null` disables size-based splitting.
+   */
+  maxImports: number | null
+}
+export type PartitionsOrderStabilityOption =
+  (typeof PARTITIONS_ORDER_STABILITY_OPTION)[number]
+
+export type PartitionsOrderByOption = (typeof PARTITIONS_ORDER_BY_OPTION)[number]
+
+export type ImportsOrderByOption = (typeof IMPORTS_ORDER_BY_OPTION)[number]
+
+export let importsOrderByJsonSchema: JSONSchema4 = {
+  enum: [...IMPORTS_ORDER_BY_OPTION],
+  type: 'string',
+}
+
+export let partitionsOrderByJsonSchema: JSONSchema4 = {
+  enum: [...PARTITIONS_ORDER_BY_OPTION],
+  type: 'string',
+}
+
+export let partitionsOrderStabilityJsonSchema: JSONSchema4 = {
+  enum: [...PARTITIONS_ORDER_STABILITY_OPTION],
+  type: 'string',
 }
 
 export const TYPE_IMPORT_FIRST_TYPE_OPTION = 'type-import-first'

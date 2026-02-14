@@ -5,17 +5,22 @@ import { AST_NODE_TYPES } from '@typescript-eslint/utils'
 
 import type {
   SortImportsSortingNode,
+  PartitionsOptions,
+  ImportsOptions,
   Modifier,
   Selector,
   Options,
 } from './sort-imports/types'
+import type { PartitionByCommentOption } from '../types/common-partition-options'
 import type { NewlinesInsideOption } from '../types/common-groups-options'
 import type { CustomOrderFixesParameters } from '../utils/make-fixes'
 
 import {
   additionalCustomGroupMatchOptionsJsonSchema,
-  additionalSortOptionsJsonSchema,
+  partitionsOrderStabilityJsonSchema,
   TYPE_IMPORT_FIRST_TYPE_OPTION,
+  partitionsOrderByJsonSchema,
+  importsOrderByJsonSchema,
   allModifiers,
   allSelectors,
 } from './sort-imports/types'
@@ -37,6 +42,10 @@ import {
   partitionByNewLineJsonSchema,
 } from '../utils/json-schemas/common-partition-json-schemas'
 import { isNonExternalReferenceTsImportEquals } from './sort-imports/is-non-external-reference-ts-import-equals'
+import {
+  computeSourceSpecifierName,
+  computeSpecifierName,
+} from './sort-imports/compute-specifier-name'
 import { validateSideEffectsConfiguration } from './sort-imports/validate-side-effects-configuration'
 import { buildOptionsByGroupIndexComputer } from '../utils/build-options-by-group-index-computer'
 import { computeDependenciesBySortingNode } from '../utils/compute-dependencies-by-sorting-node'
@@ -54,7 +63,6 @@ import { computeDependencyNames } from './sort-imports/compute-dependency-names'
 import { getNewlinesBetweenOption } from '../utils/get-newlines-between-option'
 import { generatePredefinedGroups } from '../utils/generate-predefined-groups'
 import { sortNodesByDependencies } from '../utils/sort-nodes-by-dependencies'
-import { computeSpecifierName } from './sort-imports/compute-specifier-name'
 import { getEslintDisabledLines } from '../utils/get-eslint-disabled-lines'
 import { computeDependencies } from './sort-imports/compute-dependencies'
 import { isSideEffectImport } from './sort-imports/is-side-effect-import'
@@ -106,20 +114,26 @@ let defaultOptions: Required<Options[number]> = {
     'ts-equals-import',
     'unknown',
   ],
+  partitions: {
+    splitBy: {
+      comments: false,
+      newlines: false,
+    },
+    orderStability: 'stable',
+    orderBy: 'source',
+    maxImports: null,
+  },
+  imports: {
+    splitDeclarations: false,
+    sortSideEffects: false,
+    maxLineLength: null,
+    orderBy: 'path',
+  },
   useExperimentalDependencyDetection: true,
   internalPattern: ['^~/.+', '^@/.+'],
   fallbackSort: { type: 'unsorted' },
-  partitionImportsSplitOnSort: false,
-  partitionInsideGroup: 'preserve',
-  partitionMaxImports: Infinity,
-  partitionSortingStable: true,
-  partitionByComment: false,
-  partitionByNewLine: false,
   specialCharacters: 'keep',
   tsconfig: { rootDir: '' },
-  partitionSorting: 'off',
-  maxLineLength: Infinity,
-  sortSideEffects: false,
   type: 'alphabetical',
   environment: 'node',
   newlinesBetween: 1,
@@ -127,7 +141,6 @@ let defaultOptions: Required<Options[number]> = {
   customGroups: [],
   ignoreCase: true,
   locales: 'en-US',
-  sortBy: 'path',
   alphabet: '',
   order: 'asc',
 }
@@ -139,14 +152,37 @@ interface SortImportsSpecifierSortingNode extends SortImportsSortingNode {
   specifier?: TSESTree.ImportClause
 }
 
+type SortImportsOptions = {
+  partitions: NormalizedPartitionsOptions | 'merge'
+  imports: NormalizedImportsOptions
+} & Omit<Required<Options[number]>, 'partitions' | 'imports'>
+
+interface PartitionSortingInfo {
+  sortedPartitions: PartitionInfo[]
+  partitions: PartitionInfo[]
+  separatorsBetween: string[]
+  regionStart: number
+  regionEnd: number
+}
+
+interface PartitionInfo {
+  nodeSet: Set<SortImportsSortingNode>
+  nodes: SortImportsSortingNode[]
+  isTypeOnly: boolean
+  start: number
+  end: number
+}
+
 export default createEslintRule<Options, MessageId>({
   create: context => {
     let settings = getSettings(context.settings)
 
     let userOptions = context.options.at(0)
-    let options = getOptionsWithCleanGroups(
+    let rawOptions = getOptionsWithCleanGroups(
       complete(userOptions, settings, defaultOptions),
     )
+    validateSortImportsConfiguration(rawOptions)
+    let options = normalizeSortImportsOptions(rawOptions)
     normalizeNewlinesInsideForPartitionPreserve(options)
 
     validateGroupsConfiguration({
@@ -155,8 +191,10 @@ export default createEslintRule<Options, MessageId>({
       options,
     })
     validateCustomSortConfiguration(options)
-    validateSortImportsConfiguration(options)
-    validateSideEffectsConfiguration(options)
+    validateSideEffectsConfiguration({
+      sortSideEffects: options.imports.sortSideEffects,
+      groups: options.groups,
+    })
 
     let tsconfigRootDirectory = options.tsconfig.rootDir
     let tsConfigOutput =
@@ -269,12 +307,15 @@ export default createEslintRule<Options, MessageId>({
         node.type === AST_NODE_TYPES.ImportDeclaration &&
         isSortable(node.specifiers)
       let size = rangeToDiff(node, sourceCode)
-      if (hasMultipleImportDeclarations && size > options.maxLineLength) {
+      if (
+        hasMultipleImportDeclarations &&
+        size > options.imports.maxLineLength
+      ) {
         size = name.length + 10
       }
       sortingNodesWithoutPartitionId.push({
         isIgnored:
-          !options.sortSideEffects &&
+          !options.imports.sortSideEffects &&
           isSideEffect &&
           !shouldRegroupSideEffectNodes &&
           (!isStyleSideEffect || !shouldRegroupSideEffectStyleNodes),
@@ -282,6 +323,7 @@ export default createEslintRule<Options, MessageId>({
           options.useExperimentalDependencyDetection ?
             []
           : computeDependencies(node),
+        sourceSpecifierName: computeSourceSpecifierName({ sourceCode, node }),
         isEslintDisabled: isNodeEslintDisabled(node, eslintDisabledLines),
         dependencyNames: computeDependencyNames({ sourceCode, node }),
         specifierName: computeSpecifierName({ sourceCode, node }),
@@ -323,14 +365,73 @@ export default createEslintRule<Options, MessageId>({
         properties: {
           ...buildCommonJsonSchemas({
             allowedAdditionalTypeValues: [TYPE_IMPORT_FIRST_TYPE_OPTION],
-            additionalSortProperties: additionalSortOptionsJsonSchema,
           }),
           ...buildCommonGroupsJsonSchemas({
             additionalCustomGroupMatchProperties:
               additionalCustomGroupMatchOptionsJsonSchema,
             allowedAdditionalTypeValues: [TYPE_IMPORT_FIRST_TYPE_OPTION],
-            additionalSortProperties: additionalSortOptionsJsonSchema,
           }),
+          partitions: {
+            oneOf: [
+              {
+                enum: ['merge'],
+                type: 'string',
+              },
+              {
+                properties: {
+                  maxImports: {
+                    oneOf: [
+                      {
+                        type: 'integer',
+                        minimum: 1,
+                      },
+                      {
+                        type: 'null',
+                      },
+                    ],
+                  },
+                  splitBy: {
+                    properties: {
+                      comments: partitionByCommentJsonSchema,
+                      newlines: partitionByNewLineJsonSchema,
+                    },
+                    additionalProperties: false,
+                    type: 'object',
+                  },
+                  orderStability: partitionsOrderStabilityJsonSchema,
+                  orderBy: partitionsOrderByJsonSchema,
+                },
+                additionalProperties: false,
+                type: 'object',
+              },
+            ],
+            description: 'vNext partition configuration.',
+          },
+          imports: {
+            properties: {
+              maxLineLength: {
+                oneOf: [
+                  {
+                    type: 'integer',
+                    minimum: 1,
+                  },
+                  {
+                    type: 'null',
+                  },
+                ],
+              },
+              splitDeclarations: {
+                type: 'boolean',
+              },
+              sortSideEffects: {
+                type: 'boolean',
+              },
+              orderBy: importsOrderByJsonSchema,
+            },
+            description: 'vNext import sorting configuration.',
+            additionalProperties: false,
+            type: 'object',
+          },
           tsconfig: {
             properties: {
               rootDir: {
@@ -346,45 +447,6 @@ export default createEslintRule<Options, MessageId>({
             required: ['rootDir'],
             type: 'object',
           },
-          partitionInsideGroup: {
-            description:
-              'Controls whether partitions are preserved or merged within each group.',
-            enum: ['preserve', 'merge'],
-            type: 'string',
-          },
-          partitionSorting: {
-            description:
-              'Controls partition reordering when partitionByNewLine is enabled.',
-            enum: ['off', 'type-first'],
-            type: 'string',
-          },
-          partitionMaxImports: {
-            description:
-              'Maximum number of imports per partition before splitting.',
-            type: 'integer',
-            minimum: 1,
-          },
-          maxLineLength: {
-            description: 'Specifies the maximum line length.',
-            exclusiveMinimum: true,
-            type: 'integer',
-            minimum: 0,
-          },
-          partitionImportsSplitOnSort: {
-            description:
-              'Controls whether specifier sorting can split import declarations.',
-            type: 'boolean',
-          },
-          partitionSortingStable: {
-            description:
-              'Whether to keep partition order stable within the same category.',
-            type: 'boolean',
-          },
-          sortSideEffects: {
-            description:
-              'Controls whether side-effect imports should be sorted.',
-            type: 'boolean',
-          },
           environment: {
             description: 'Specifies the environment.',
             enum: ['node', 'bun'],
@@ -392,8 +454,6 @@ export default createEslintRule<Options, MessageId>({
           },
           useExperimentalDependencyDetection:
             useExperimentalDependencyDetectionJsonSchema,
-          partitionByComment: partitionByCommentJsonSchema,
-          partitionByNewLine: partitionByNewLineJsonSchema,
           internalPattern: buildRegexJsonSchema(),
         },
         additionalProperties: false,
@@ -422,20 +482,12 @@ export default createEslintRule<Options, MessageId>({
   name: 'sort-imports',
 })
 
-interface PartitionSortingInfo {
-  sortedPartitions: PartitionInfo[]
-  partitions: PartitionInfo[]
-  separatorsBetween: string[]
-  regionStart: number
-  regionEnd: number
+type NormalizedImportsOptions = Omit<ImportsOptions, 'maxLineLength'> & {
+  maxLineLength: number
 }
 
-interface PartitionInfo {
-  nodeSet: Set<SortImportsSortingNode>
-  nodes: SortImportsSortingNode[]
-  isTypeOnly: boolean
-  start: number
-  end: number
+type NormalizedPartitionsOptions = Omit<PartitionsOptions, 'maxImports'> & {
+  maxImports: number
 }
 
 function sortImportNodes({
@@ -445,7 +497,7 @@ function sortImportNodes({
 }: {
   sortingNodesWithoutPartitionId: Omit<SortImportsSortingNode, 'partitionId'>[]
   context: Readonly<TSESLint.RuleContext<MessageId, Options>>
-  options: Required<Options[number]>
+  options: SortImportsOptions
 }): void {
   let { sourceCode } = context
   let optionsByGroupIndexComputer = buildOptionsByGroupIndexComputer(options)
@@ -502,7 +554,7 @@ function sortImportNodes({
     }
 
     let expandedSortingNodeGroupsSource =
-      options.partitionImportsSplitOnSort ?
+      options.imports.splitDeclarations ?
         partitionsInSourceOrder.map(nodes =>
           expandSortingNodesBySpecifier({
             sourceCode,
@@ -525,11 +577,11 @@ function sortImportNodes({
     )
 
     let expandedSortingNodes =
-      options.partitionImportsSplitOnSort ?
+      options.imports.splitDeclarations ?
         expandedSortingNodeGroupsSource.flat()
       : (sortingNodes as SortImportsSpecifierSortingNode[])
     let usesSpecifierSorting =
-      options.partitionImportsSplitOnSort &&
+      options.imports.splitDeclarations &&
       expandedSortingNodes.some(node => node.specifier)
 
     let partitionOrderInfo =
@@ -566,10 +618,9 @@ function sortImportNodes({
       : undefined
 
     let shouldPartitionNewlinesInside =
-      options.partitionByNewLine ||
-      options.partitionByComment ||
-      (Number.isFinite(options.partitionMaxImports) &&
-        options.partitionMaxImports > 0)
+      isPartitionByNewLineEnabled(options) ||
+      Boolean(getPartitionByCommentOption(options)) ||
+      getPartitionMaxImports(options) !== Infinity
 
     function newlinesBetweenValueGetter({
       computedNewlinesBetween,
@@ -601,7 +652,7 @@ function sortImportNodes({
 
       if (
         shouldPartitionNewlinesInside &&
-        options.partitionInsideGroup !== 'merge'
+        options.partitions !== 'merge'
       ) {
         let leftPartitionKey = partitionKeyByNode.get(leftGroupNode)
         let rightPartitionKey = partitionKeyByNode.get(rightGroupNode)
@@ -615,7 +666,8 @@ function sortImportNodes({
         if (
           leftPartitionKey !== undefined &&
           rightPartitionKey !== undefined &&
-          (options.partitionByNewLine || options.partitionByComment)
+          (isPartitionByNewLineEnabled(options) ||
+            Boolean(getPartitionByCommentOption(options)))
         ) {
           return 'ignore'
         }
@@ -654,11 +706,14 @@ function sortImportNodes({
       sortNodesExcludingEslintDisabled: createSortNodesExcludingEslintDisabled(
         expandedSortingNodeGroupsForSorting,
       ),
+      options: {
+        ...options,
+        partitionByComment: getPartitionByCommentOption(options),
+      },
       customOrderFixesAreSingleRange:
         usesSpecifierSorting || !!partitionOrderFixes,
       nodes: expandedSortingNodes,
       newlinesBetweenValueGetter,
-      options,
       context,
     })
   }
@@ -672,7 +727,7 @@ function sortImportNodes({
       let nodesSortedByGroups = nodeGroups.flatMap(nodes =>
         sortNodesByGroups({
           isNodeIgnoredForGroup: ({ groupIndex }) => {
-            if (options.sortSideEffects) {
+            if (options.imports.sortSideEffects) {
               return false
             }
             return isSideEffectOnlyGroup(options.groups[groupIndex])
@@ -703,13 +758,100 @@ function sortImportNodes({
     )
   }
 }
-function normalizeNewlinesInsideForPartitionPreserve(
-  options: Required<Options[number]>,
-): void {
+function isValidPartitionsOption(partitions: unknown): boolean {
+  if (partitions === 'merge') {
+    return true
+  }
+  if (!isObjectRecord(partitions)) {
+    return false
+  }
+
+  assertNoUnknownKeys(partitions, [
+    'maxImports',
+    'orderBy',
+    'orderStability',
+    'splitBy',
+  ])
+
+  let { orderStability, maxImports, orderBy, splitBy } = partitions
+
   if (
-    options.partitionInsideGroup !== 'preserve' ||
-    !options.partitionByNewLine
+    orderBy !== undefined &&
+    orderBy !== 'source' &&
+    orderBy !== 'type-first'
   ) {
+    return false
+  }
+
+  if (
+    orderStability !== undefined &&
+    orderStability !== 'stable' &&
+    orderStability !== 'unstable'
+  ) {
+    return false
+  }
+
+  if (maxImports !== undefined && maxImports !== null && !isPositiveInteger(maxImports)) {
+    return false
+  }
+
+  if (splitBy !== undefined) {
+    if (!isObjectRecord(splitBy)) {
+      return false
+    }
+    assertNoUnknownKeys(splitBy, ['comments', 'newlines'])
+    let splitByNewlines = splitBy['newlines']
+    let splitByComments = splitBy['comments']
+    if (splitByNewlines !== undefined && typeof splitByNewlines !== 'boolean') {
+      return false
+    }
+    if (
+      splitByComments !== undefined &&
+      !isValidPartitionByCommentOption(splitByComments)
+    ) {
+      return false
+    }
+  }
+
+  return true
+}
+
+function normalizeSortImportsOptions(
+  options: Required<Options[number]>,
+): SortImportsOptions {
+  let importsOption = options.imports
+  let partitionsOption = options.partitions
+  let partitionsSplitByOption = partitionsOption === 'merge' ? undefined : partitionsOption.splitBy
+  let partitionsSplitByComments = partitionsSplitByOption?.comments
+
+  let normalizedPartitions: SortImportsOptions['partitions'] =
+    partitionsOption === 'merge' ? 'merge'
+    : {
+        splitBy: {
+          comments: isValidPartitionByCommentOption(partitionsSplitByComments) ? partitionsSplitByComments : false,
+          newlines: partitionsSplitByOption?.newlines ?? false,
+        },
+        maxImports: partitionsOption.maxImports ?? Infinity,
+        orderStability: partitionsOption.orderStability,
+        orderBy: partitionsOption.orderBy,
+      }
+
+  return {
+    ...options,
+    imports: {
+      maxLineLength: importsOption.maxLineLength ?? Infinity,
+      splitDeclarations: importsOption.splitDeclarations,
+      sortSideEffects: importsOption.sortSideEffects,
+      orderBy: importsOption.orderBy,
+    },
+    partitions: normalizedPartitions,
+  }
+}
+
+function normalizeNewlinesInsideForPartitionPreserve(
+  options: SortImportsOptions,
+): void {
+  if (options.partitions === 'merge' || !isPartitionByNewLineEnabled(options)) {
     return
   }
 
@@ -725,7 +867,7 @@ function normalizeNewlinesInsideForPartitionPreserve(
 
     let normalizedNewlinesInside = normalizeNewlinesInsideValue(
       group.newlinesInside,
-    ) as NewlinesInsideOption
+    )
     return {
       ...group,
       newlinesInside: normalizedNewlinesInside,
@@ -739,7 +881,7 @@ function normalizeNewlinesInsideForPartitionPreserve(
 
     let normalizedNewlinesInside = normalizeNewlinesInsideValue(
       customGroup.newlinesInside,
-    ) as NewlinesInsideOption
+    )
     return {
       ...customGroup,
       newlinesInside: normalizedNewlinesInside,
@@ -786,24 +928,203 @@ function shouldIgnoreSpecifierOrder({
 function validateSortImportsConfiguration(
   options: Required<Options[number]>,
 ): void {
-  let partitionInsideGroup = options.partitionInsideGroup as string
-  if (partitionInsideGroup !== 'preserve' && partitionInsideGroup !== 'merge') {
+  assertNoUnknownKeys(options as Record<string, unknown>, [
+    'alphabet',
+    'customGroups',
+    'environment',
+    'fallbackSort',
+    'groups',
+    'ignoreCase',
+    'imports',
+    'internalPattern',
+    'locales',
+    'newlinesBetween',
+    'newlinesInside',
+    'order',
+    'partitions',
+    'specialCharacters',
+    'tsconfig',
+    'type',
+    'useExperimentalDependencyDetection',
+  ])
+
+  if (!isValidImportsOption(options.imports)) {
     throw new Error(
-      "The 'partitionInsideGroup' option must be 'preserve' or 'merge'.",
+      "The 'imports' option must be an object with valid vNext fields.",
+    )
+  }
+
+  if (!isValidPartitionsOption(options.partitions)) {
+    throw new Error(
+      "The 'partitions' option must be 'merge' or an object with valid vNext fields.",
+    )
+  }
+
+  if (!isValidTsconfigOption(options.tsconfig)) {
+    throw new Error(
+      "The 'tsconfig' option must be an object with { rootDir, filename? }.",
     )
   }
 }
 
-function normalizeNewlinesInsideValue(
+function isValidPartitionByCommentOption(
+  value: unknown,
+): value is PartitionByCommentOption {
+  if (typeof value === 'boolean') {
+    return true
+  }
+  if (typeof value === 'string') {
+    return true
+  }
+  if (Array.isArray(value)) {
+    return value.every(isValidRegexOptionValue)
+  }
+  if (!isObjectRecord(value)) {
+    return false
+  }
+
+  let hasPattern = 'pattern' in value
+  if (hasPattern) {
+    assertNoUnknownKeys(value, ['flags', 'pattern'])
+    if (typeof value['pattern'] !== 'string') {
+      return false
+    }
+    if (value['flags'] !== undefined && typeof value['flags'] !== 'string') {
+      return false
+    }
+    return true
+  }
+
+  assertNoUnknownKeys(value, ['block', 'line'])
+  let { block, line } = value
+  if (
+    block !== undefined &&
+    !isValidPartitionByCommentOption(block)
+  ) {
+    return false
+  }
+  if (line !== undefined && !isValidPartitionByCommentOption(line)) {
+    return false
+  }
+  return Object.keys(value).length > 0
+}
+
+function isValidImportsOption(imports: unknown): boolean {
+  if (!isObjectRecord(imports)) {
+    return false
+  }
+  assertNoUnknownKeys(imports, [
+    'maxLineLength',
+    'orderBy',
+    'sortSideEffects',
+    'splitDeclarations',
+  ])
+
+  let { splitDeclarations, sortSideEffects, maxLineLength, orderBy } = imports
+
+  if (
+    orderBy !== undefined &&
+    orderBy !== 'path' &&
+    orderBy !== 'alias' &&
+    orderBy !== 'specifier'
+  ) {
+    return false
+  }
+
+  if (
+    splitDeclarations !== undefined &&
+    typeof splitDeclarations !== 'boolean'
+  ) {
+    return false
+  }
+
+  if (sortSideEffects !== undefined && typeof sortSideEffects !== 'boolean') {
+    return false
+  }
+
+  if (
+    maxLineLength !== undefined &&
+    maxLineLength !== null &&
+    !isPositiveInteger(maxLineLength)
+  ) {
+    return false
+  }
+
+  return true
+}
+
+function isValidRegexOptionValue(value: unknown): boolean {
+  if (typeof value === 'string') {
+    return true
+  }
+  if (!isObjectRecord(value)) {
+    return false
+  }
+  assertNoUnknownKeys(value, ['flags', 'pattern'])
+  let { pattern, flags } = value
+  return (
+    typeof pattern === 'string' &&
+    (flags === undefined || typeof flags === 'string')
+  )
+}
+
+function isValidTsconfigOption(tsconfig: unknown): boolean {
+  if (!isObjectRecord(tsconfig)) {
+    return false
+  }
+  assertNoUnknownKeys(tsconfig, ['filename', 'rootDir'])
+  let { rootDir: rootDirectory, filename } = tsconfig
+  if (typeof rootDirectory !== 'string') {
+    return false
+  }
+  return filename === undefined || typeof filename === 'string'
+}
+
+function assertNoUnknownKeys(
+  value: Record<string, unknown>,
+  allowedKeys: string[],
+): void {
+  let allowed = new Set(allowedKeys)
+  for (let key of Object.keys(value)) {
+    if (!allowed.has(key)) {
+      throw new Error(`Unknown option '${key}' in sort-imports configuration.`)
+    }
+  }
+}
+
+function normalizeNewlinesInsideValue<
+  T extends SortImportsOptions['newlinesInside'] | NewlinesInsideOption,
+>(
   newlinesInside:
-    | Required<Options[number]>['newlinesInside']
-    | NewlinesInsideOption,
-): Required<Options[number]>['newlinesInside'] | NewlinesInsideOption {
+    T,
+): T {
   if (typeof newlinesInside !== 'number') {
     return newlinesInside
   }
 
-  return Math.max(0, newlinesInside)
+  return Math.max(0, newlinesInside) as T
+}
+
+function getPartitionByCommentOption(
+  options: SortImportsOptions,
+): PartitionByCommentOption | false {
+  return options.partitions === 'merge' ? false : options.partitions.splitBy.comments
+}
+
+function isPartitionByNewLineEnabled(options: SortImportsOptions): boolean {
+  return options.partitions !== 'merge' && options.partitions.splitBy.newlines
+}
+
+function getPartitionMaxImports(options: SortImportsOptions): number {
+  return options.partitions === 'merge' ? Infinity : options.partitions.maxImports
+}
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function isPositiveInteger(value: unknown): value is number {
+  return Number.isInteger(value) && Number(value) >= 1
 }
 
 let namedSpecifierSegmentsCache = new WeakMap<
@@ -836,9 +1157,9 @@ function buildPartitionGroups({
   options,
   nodes,
 }: {
-  options: Required<Options[number]>
   nodes: SortImportsSortingNode[]
   sourceCode: TSESLint.SourceCode
+  options: SortImportsOptions
 }): {
   partitionKeyByNode: Map<SortImportsSortingNode, number>
   partitionsInSortedOrder: SortImportsSortingNode[][]
@@ -852,7 +1173,7 @@ function buildPartitionGroups({
     }
   }
 
-  if (options.partitionInsideGroup === 'merge') {
+  if (options.partitions === 'merge') {
     let partitionKeyByNode = new Map(nodes.map(node => [node, 0] as const))
     return {
       partitionsInSortedOrder: [nodes],
@@ -861,7 +1182,10 @@ function buildPartitionGroups({
     }
   }
 
-  let { partitionSortingStable, partitionMaxImports, groups } = options
+  let { groups } = options
+  let { partitions } = options
+  let partitionMaxImports = getPartitionMaxImports(options)
+  let partitionSortingStable = partitions.orderStability === 'stable'
   let partitionsInSourceOrder: SortImportsSortingNode[][] = []
   let currentPartition: SortImportsSortingNode[] = []
   let hasPartition = false
@@ -875,10 +1199,13 @@ function buildPartitionGroups({
       !hasPartition ||
       !isSameGroupAsPrevious ||
       shouldPartition({
+        options: {
+          partitionByComment: getPartitionByCommentOption(options),
+          partitionByNewLine: isPartitionByNewLineEnabled(options),
+        },
         lastSortingNode,
         sortingNode,
         sourceCode,
-        options,
       })
 
     if (shouldStartNewPartition) {
@@ -905,9 +1232,9 @@ function buildPartitionGroups({
   let partitionsByGroupIndex = new Map<number, SortImportsSortingNode[][]>()
   for (let partition of partitionsInSourceOrder) {
     let groupIndex = getGroupIndex(groups, partition[0]!)
-    let partitions = partitionsByGroupIndex.get(groupIndex) ?? []
-    partitions.push(partition)
-    partitionsByGroupIndex.set(groupIndex, partitions)
+    let groupPartitions = partitionsByGroupIndex.get(groupIndex) ?? []
+    groupPartitions.push(partition)
+    partitionsByGroupIndex.set(groupIndex, groupPartitions)
   }
 
   let partitionsInSortedOrder: SortImportsSortingNode[][] = []
@@ -1143,56 +1470,6 @@ function getNamedSpecifierSegments(
   return result
 }
 
-function createSpecifierAwareOrderFixes({
-  partitionInfo,
-  sourceCode,
-  options,
-}: {
-  partitionInfo: PartitionSortingInfo
-  options: Required<Options[number]>
-  sourceCode: TSESLint.SourceCode
-}) {
-  return function ({
-    sortedNodes,
-    fixer,
-  }: CustomOrderFixesParameters<SortImportsSpecifierSortingNode>): TSESLint.RuleFix[] {
-    let { separatorsBetween, sortedPartitions, regionStart, regionEnd } =
-      partitionInfo
-    let updatedText = sortedPartitions
-      .map((partition, index) => {
-        let partitionNodes = sortedNodes.filter(node =>
-          partition.nodeSet.has(node.parentSortingNode),
-        )
-        let partitionText =
-          needsSplitImportDeclarations(partitionNodes) ?
-            buildSortedPartitionTextWithSpecifiers({
-              sortedNodes: partitionNodes,
-              sourceCode,
-              options,
-            })
-          : buildSortedPartitionText({
-              sortedNodes: getSortedOriginalNodes(partitionNodes),
-              sourceCode,
-              partition,
-              options,
-            })
-        let separator =
-          index < separatorsBetween.length ?
-            computeSeparatorBetweenPartitions({
-              originalSeparator: separatorsBetween[index]!,
-              right: sortedPartitions[index + 1],
-              left: partition,
-              options,
-            })
-          : ''
-        return `${partitionText}${separator}`
-      })
-      .join('')
-
-    return [fixer.replaceTextRange([regionStart, regionEnd], updatedText)]
-  }
-}
-
 function buildPartitionOrderInfo({
   sortedPartitions,
   partitions,
@@ -1201,14 +1478,16 @@ function buildPartitionOrderInfo({
 }: {
   sortedPartitions: SortImportsSortingNode[][]
   partitions: SortImportsSortingNode[][]
-  options: Required<Options[number]>
   sourceCode: TSESLint.SourceCode
+  options: SortImportsOptions
 }): PartitionSortingInfo {
   let partitionInfos = partitions.map(nodes => {
     let start = getNodeRange({
+      options: {
+        partitionByComment: getPartitionByCommentOption(options),
+      },
       node: nodes.at(0)!.node,
       sourceCode,
-      options,
     }).at(0)!
     let end = getPartitionEnd({
       node: nodes.at(-1)!.node,
@@ -1252,14 +1531,121 @@ function buildPartitionOrderInfo({
   }
 }
 
+function createSpecifierAwareOrderFixes({
+  partitionInfo,
+  sourceCode,
+  options,
+}: {
+  partitionInfo: PartitionSortingInfo
+  sourceCode: TSESLint.SourceCode
+  options: SortImportsOptions
+}) {
+  return function ({
+    sortedNodes,
+    fixer,
+  }: CustomOrderFixesParameters<SortImportsSpecifierSortingNode>): TSESLint.RuleFix[] {
+    let { separatorsBetween, sortedPartitions, regionStart, regionEnd } =
+      partitionInfo
+    let updatedText = sortedPartitions
+      .map((partition, index) => {
+        let partitionNodes = sortedNodes.filter(node =>
+          partition.nodeSet.has(node.parentSortingNode),
+        )
+        let partitionText =
+          needsSplitImportDeclarations(partitionNodes) ?
+            buildSortedPartitionTextWithSpecifiers({
+              sortedNodes: partitionNodes,
+              sourceCode,
+              options,
+            })
+          : buildSortedPartitionText({
+              sortedNodes: getSortedOriginalNodes(partitionNodes),
+              sourceCode,
+              partition,
+              options,
+            })
+        let separator =
+          index < separatorsBetween.length ?
+            computeSeparatorBetweenPartitions({
+              originalSeparator: separatorsBetween[index]!,
+              right: sortedPartitions[index + 1],
+              left: partition,
+              options,
+            })
+          : ''
+        return `${partitionText}${separator}`
+      })
+      .join('')
+
+    return [fixer.replaceTextRange([regionStart, regionEnd], updatedText)]
+  }
+}
+
+function buildOutputNodeText({
+  outputNode,
+  sourceCode,
+  options,
+}: {
+  sourceCode: TSESLint.SourceCode
+  options: SortImportsOptions
+  outputNode: OutputNode
+}): string {
+  if (outputNode.kind === 'original') {
+    return sourceCode.text.slice(
+      ...getNodeRangeWithInlineComment({
+        node: outputNode.sortingNode.node,
+        sourceCode,
+        options,
+      }),
+    )
+  }
+
+  let {
+    includeTrailingComment,
+    includeLeadingComments,
+    parentImportNode,
+    specifiers,
+  } = outputNode
+  let leadingText = ''
+  if (includeLeadingComments) {
+    let [start] = getNodeRange({
+      options: {
+        partitionByComment: getPartitionByCommentOption(options),
+      },
+      node: parentImportNode,
+      sourceCode,
+    })
+    leadingText = sourceCode.text.slice(start, parentImportNode.range.at(0))
+  }
+
+  let trailingText = ''
+  if (includeTrailingComment) {
+    let inlineComment = getInlineCommentAfter(parentImportNode, sourceCode)
+    if (inlineComment) {
+      trailingText = sourceCode.text.slice(
+        parentImportNode.range.at(1),
+        inlineComment.range.at(1),
+      )
+    }
+  }
+
+  let importText = buildSplitImportDeclarationText({
+    importNode: parentImportNode,
+    sourceCode,
+    specifiers,
+  })
+
+  return `${leadingText}${importText}${trailingText}`
+}
+
 function createPartitionOrderFixes({
   partitionSortingInfo,
   sourceCode,
   options,
 }: {
   partitionSortingInfo: PartitionSortingInfo
-  options: Required<Options[number]>
   sourceCode: TSESLint.SourceCode
+  options: SortImportsOptions
 }) {
   return function ({
     sortedNodes,
@@ -1296,61 +1682,6 @@ function createPartitionOrderFixes({
   }
 }
 
-function buildOutputNodeText({
-  outputNode,
-  sourceCode,
-  options,
-}: {
-  options: Required<Options[number]>
-  sourceCode: TSESLint.SourceCode
-  outputNode: OutputNode
-}): string {
-  if (outputNode.kind === 'original') {
-    return sourceCode.text.slice(
-      ...getNodeRangeWithInlineComment({
-        node: outputNode.sortingNode.node,
-        sourceCode,
-        options,
-      }),
-    )
-  }
-
-  let {
-    includeTrailingComment,
-    includeLeadingComments,
-    parentImportNode,
-    specifiers,
-  } = outputNode
-  let leadingText = ''
-  if (includeLeadingComments) {
-    let [start] = getNodeRange({
-      node: parentImportNode,
-      sourceCode,
-      options,
-    })
-    leadingText = sourceCode.text.slice(start, parentImportNode.range.at(0))
-  }
-
-  let trailingText = ''
-  if (includeTrailingComment) {
-    let inlineComment = getInlineCommentAfter(parentImportNode, sourceCode)
-    if (inlineComment) {
-      trailingText = sourceCode.text.slice(
-        parentImportNode.range.at(1),
-        inlineComment.range.at(1),
-      )
-    }
-  }
-
-  let importText = buildSplitImportDeclarationText({
-    importNode: parentImportNode,
-    sourceCode,
-    specifiers,
-  })
-
-  return `${leadingText}${importText}${trailingText}`
-}
-
 function buildSortedPartitionText({
   sortedNodes,
   sourceCode,
@@ -1358,8 +1689,8 @@ function buildSortedPartitionText({
   options,
 }: {
   sortedNodes: SortImportsSortingNode[]
-  options: Required<Options[number]>
   sourceCode: TSESLint.SourceCode
+  options: SortImportsOptions
   partition: PartitionInfo
 }): string {
   let sortedPartitionNodes = sortedNodes.filter(node =>
@@ -1406,16 +1737,16 @@ function expandSortingNodesBySpecifier({
   options,
   nodes,
 }: {
-  options: Required<Options[number]>
   nodes: SortImportsSortingNode[]
   sourceCode: TSESLint.SourceCode
+  options: SortImportsOptions
 }): SortImportsSpecifierSortingNode[] {
   return nodes.flatMap(node => {
     let importNode =
       node.node.type === AST_NODE_TYPES.ImportDeclaration ? node.node : null
 
     if (
-      options.sortBy !== 'specifier' ||
+      options.imports.orderBy === 'path' ||
       !importNode ||
       !isSortable(importNode.specifiers)
     ) {
@@ -1431,7 +1762,8 @@ function expandSortingNodesBySpecifier({
       dependencyNames: [
         computeImportSpecifierDependencyName(specifier, sourceCode),
       ],
-      specifierName: computeImportSpecifierName(specifier),
+      sourceSpecifierName: computeImportSpecifierSourceName(specifier),
+      specifierName: computeImportSpecifierAliasName(specifier),
       specifierKind: getSpecifierKind(specifier),
       size: rangeToDiff(specifier, sourceCode),
       parentImportNode: importNode,
@@ -1503,17 +1835,14 @@ function buildSortedPartitionTextWithSpecifiers({
   options,
 }: {
   sortedNodes: SortImportsSpecifierSortingNode[]
-  options: Required<Options[number]>
   sourceCode: TSESLint.SourceCode
+  options: SortImportsOptions
 }): string {
   let shouldIgnoreNewlinesInside =
-    options.partitionInsideGroup !== 'merge' &&
-    Boolean(
-      options.partitionByNewLine ||
-      options.partitionByComment ||
-      (Number.isFinite(options.partitionMaxImports) &&
-        options.partitionMaxImports > 0),
-    )
+    options.partitions !== 'merge' &&
+    (isPartitionByNewLineEnabled(options) ||
+      Boolean(getPartitionByCommentOption(options)) ||
+      getPartitionMaxImports(options) !== Infinity)
 
   let outputNodes = buildOutputNodes(sortedNodes)
   let text = ''
@@ -1579,8 +1908,8 @@ function computeSeparatorBetweenPartitions({
   right,
   left,
 }: {
-  options: Required<Options[number]>
   right: PartitionInfo | undefined
+  options: SortImportsOptions
   originalSeparator: string
   left: PartitionInfo
 }): string {
@@ -1617,7 +1946,7 @@ function buildSeparatorBetweenOutputNodes({
   right: SortImportsSpecifierSortingNode
   left: SortImportsSpecifierSortingNode
   shouldIgnoreNewlinesInside: boolean
-  options: Required<Options[number]>
+  options: SortImportsOptions
 }): string {
   let leftGroupIndex = getGroupIndex(options.groups, left)
   let rightGroupIndex = getGroupIndex(options.groups, right)
@@ -1645,7 +1974,7 @@ function computeGroupExceptUnknown({
   options,
   name,
 }: {
-  options: Required<Options[number]>
+  options: SortImportsOptions
   selectors: Selector[]
   modifiers: Modifier[]
   name: string
@@ -1696,6 +2025,24 @@ function needsSplitImportDeclarations(
   }
 
   return false
+}
+
+function computeImportSpecifierSourceName(
+  specifier: TSESTree.ImportClause,
+): string {
+  switch (specifier.type) {
+    case AST_NODE_TYPES.ImportNamespaceSpecifier:
+    case AST_NODE_TYPES.ImportDefaultSpecifier:
+      return specifier.local.name
+    case AST_NODE_TYPES.ImportSpecifier:
+      if (specifier.imported.type === AST_NODE_TYPES.Identifier) {
+        return specifier.imported.name
+      }
+      return specifier.imported.value
+    /* v8 ignore next 2 -- @preserve Exhaustive guard. */
+    default:
+      throw new UnreachableCaseError(specifier)
+  }
 }
 
 function computeImportSpecifierDependencyName(
@@ -1750,7 +2097,9 @@ function getSpecifierKind(
   }
 }
 
-function computeImportSpecifierName(specifier: TSESTree.ImportClause): string {
+function computeImportSpecifierAliasName(
+  specifier: TSESTree.ImportClause,
+): string {
   switch (specifier.type) {
     case AST_NODE_TYPES.ImportNamespaceSpecifier:
     case AST_NODE_TYPES.ImportDefaultSpecifier:
@@ -1780,6 +2129,26 @@ function getSortedOriginalNodes(
   return originalNodes
 }
 
+function getNodeRangeWithInlineComment({
+  sourceCode,
+  options,
+  node,
+}: {
+  node: SortImportsSortingNode['node']
+  sourceCode: TSESLint.SourceCode
+  options: SortImportsOptions
+}): TSESTree.Range {
+  let start = getNodeRange({
+    options: {
+      partitionByComment: getPartitionByCommentOption(options),
+    },
+    sourceCode,
+    node,
+  }).at(0)!
+
+  return [start, getPartitionEnd({ sourceCode, node })]
+}
+
 function orderPartitionsByTypeFirst({
   partitions,
   stable,
@@ -1797,24 +2166,6 @@ function orderPartitionsByTypeFirst({
   return partitions.toSorted(
     (left, right) => Number(right.isTypeOnly) - Number(left.isTypeOnly),
   )
-}
-
-function getNodeRangeWithInlineComment({
-  sourceCode,
-  options,
-  node,
-}: {
-  node: SortImportsSortingNode['node']
-  options: Required<Options[number]>
-  sourceCode: TSESLint.SourceCode
-}): TSESTree.Range {
-  let start = getNodeRange({
-    sourceCode,
-    options,
-    node,
-  }).at(0)!
-
-  return [start, getPartitionEnd({ sourceCode, node })]
 }
 
 function getPartitionEnd({
@@ -1840,8 +2191,8 @@ function isTypeOnlyPartition(nodes: SortImportsSortingNode[]): boolean {
   )
 }
 
-function shouldSortPartitions(options: Required<Options[number]>): boolean {
-  return options.partitionByNewLine && options.partitionSorting === 'type-first'
+function shouldSortPartitions(options: SortImportsOptions): boolean {
+  return options.partitions !== 'merge' && options.partitions.orderBy === 'type-first'
 }
 
 let styleExtensions = [

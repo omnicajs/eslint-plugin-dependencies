@@ -7,6 +7,26 @@ import type { SortImportsNode } from './types'
 
 import { UnreachableCaseError } from '../../utils/unreachable-case-error'
 
+export function computeSourceSpecifierName({
+  sourceCode,
+  node,
+}: {
+  sourceCode: TSESLint.SourceCode
+  node: SortImportsNode
+}): string | null {
+  switch (node.type) {
+    case AST_NODE_TYPES.TSImportEqualsDeclaration:
+      return node.id.name
+    case AST_NODE_TYPES.VariableDeclaration:
+      return computeVariableDeclarationSourceName(node, sourceCode)
+    case AST_NODE_TYPES.ImportDeclaration:
+      return computeImportDeclarationSourceName(node)
+    /* v8 ignore next 2 -- @preserve Exhaustive guard. */
+    default:
+      throw new UnreachableCaseError(node)
+  }
+}
+
 export function computeSpecifierName({
   sourceCode,
   node,
@@ -18,16 +38,16 @@ export function computeSpecifierName({
     case AST_NODE_TYPES.TSImportEqualsDeclaration:
       return node.id.name
     case AST_NODE_TYPES.VariableDeclaration:
-      return computeVariableDeclarationSpecifierName(node, sourceCode)
+      return computeVariableDeclarationAliasName(node, sourceCode)
     case AST_NODE_TYPES.ImportDeclaration:
-      return computeImportDeclarationSpecifierName(node)
+      return computeImportDeclarationAliasName(node)
     /* v8 ignore next 2 -- @preserve Exhaustive guard. */
     default:
       throw new UnreachableCaseError(node)
   }
 }
 
-function computeVariableDeclarationSpecifierName(
+function computeVariableDeclarationAliasName(
   node: TSESTree.VariableDeclaration,
   sourceCode: TSESLint.SourceCode,
 ): string | null {
@@ -66,7 +86,48 @@ function computeVariableDeclarationSpecifierName(
   }
 }
 
-function computeImportDeclarationSpecifierName(
+function computeObjectPatternPropertySourceName(
+  property: TSESTree.RestElement | TSESTree.Property | undefined,
+): string | null {
+  if (!property) {
+    return null
+  }
+  switch (property.type) {
+    case AST_NODE_TYPES.RestElement:
+      return null
+    case AST_NODE_TYPES.Property:
+      if (property.key.type === AST_NODE_TYPES.Identifier) {
+        return property.key.name
+      }
+      if (property.key.type === AST_NODE_TYPES.Literal) {
+        return `${property.key.value}`
+      }
+      return null
+    /* v8 ignore next 2 -- @preserve Exhaustive guard. */
+    default:
+      throw new UnreachableCaseError(property)
+  }
+}
+
+function computeVariableDeclarationSourceName(
+  node: TSESTree.VariableDeclaration,
+  sourceCode: TSESLint.SourceCode,
+): string | null {
+  let [declaration] = node.declarations
+
+  switch (declaration.id.type) {
+    case AST_NODE_TYPES.ObjectPattern:
+      return computeObjectPatternPropertySourceName(declaration.id.properties[0])
+    case AST_NODE_TYPES.ArrayPattern:
+    case AST_NODE_TYPES.Identifier:
+      return computeVariableDeclarationAliasName(node, sourceCode)
+    /* v8 ignore next 2 -- @preserve Exhaustive guard. */
+    default:
+      throw new UnreachableCaseError(declaration.id)
+  }
+}
+
+function computeImportDeclarationAliasName(
   node: TSESTree.ImportDeclaration,
 ): string | null {
   let [specifier] = node.specifiers
@@ -85,4 +146,33 @@ function computeImportDeclarationSpecifierName(
     default:
       throw new UnreachableCaseError(specifier)
   }
+}
+
+function computeImportDeclarationSourceName(
+  node: TSESTree.ImportDeclaration,
+): string | null {
+  let [specifier] = node.specifiers
+  if (!specifier) {
+    return null
+  }
+
+  switch (specifier.type) {
+    case AST_NODE_TYPES.ImportNamespaceSpecifier:
+    case AST_NODE_TYPES.ImportDefaultSpecifier:
+      return specifier.local.name
+    case AST_NODE_TYPES.ImportSpecifier:
+      return getImportSpecifierImportedName(specifier)
+    /* v8 ignore next 2 -- @preserve Exhaustive guard. */
+    default:
+      throw new UnreachableCaseError(specifier)
+  }
+}
+
+function getImportSpecifierImportedName(
+  specifier: TSESTree.ImportSpecifier,
+): string {
+  if (specifier.imported.type === AST_NODE_TYPES.Identifier) {
+    return specifier.imported.name
+  }
+  return specifier.imported.value
 }

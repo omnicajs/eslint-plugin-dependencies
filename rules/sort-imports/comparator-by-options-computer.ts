@@ -1,6 +1,6 @@
 import type { ComparatorByOptionsComputer } from '../../utils/compare/default-comparator-by-options-computer'
+import type { SortImportsSortingNode, ImportsOrderByOption, Options } from './types'
 import type { CommonOptions, TypeOption } from '../../types/common-options'
-import type { SortImportsSortingNode, Options } from './types'
 
 import { defaultComparatorByOptionsComputer } from '../../utils/compare/default-comparator-by-options-computer'
 import { buildLineLengthComparator } from '../../utils/compare/build-line-length-comparator'
@@ -24,10 +24,12 @@ export let comparatorByOptionsComputer: ComparatorByOptionsComputer<
     case 'unsorted':
     case 'natural':
     case 'custom':
-      switch (options.sortBy) {
+      switch (options.imports.orderBy) {
         case 'specifier':
+        case 'alias':
           return bySpecifierComparatorByOptionsComputer({
             ...options,
+            orderBy: options.imports.orderBy,
             type: options.type,
           })
         case 'path':
@@ -37,7 +39,7 @@ export let comparatorByOptionsComputer: ComparatorByOptionsComputer<
           })
         /* v8 ignore next 2 -- @preserve Exhaustive guard. */
         default:
-          throw new UnreachableCaseError(options.sortBy)
+          throw new UnreachableCaseError(options.imports.orderBy)
       }
     /* v8 ignore next 2 -- @preserve Exhaustive guard. */
     default:
@@ -72,34 +74,34 @@ function compareTypeImportFirst(
 }
 
 let bySpecifierComparatorByOptionsComputer: ComparatorByOptionsComputer<
-  Omit<Required<Options[number]>, 'type'> & { type: TypeOption },
+  {
+    orderBy: ImportsOrderByOption
+    type: TypeOption
+  } & Omit<Required<Options[number]>, 'type'>,
   SortImportsSortingNode
 > = options => {
+  function getSpecifierName(node: SortImportsSortingNode): string {
+    return options.orderBy === 'specifier' ?
+        (node.sourceSpecifierName ?? node.specifierName ?? '')
+      : (node.specifierName ?? '')
+  }
+
   switch (options.type) {
     /* v8 ignore next 2 -- @preserve Untested for now as not a relevant sort for this rule. */
     case 'subgroup-order':
       return defaultComparatorByOptionsComputer(options)
     case 'alphabetical':
       return (a, b) =>
-        compareAlphabetically(
-          a.specifierName ?? '',
-          b.specifierName ?? '',
-          options,
-        )
+        compareAlphabetically(getSpecifierName(a), getSpecifierName(b), options)
     case 'line-length':
       return buildLineLengthComparator(options)
     case 'unsorted':
       return unsortedComparator
     case 'natural':
-      return (a, b) =>
-        compareNaturally(a.specifierName ?? '', b.specifierName ?? '', options)
+      return (a, b) => compareNaturally(getSpecifierName(a), getSpecifierName(b), options)
     case 'custom':
       return (a, b) =>
-        compareByCustomSort(
-          a.specifierName ?? '',
-          b.specifierName ?? '',
-          options,
-        )
+        compareByCustomSort(getSpecifierName(a), getSpecifierName(b), options)
     /* v8 ignore next 2 -- @preserve Exhaustive guard. */
     default:
       throw new UnreachableCaseError(options.type)

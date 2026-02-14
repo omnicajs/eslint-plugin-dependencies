@@ -287,15 +287,50 @@ Specifies the sorting locales. Refer To
 - `string` — A BCP 47 language tag (e.g. `'en'`, `'en-US'`, `'zh-CN'`).
 - `string[]` — An array of BCP 47 language tags.
 
-### sortBy
+### imports
 
-<sub>default: `'path'`</sub>
+<sub>
+  type:
+  ```ts
+  {
+    orderBy?: 'path' | 'alias' | 'specifier'
+    splitDeclarations?: boolean
+    sortSideEffects?: boolean
+    maxLineLength?: number | null
+  }
+  ```
+</sub>
+<sub>
+  default:
+  ```ts
+  {
+    orderBy: 'path',
+    splitDeclarations: false,
+    sortSideEffects: false,
+    maxLineLength: null,
+  }
+  ```
+</sub>
 
-Controls whether sorting should be done using the import's path or first
-specifier.
+#### imports.orderBy
 
-- `'path'` — Use the import's path.
-- `'specifier'` — Use the import's first specifier if it exists.
+- `'path'` — Sort by module source path.
+- `'alias'` — Sort by the first local binding.
+- `'specifier'` — Sort by the first source-side imported name, with alias
+  fallback when source-side name is not applicable.
+
+#### imports.splitDeclarations
+
+When enabled, the rule can split a declaration into multiple imports if
+specifier-level sorting interleaves sources.
+
+#### imports.sortSideEffects
+
+Controls whether side-effect imports are sortable.
+
+#### imports.maxLineLength
+
+Limits line-length comparator input. `null` disables the threshold.
 
 ### internalPattern
 
@@ -306,45 +341,67 @@ distinguishing your own modules from external dependencies.
 
 You can use regexp patterns to define these internal imports.
 
-### sortSideEffects
+### partitions
 
-<sub>default: `false`</sub>
+<sub>
+  type:
+  ```ts
+  | 'merge'
+  | {
+      orderBy?: 'source' | 'type-first'
+      orderStability?: 'stable' | 'unstable'
+      splitBy?: {
+        comments?:
+          | boolean
+          | RegExpPattern
+          | RegExpPattern[]
+          | {
+              block?: boolean | RegExpPattern | RegExpPattern[]
+              line?: boolean | RegExpPattern | RegExpPattern[]
+            }
+        newlines?: boolean
+      }
+      maxImports?: number | null
+    }
+  ```
+</sub>
+<sub>
+  default:
+  ```ts
+  {
+    orderBy: 'source',
+    orderStability: 'stable',
+    splitBy: { comments: false, newlines: false },
+    maxImports: null,
+  }
+  ```
+</sub>
 
-Specifies whether side effect imports should be sorted. By default, sorting
-side-effect imports is disabled for security reasons.
+- `'merge'` — Merge partitions inside each group into a single sortable unit.
+- object — Preserve partitions and configure partition ordering/splitting.
 
-- `true` — Sort side effect imports.
-- `false` — Do not sort side effect imports.
+#### partitions.orderBy
 
-### partitionByComment
+- `'source'` — Keep source partition order.
+- `'type-first'` — Move type-only partitions before value partitions.
 
-<sub>default: `false`</sub>
+#### partitions.orderStability
 
-Enables the use of comments to separate imports into logical groups.
+- `'stable'` — Keep relative order within the same partition category.
+- `'unstable'` — Allow non-stable reordering.
 
-- `true` — All comments will be treated as delimiters, creating partitions.
-- `false` — Comments will not be used as delimiters.
-- `RegExpPattern = string | { pattern: string; flags: string}` — A regexp
-  pattern to specify which comments should act as delimiters.
-- `RegExpPattern[]` — A list of regexp patterns to specify which comments should
-  act as delimiters.
-- `{ block: boolean | RegExpPattern | RegExpPattern[]; line: boolean | RegExpPattern | RegExpPattern[] }`
-  — Specify which block and line comments should act as delimiters.
+#### partitions.splitBy.comments
 
-### partitionByNewLine
+Comment-based partition split signal.
 
-<sub>default: `false`</sub>
+#### partitions.splitBy.newlines
 
-When `true`, empty lines inside a group define partitions that are sorted
-independently. Partition boundaries are never crossed when
-`partitionInsideGroup` is set to `'preserve'`.
+When `true`, empty lines create partition boundaries.
 
-```ts
-import { b1, b2 } from 'b'
+#### partitions.maxImports
 
-import { a } from 'a'
-import { c } from 'c'
-```
+Split partitions into chunks of at most `N` imports. `null` disables size-based
+splitting.
 
 ### newlinesBetween
 
@@ -386,22 +443,6 @@ options.
 This option controls spacing between partitions inside a group only. It does not
 change partition boundaries.
 
-### partitionInsideGroup
-
-<sub>default: `'preserve'`</sub>
-
-Controls whether partitions are preserved or merged inside a group.
-
-- `'preserve'` — Keep partitions and sort within each partition independently.
-- `'merge'` — Merge all partitions in a group into a single partition.
-
-### partitionMaxImports
-
-<sub>default: `Infinity`</sub>
-
-Splits each partition into chunks of at most `N` imports after partitions are
-formed. This applies when `partitionInsideGroup` is `'preserve'`.
-
 #### Partition examples
 
 Preserve partitions inside groups:
@@ -410,8 +451,9 @@ Preserve partitions inside groups:
 // options
 {
   groups: ['react', 'external', 'internal', 'relative'],
-  partitionByNewLine: true,
-  partitionInsideGroup: 'preserve',
+  partitions: {
+    splitBy: { newlines: true },
+  },
   newlinesBetween: 1,
 }
 
@@ -443,8 +485,7 @@ Merge partitions inside groups:
 // options
 {
   groups: ['external', 'internal', 'relative'],
-  partitionByNewLine: true,
-  partitionInsideGroup: 'merge',
+  partitions: 'merge',
   newlinesBetween: 1,
 }
 
@@ -473,8 +514,7 @@ Split partitions by size:
 // options
 {
   groups: ['external'],
-  partitionInsideGroup: 'preserve',
-  partitionMaxImports: 2,
+  partitions: { maxImports: 2 },
   newlinesInside: 1,
   newlinesBetween: 0,
 }
@@ -495,16 +535,6 @@ import d from 'd'
 
 import e from 'e'
 ```
-
-### maxLineLength
-
-<sub>default: `Infinity`</sub>
-
-Specifies a maximum line length for sorting imports. When the line length
-exceeds this number, sorting will be based only on the import name, excluding
-the elements.
-
-This option is only available when the type is set to `'line-length'`.
 
 ### tsconfig
 
@@ -943,13 +973,24 @@ export default [
           fallbackSort: { type: 'unsorted' },
           ignoreCase: true,
           specialCharacters: 'keep',
-          sortBy: 'path',
+          imports: {
+            orderBy: 'path',
+            splitDeclarations: false,
+            sortSideEffects: false,
+            maxLineLength: null,
+          },
+          partitions: {
+            orderBy: 'source',
+            orderStability: 'stable',
+            splitBy: {
+              comments: false,
+              newlines: false,
+            },
+            maxImports: null,
+          },
           internalPattern: ['^~/.+', '^@/.+'],
-          partitionByComment: false,
-          partitionByNewLine: false,
           newlinesBetween: 1,
           newlinesInside: 0,
-          maxLineLength: undefined,
           groups: [
             'type-import',
             ['value-builtin', 'value-external'],
@@ -985,13 +1026,24 @@ module.exports = {
         fallbackSort: { type: 'unsorted' },
         ignoreCase: true,
         specialCharacters: 'keep',
-        sortBy: 'path',
+        imports: {
+          orderBy: 'path',
+          splitDeclarations: false,
+          sortSideEffects: false,
+          maxLineLength: null,
+        },
+        partitions: {
+          orderBy: 'source',
+          orderStability: 'stable',
+          splitBy: {
+            comments: false,
+            newlines: false,
+          },
+          maxImports: null,
+        },
         internalPattern: ['^~/.+', '^@/.+'],
-        partitionByComment: false,
-        partitionByNewLine: false,
         newlinesBetween: 1,
         newlinesInside: 0,
-        maxLineLength: undefined,
         groups: [
           'type-import',
           ['value-builtin', 'value-external'],
