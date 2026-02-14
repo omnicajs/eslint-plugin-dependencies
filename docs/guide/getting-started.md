@@ -131,10 +131,12 @@ In settings, you can set the following options:
 - `locales` - The locales of sorting. Values can be a string with a BCP 47
   language tag, or an array of such strings. See
   [String.prototype.localeCompare() - locales](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare#locales).
-- `partitionByComment` — Partition the sorted elements by comments. Values can
-  be `true`, `false` or regexp pattern.
-- `partitionByNewLine` — Partition the sorted elements by newlines. Values can
-  be `true` or `false`.
+- `partitions` — Partition configuration for sorted elements.
+  - `'merge'` — Disable partition boundaries for the rule.
+  - `{ splitBy: { comments, newlines } }` — Configure partition delimiters.
+  - `splitBy.comments` accepts `true`, `false`, regexp patterns, arrays, or
+    `{ block, line }`.
+  - `splitBy.newlines` accepts `true` or `false`.
 - `newlinesBetween` — Specifies how to handle newlines between groups. Values
   can be `'ignore'` or a number.
 - `newlinesInside` — Specifies how to handle newlines between elements of each
@@ -165,7 +167,12 @@ export default [
     settings: {
       dependencies: {
         type: 'line-length',
-        partitionByComment: true,
+        partitions: {
+          splitBy: {
+            comments: true,
+            newlines: false,
+          },
+        },
       },
     },
   },
@@ -190,7 +197,12 @@ module.exports = {
   settings: {
     dependencies: {
       type: 'line-length',
-      partitionByComment: true,
+      partitions: {
+        splitBy: {
+          comments: true,
+          newlines: false,
+        },
+      },
     },
   },
 }
