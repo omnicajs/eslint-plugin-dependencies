@@ -1,6 +1,9 @@
 ---
 title: sort-named-imports
-description: Enforce a standardized ordering of named imports for easier navigation and understanding of import statements. This ESLint rule helps keep your named imports organized
+description:
+  Enforce a standardized ordering of named imports for easier navigation and
+  understanding of import statements. This ESLint rule helps keep your named
+  imports organized
 shortDescription: Enforce sorted named imports
 keywords:
   - eslint
@@ -11,15 +14,24 @@ keywords:
   - javascript linting
   - named imports sorting
 ---
+
 Enforce sorted named imports.
 
-Sorting named imports promotes a standardized ordering, making it easier for developers to navigate and understand import statements.
+Sorting named imports promotes a standardized ordering, making it easier for
+developers to navigate and understand import statements.
 
-This rule ensures that named imports are consistently organized, enhancing the readability and maintainability of the code. By keeping imports sorted, developers can quickly locate necessary modules and maintain a clean code structure.
+This rule ensures that named imports are consistently organized, enhancing the
+readability and maintainability of the code. By keeping imports sorted,
+developers can quickly locate necessary modules and maintain a clean code
+structure.
 
 > **Important**
 >
-> If you use the [`sort-imports`](https://eslint.org/docs/latest/rules/sort-imports) rule, it is highly recommended to [disable it](https://eslint.org/docs/latest/use/configure/rules#using-configuration-files-1) to avoid conflicts.
+> If you use the
+> [`sort-imports`](https://eslint.org/docs/latest/rules/sort-imports) rule, it
+> is highly recommended to
+> [disable it](https://eslint.org/docs/latest/use/configure/rules#using-configuration-files-1)
+> to avoid conflicts.
 
 ## Try it out
 
@@ -45,6 +57,7 @@ import {
 
 import { useStore, useDispatch } from 'react-redux'
 ```
+
 ### After (Alphabetical)
 
 ```tsx
@@ -67,6 +80,7 @@ import {
 
 import { useDispatch, useStore } from 'react-redux'
 ```
+
 ### After (Line Length)
 
 ```tsx
@@ -100,11 +114,16 @@ This rule accepts an options object with the following properties:
 
 Specifies the sorting method.
 
-- `'alphabetical'` — Sort items alphabetically (e.g., “a” < “b” < “c”) using [localeCompare](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare).
-- `'natural'` — Sort items in a [natural](https://github.com/yobacca/natural-orderby) order (e.g., “item2” < “item10”).
+- `'alphabetical'` — Sort items alphabetically (e.g., “a” < “b” < “c”) using
+  [localeCompare](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare).
+- `'natural'` — Sort items in a
+  [natural](https://github.com/yobacca/natural-orderby) order (e.g., “item2” <
+  “item10”).
 - `'line-length'` — Sort items by code line length (shorter lines first).
-- `'custom'` — Sort items using the alphabet specified in the [`alphabet`](#alphabet) option.
-- `'unsorted'` — Do not sort items. [`grouping`](#groups) and [`newlines behavior`](#newlinesbetween) are still enforced.
+- `'custom'` — Sort items using the alphabet specified in the
+  [`alphabet`](#alphabet) option.
+- `'unsorted'` — Do not sort items. [`grouping`](#groups) and
+  [`newlines behavior`](#newlinesbetween) are still enforced.
 
 ### order
 
@@ -134,11 +153,14 @@ Specifies whether to sort items in ascending or descending order.
 </sub>
 <sub>default: `{ type: 'unsorted' }`</sub>
 
-Specifies fallback sort options for elements that are equal according to the primary sort [`type`](#type).
+Specifies fallback sort options for elements that are equal according to the
+primary sort [`type`](#type).
 
-You can also sort by subgroup order (nested groups in the [`groups`](#groups) option) using `subgroup-order`.
+You can also sort by subgroup order (nested groups in the [`groups`](#groups)
+option) using `subgroup-order`.
 
 Example: enforce alphabetical sort between two elements with the same length.
+
 ```ts
 {
   type: 'line-length',
@@ -151,9 +173,12 @@ Example: enforce alphabetical sort between two elements with the same length.
 
 <sub>default: `''`</sub>
 
-Used only when the [`type`](#type) option is set to `'custom'`. Specifies the custom alphabet for sorting.
+Used only when the [`type`](#type) option is set to `'custom'`. Specifies the
+custom alphabet for sorting.
 
-Use the `Alphabet` utility class from `@omnicajs/eslint-plugin-dependencies/alphabet` to quickly generate a custom alphabet.
+Use the `Alphabet` utility class from
+`@omnicajs/eslint-plugin-dependencies/alphabet` to quickly generate a custom
+alphabet.
 
 Example: `0123456789abcdef...`
 
@@ -163,7 +188,8 @@ Example: `0123456789abcdef...`
 
 Specifies whether sorting should be case-sensitive.
 
-- `true` — Ignore case when sorting alphabetically or naturally (e.g., “A” and “a” are the same).
+- `true` — Ignore case when sorting alphabetically or naturally (e.g., “A” and
+  “a” are the same).
 - `false` — Consider case when sorting (e.g., “a” comes before “A”).
 
 ### specialCharacters
@@ -172,15 +198,19 @@ Specifies whether sorting should be case-sensitive.
 
 Specifies whether to trim, remove, or keep special characters before sorting.
 
-- `'keep'` — Keep special characters when sorting (e.g., “_a” comes before “a”).
-- `'trim'` — Trim special characters when sorting alphabetically or naturally (e.g., “_a” and “a” are the same).
-- `'remove'` — Remove special characters when sorting (e.g., “/a/b” and “ab” are the same).
+- `'keep'` — Keep special characters when sorting (e.g., “\_a” comes before
+  “a”).
+- `'trim'` — Trim special characters when sorting alphabetically or naturally
+  (e.g., “\_a” and “a” are the same).
+- `'remove'` — Remove special characters when sorting (e.g., “/a/b” and “ab” are
+  the same).
 
 ### locales
 
 <sub>default: `'en-US'`</sub>
 
-Specifies the sorting locales. Refer To [String.prototype.localeCompare() - locales](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare#locales).
+Specifies the sorting locales. Refer To
+[String.prototype.localeCompare() - locales](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare#locales).
 
 - `string` — A BCP 47 language tag (e.g. `'en'`, `'en-US'`, `'zh-CN'`).
 - `string[]` — An array of BCP 47 language tags.
@@ -189,7 +219,8 @@ Specifies the sorting locales. Refer To [String.prototype.localeCompare() - loca
 
 <sub>default: `false`</sub>
 
-Specifies whether to use the import alias as the name for sorting instead of the exported name.
+Specifies whether to use the import alias as the name for sorting instead of the
+exported name.
 
 - `true` — Use the import alias for sorting.
 - `false` — Use the exported name for sorting.
@@ -198,37 +229,44 @@ Specifies whether to use the import alias as the name for sorting instead of the
 
 <sub>default: `false`</sub>
 
-Enables the use of comments to separate the members of named imports into logical groups. This can help in organizing and maintaining large named imports by creating partitions based on comments.
+Enables the use of comments to separate the members of named imports into
+logical groups. This can help in organizing and maintaining large named imports
+by creating partitions based on comments.
 
 - `true` — All comments will be treated as delimiters, creating partitions.
 - `false` — Comments will not be used as delimiters.
-- `RegExpPattern = string | { pattern: string; flags: string}` — A regexp pattern to specify which comments should act as delimiters.
-- `RegExpPattern[]` — A list of regexp patterns to specify which comments should act as delimiters.
-- `{ block: boolean | RegExpPattern | RegExpPattern[]; line: boolean | RegExpPattern | RegExpPattern[] }` — Specify which block and line comments should act as delimiters.
+- `RegExpPattern = string | { pattern: string; flags: string}` — A regexp
+  pattern to specify which comments should act as delimiters.
+- `RegExpPattern[]` — A list of regexp patterns to specify which comments should
+  act as delimiters.
+- `{ block: boolean | RegExpPattern | RegExpPattern[]; line: boolean | RegExpPattern | RegExpPattern[] }`
+  — Specify which block and line comments should act as delimiters.
 
 ### partitionByNewLine
 
 <sub>default: `false`</sub>
 
-When `true`, the rule will not sort the members of named imports if there is an empty line between them. This helps maintain the defined order of logically separated groups of members.
+When `true`, the rule will not sort the members of named imports if there is an
+empty line between them. This helps maintain the defined order of logically
+separated groups of members.
 
 ```ts
 import {
-     // Group 1
-    Drone,
-    Keyboard,
-    Mouse,
-    Smartphone,
+  // Group 1
+  Drone,
+  Keyboard,
+  Mouse,
+  Smartphone,
 
-    // Group 2
-    Laptop,
-    Monitor,
-    Smartwatch,
-    Tablet,
+  // Group 2
+  Laptop,
+  Monitor,
+  Smartwatch,
+  Tablet,
 
-    // Group 3
-    Headphones,
-    Router,
+  // Group 3
+  Headphones,
+  Router,
 } from './devices'
 ```
 
@@ -245,10 +283,11 @@ Specifies how to handle newlines between groups.
 - `0` — No newlines are allowed.
 - Any other number — Enforce this number of newlines between each group.
 
-You can also enforce the newline behavior between two specific groups through the [`groups`](#newlines-between-groups)
-option.
+You can also enforce the newline behavior between two specific groups through
+the [`groups`](#newlines-between-groups) option.
 
-This option is only applicable when [`partitionByNewLine`](#partitionbynewline) is `false`.
+This option is only applicable when [`partitionByNewLine`](#partitionbynewline)
+is `false`.
 
 ### newlinesInside
 
@@ -260,14 +299,18 @@ This option is only applicable when [`partitionByNewLine`](#partitionbynewline) 
 Specifies how to handle newlines inside groups.
 
 - `'ignore'` — Do not report errors related to newlines.
-- `'newlinesBetween'` — [DEPRECATED] If [`newlinesBetween`](#newlinesbetween) is `'ignore'`, then `'ignore'`, otherwise `0`.
+- `'newlinesBetween'` — [DEPRECATED] If [`newlinesBetween`](#newlinesbetween) is
+  `'ignore'`, then `'ignore'`, otherwise `0`.
 - `0` — No newlines are allowed.
-- Any other number — Enforce this number of newlines between each element of the same group.
+- Any other number — Enforce this number of newlines between each element of the
+  same group.
 
-You can also enforce the newline behavior inside a given group through the [`groups`](#group-with-overridden-settings)
-or [`customGroups`](#customgroups) options.
+You can also enforce the newline behavior inside a given group through the
+[`groups`](#group-with-overridden-settings) or [`customGroups`](#customgroups)
+options.
 
-This option is only applicable when [`partitionByNewLine`](#partitionbynewline) is `false`.
+This option is only applicable when [`partitionByNewLine`](#partitionbynewline)
+is `false`.
 
 ### groups
 
@@ -290,17 +333,23 @@ This option is only applicable when [`partitionByNewLine`](#partitionbynewline) 
 </sub>
 <sub>default: `[]`</sub>
 
-Specifies a list of named imports groups for sorting. Groups help organize named imports into categories, making them more readable and maintainable.
+Specifies a list of named imports groups for sorting. Groups help organize named
+imports into categories, making them more readable and maintainable.
 
-Each named import will be assigned a single group specified in the `groups` option (or the `unknown` group if no match is found).
-The order of items in the `groups` option determines how groups are ordered.
+Each named import will be assigned a single group specified in the `groups`
+option (or the `unknown` group if no match is found). The order of items in the
+`groups` option determines how groups are ordered.
 
-Within a given group, members will be sorted according to the `type`, `order`, `ignoreCase`, etc. options.
+Within a given group, members will be sorted according to the `type`, `order`,
+`ignoreCase`, etc. options.
 
-Individual groups can be combined together by placing them in an array. The order of groups in that array does not matter.
-All members of the groups in the array will be sorted together as if they were part of a single group.
+Individual groups can be combined together by placing them in an array. The
+order of groups in that array does not matter. All members of the groups in the
+array will be sorted together as if they were part of a single group.
 
-Predefined groups are characterized by a single selector and potentially multiple modifiers. You may enter modifiers in any order, but the selector must always come at the end.
+Predefined groups are characterized by a single selector and potentially
+multiple modifiers. You may enter modifiers in any order, but the selector must
+always come at the end.
 
 #### Selectors
 
@@ -317,17 +366,21 @@ Example: `type-import`.
 
 ##### The `unknown` group
 
-Members that don’t fit into any group specified in the `groups` option will be placed in the `unknown` group. If the `unknown` group is not specified in the `groups` option,
-it will automatically be added to the end of the list.
+Members that don’t fit into any group specified in the `groups` option will be
+placed in the `unknown` group. If the `unknown` group is not specified in the
+`groups` option, it will automatically be added to the end of the list.
 
 ##### Group with overridden settings
 
-You may directly override options for a specific group by using an object with the `group` property and other option overrides.
+You may directly override options for a specific group by using an object with
+the `group` property and other option overrides.
 
 - `type` — Overrides the [`type`](#type) option for that group.
 - `order` — Overrides the [`order`](#order) option for that group.
-- `fallbackSort` — Overrides the [`fallbackSort`](#fallbacksort) option for that group.
-- `newlinesInside` — Overrides the [`newlinesInside`](#newlinesinside) option for that group.
+- `fallbackSort` — Overrides the [`fallbackSort`](#fallbacksort) option for that
+  group.
+- `newlinesInside` — Overrides the [`newlinesInside`](#newlinesinside) option
+  for that group.
 
 ```ts
 {
@@ -340,11 +393,13 @@ You may directly override options for a specific group by using an object with t
 
 ##### Newlines between groups
 
-You may place `newlinesBetween` objects between your groups to enforce the newline behavior between two specific groups.
+You may place `newlinesBetween` objects between your groups to enforce the
+newline behavior between two specific groups.
 
 See the [`newlinesBetween`](#newlinesbetween) option.
 
-This feature is only applicable when [`partitionByNewLine`](#partitionbynewline) is `false`.
+This feature is only applicable when [`partitionByNewLine`](#partitionbynewline)
+is `false`.
 
 ```ts
 {
@@ -376,11 +431,16 @@ interface CustomGroupDefinition {
   fallbackSort?: { type: string; order?: 'asc' | 'desc' }
   newlinesInside?: number | 'ignore'
   selector?: string
-  elementNamePattern?: string | string[] | { pattern: string; flags?: string } | { pattern: string; flags?: string }[]
+  elementNamePattern?:
+    | string
+    | string[]
+    | { pattern: string; flags?: string }
+    | { pattern: string; flags?: string }[]
 }
 ```
 
-A named import will match a `CustomGroupDefinition` group if it matches all the filters of the custom group's definition.
+A named import will match a `CustomGroupDefinition` group if it matches all the
+filters of the custom group's definition.
 
 or:
 
@@ -392,28 +452,37 @@ interface CustomGroupAnyOfDefinition {
   fallbackSort?: { type: string; order?: 'asc' | 'desc' }
   newlinesInside?: number | 'ignore'
   anyOf: Array<{
-      selector?: string
-      elementNamePattern?: string | string[] | { pattern: string; flags?: string } | { pattern: string; flags?: string }[]
+    selector?: string
+    elementNamePattern?:
+      | string
+      | string[]
+      | { pattern: string; flags?: string }
+      | { pattern: string; flags?: string }[]
   }>
 }
 ```
 
-A named import will match a `CustomGroupAnyOfDefinition` group if it matches all the filters of at least one of the `anyOf` items.
+A named import will match a `CustomGroupAnyOfDefinition` group if it matches all
+the filters of at least one of the `anyOf` items.
 
 #### Attributes
 
-- `groupName` — The group's name, which needs to be put in the [`groups`](#groups) option.
+- `groupName` — The group's name, which needs to be put in the
+  [`groups`](#groups) option.
 - `selector` — Filter on the `selector` of the element.
-- `elementNamePattern` — If entered, will check that the name of the element matches the pattern entered.
+- `elementNamePattern` — If entered, will check that the name of the element
+  matches the pattern entered.
 - `type` — Overrides the [`type`](#type) option for that custom group.
 - `order` — Overrides the [`order`](#order) option for that custom group.
-- `fallbackSort` — Overrides the [`fallbackSort`](#fallbacksort) option for that custom group.
-- `newlinesInside` — Overrides the [`newlinesInside`](#newlinesinside) option for that custom group.
+- `fallbackSort` — Overrides the [`fallbackSort`](#fallbacksort) option for that
+  custom group.
+- `newlinesInside` — Overrides the [`newlinesInside`](#newlinesinside) option
+  for that custom group.
 
 #### Match importance
 
-The `customGroups` list is ordered:
-The first custom group definition that matches an element will be used.
+The `customGroups` list is ordered: The first custom group definition that
+matches an element will be used.
 
 Custom groups have a higher priority than any predefined group.
 
@@ -458,9 +527,7 @@ export default [
 ```tsx
 // .eslintrc.js
 module.exports = {
-  plugins: [
-    'dependencies',
-  ],
+  plugins: ['dependencies'],
   rules: {
     'dependencies/sort-named-imports': [
       'error',

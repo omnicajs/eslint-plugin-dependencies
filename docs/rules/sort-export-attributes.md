@@ -1,6 +1,8 @@
 ---
 title: sort-export-attributes
-description: Keep export attributes consistently ordered for clearer, more maintainable exports. This rule sorts attributes defined with the export attributes syntax
+description:
+  Keep export attributes consistently ordered for clearer, more maintainable
+  exports. This rule sorts attributes defined with the export attributes syntax
 shortDescription: Enforce sorted export attributes
 keywords:
   - eslint
@@ -11,9 +13,12 @@ keywords:
   - code quality
   - javascript linting
 ---
+
 Enforce sorted export attributes.
 
-This rule keeps attributes inside `export ... with { ... }` consistently ordered. It improves readability, makes diffs smaller, and keeps attribute groups tidy in larger files.
+This rule keeps attributes inside `export ... with { ... }` consistently
+ordered. It improves readability, makes diffs smaller, and keeps attribute
+groups tidy in larger files.
 
 ## Try it out
 
@@ -26,6 +31,7 @@ export { data } from 'lib' with {
   integrity: 'sha256-...',
 }
 ```
+
 ### After (Alphabetical)
 
 ```tsx
@@ -35,6 +41,7 @@ export { data } from 'lib' with {
   type: 'json',
 }
 ```
+
 ### After (Line Length)
 
 ```tsx
@@ -55,11 +62,15 @@ This rule accepts an options object with the following properties:
 
 Specifies the sorting method.
 
-- `'alphabetical'` — Sort attributes alphabetically using [localeCompare](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare).
-- `'natural'` — Sort by [natural](https://github.com/yobacca/natural-orderby) order (e.g., `link2` < `link10`).
+- `'alphabetical'` — Sort attributes alphabetically using
+  [localeCompare](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare).
+- `'natural'` — Sort by [natural](https://github.com/yobacca/natural-orderby)
+  order (e.g., `link2` < `link10`).
 - `'line-length'` — Sort by attribute name length (shorter first by default).
-- `'custom'` — Sort using a custom alphabet specified in [`alphabet`](#alphabet).
-- `'unsorted'` — Do not sort items. [`grouping`](#groups) and [`newlines behavior`](#newlinesbetween) are still enforced.
+- `'custom'` — Sort using a custom alphabet specified in
+  [`alphabet`](#alphabet).
+- `'unsorted'` — Do not sort items. [`grouping`](#groups) and
+  [`newlines behavior`](#newlinesbetween) are still enforced.
 
 ### order
 
@@ -89,11 +100,14 @@ Sort direction.
 </sub>
 <sub>default: `{ type: 'unsorted' }`</sub>
 
-Specifies fallback sort options for elements that are equal according to the primary sort [`type`](#type).
+Specifies fallback sort options for elements that are equal according to the
+primary sort [`type`](#type).
 
-You can also sort by subgroup order (nested groups in the [`groups`](#groups) option) using `subgroup-order`.
+You can also sort by subgroup order (nested groups in the [`groups`](#groups)
+option) using `subgroup-order`.
 
 Example: enforce alphabetical sort between two elements with the same length.
+
 ```ts
 {
   type: 'line-length',
@@ -106,7 +120,8 @@ Example: enforce alphabetical sort between two elements with the same length.
 
 <sub>default: `''`</sub>
 
-Used only when [`type`](#type) is `'custom'`. Defines the custom character order.
+Used only when [`type`](#type) is `'custom'`. Defines the custom character
+order.
 
 ### ignoreCase
 
@@ -134,19 +149,23 @@ Locales passed to `localeCompare` for alphabetical/natural sorts.
 
 <sub>default: `false`</sub>
 
-Use comments to split attributes into independent partitions that are sorted separately.
+Use comments to split attributes into independent partitions that are sorted
+separately.
 
 - `true` — Any non-ESLint comment creates a partition.
 - `false` — Ignore comments for partitioning.
-- `RegExpPattern = string | { pattern: string; flags?: string }` — Pattern for matching comments.
+- `RegExpPattern = string | { pattern: string; flags?: string }` — Pattern for
+  matching comments.
 - `RegExpPattern[]` — List of patterns.
-- `{ block: boolean | RegExpPattern | RegExpPattern[]; line: boolean | RegExpPattern | RegExpPattern[] }` — Separate settings for block/line comments.
+- `{ block: boolean | RegExpPattern | RegExpPattern[]; line: boolean | RegExpPattern | RegExpPattern[] }`
+  — Separate settings for block/line comments.
 
 ### partitionByNewLine
 
 <sub>default: `false`</sub>
 
-When `true`, an empty line between attributes creates a partition. Each partition is sorted independently.
+When `true`, an empty line between attributes creates a partition. Each
+partition is sorted independently.
 
 ### newlinesBetween
 
@@ -161,10 +180,11 @@ Specifies how to handle newlines between groups.
 - `0` — No newlines are allowed.
 - Any other number — Enforce this number of newlines between each group.
 
-You can also enforce the newline behavior between two specific groups through the [`groups`](#newlines-between-groups)
-option.
+You can also enforce the newline behavior between two specific groups through
+the [`groups`](#newlines-between-groups) option.
 
-This option is only applicable when [`partitionByNewLine`](#partitionbynewline) is `false`.
+This option is only applicable when [`partitionByNewLine`](#partitionbynewline)
+is `false`.
 
 ### newlinesInside
 
@@ -176,14 +196,18 @@ This option is only applicable when [`partitionByNewLine`](#partitionbynewline) 
 Specifies how to handle newlines inside groups.
 
 - `'ignore'` — Do not report errors related to newlines.
-- `'newlinesBetween'` — [DEPRECATED] If [`newlinesBetween`](#newlinesbetween) is `'ignore'`, then `'ignore'`, otherwise `0`.
+- `'newlinesBetween'` — [DEPRECATED] If [`newlinesBetween`](#newlinesbetween) is
+  `'ignore'`, then `'ignore'`, otherwise `0`.
 - `0` — No newlines are allowed.
-- Any other number — Enforce this number of newlines between each element of the same group.
+- Any other number — Enforce this number of newlines between each element of the
+  same group.
 
-You can also enforce the newline behavior inside a given group through the [`groups`](#group-with-overridden-settings)
-or [`customGroups`](#customgroups) options.
+You can also enforce the newline behavior inside a given group through the
+[`groups`](#group-with-overridden-settings) or [`customGroups`](#customgroups)
+options.
 
-This option is only applicable when [`partitionByNewLine`](#partitionbynewline) is `false`.
+This option is only applicable when [`partitionByNewLine`](#partitionbynewline)
+is `false`.
 
 ### groups
 
@@ -206,11 +230,14 @@ This option is only applicable when [`partitionByNewLine`](#partitionbynewline) 
 </sub>
 <sub>default: `[]`</sub>
 
-Defines the order of attribute groups. Unknown attributes are placed after the last group.
+Defines the order of attribute groups. Unknown attributes are placed after the
+last group.
 
-You can mix predefined (none for this rule) and custom groups. Typical usage is with custom groups declared via `elementNamePattern`.
+You can mix predefined (none for this rule) and custom groups. Typical usage is
+with custom groups declared via `elementNamePattern`.
 
-Example: put any attribute starting with `type` before others, and require a newline between groups.
+Example: put any attribute starting with `type` before others, and require a
+newline between groups.
 
 ```ts
 {
@@ -224,12 +251,15 @@ Example: put any attribute starting with `type` before others, and require a new
 
 #### Group with overridden settings
 
-You may directly override options for a specific group by using an object with the `group` property and other option overrides.
+You may directly override options for a specific group by using an object with
+the `group` property and other option overrides.
 
 - `type` — Overrides the [`type`](#type) option for that group.
 - `order` — Overrides the [`order`](#order) option for that group.
-- `fallbackSort` — Overrides the [`fallbackSort`](#fallbacksort) option for that group.
-- `newlinesInside` — Overrides the [`newlinesInside`](#newlinesinside) option for that group.
+- `fallbackSort` — Overrides the [`fallbackSort`](#fallbacksort) option for that
+  group.
+- `newlinesInside` — Overrides the [`newlinesInside`](#newlinesinside) option
+  for that group.
 
 ```ts
 {
@@ -242,11 +272,13 @@ You may directly override options for a specific group by using an object with t
 
 #### Newlines between groups
 
-You may place `newlinesBetween` objects between your groups to enforce the newline behavior between two specific groups.
+You may place `newlinesBetween` objects between your groups to enforce the
+newline behavior between two specific groups.
 
 See the [`newlinesBetween`](#newlinesbetween) option.
 
-This feature is only applicable when [`partitionByNewLine`](#partitionbynewline) is `false`.
+This feature is only applicable when [`partitionByNewLine`](#partitionbynewline)
+is `false`.
 
 ```ts
 {
@@ -267,7 +299,11 @@ Define custom attribute groups with optional per-group sort overrides.
 type CustomGroup = {
   groupName: string
   // Match by attribute name
-  elementNamePattern?: string | string[] | { pattern: string; flags?: string } | { pattern: string; flags?: string }[]
+  elementNamePattern?:
+    | string
+    | string[]
+    | { pattern: string; flags?: string }
+    | { pattern: string; flags?: string }[]
 
   // Optional per-group overrides:
   type?: 'alphabetical' | 'natural' | 'line-length' | 'custom' | 'unsorted'
@@ -277,7 +313,8 @@ type CustomGroup = {
 }[]
 ```
 
-An attribute matches a custom group when its name satisfies `elementNamePattern`. The first matching definition wins.
+An attribute matches a custom group when its name satisfies
+`elementNamePattern`. The first matching definition wins.
 
 ## Usage
 

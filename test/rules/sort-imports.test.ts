@@ -1789,150 +1789,135 @@ describe('sort-imports', () => {
       })
     })
 
-    it(
-      'preserves newlines between partitions when newlinesInside is 0',
-      async () => {
-        await invalid({
-          options: [
-            {
-              ...options,
-              partitionInsideGroup: 'preserve',
-              partitionByNewLine: true,
-              groups: ['external'],
-              newlinesBetween: 0,
-              newlinesInside: 0,
-            },
-          ],
-          output: dedent`
-            import axios from 'axios';
-            import z from 'zod';
+    it('preserves newlines between partitions when newlinesInside is 0', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            partitionInsideGroup: 'preserve',
+            partitionByNewLine: true,
+            groups: ['external'],
+            newlinesBetween: 0,
+            newlinesInside: 0,
+          },
+        ],
+        output: dedent`
+          import axios from 'axios';
+          import z from 'zod';
 
-            import b from 'b';
-            import y from 'y';
-          `,
-          code: dedent`
-            import z from 'zod';
-            import axios from 'axios';
+          import b from 'b';
+          import y from 'y';
+        `,
+        code: dedent`
+          import z from 'zod';
+          import axios from 'axios';
 
-            import y from 'y';
-            import b from 'b';
-          `,
-          errors: [
-            { messageId: 'unexpectedImportsOrder' },
-            { messageId: 'unexpectedImportsOrder' },
-          ],
-        })
-      },
-    )
+          import y from 'y';
+          import b from 'b';
+        `,
+        errors: [
+          { messageId: 'unexpectedImportsOrder' },
+          { messageId: 'unexpectedImportsOrder' },
+        ],
+      })
+    })
 
-    it(
-      'does not insert newlines when newlinesInside is 0',
-      async () => {
-        await valid({
-          options: [
-            {
-              ...options,
-              partitionInsideGroup: 'preserve',
-              partitionByNewLine: true,
-              groups: ['external'],
-              newlinesBetween: 0,
-              newlinesInside: 0,
-            },
-          ],
-          code: dedent`
-            import type { Request, Response } from 'express'
-            import type { User } from '@/types/user'
-          `,
-        })
-      },
-    )
+    it('does not insert newlines when newlinesInside is 0', async () => {
+      await valid({
+        options: [
+          {
+            ...options,
+            partitionInsideGroup: 'preserve',
+            partitionByNewLine: true,
+            groups: ['external'],
+            newlinesBetween: 0,
+            newlinesInside: 0,
+          },
+        ],
+        code: dedent`
+          import type { Request, Response } from 'express'
+          import type { User } from '@/types/user'
+        `,
+      })
+    })
 
-    it(
-      'normalizes group overrides when preserving partitions by newline',
-      async () => {
-        await valid({
-          options: [
-            {
-              ...options,
-              customGroups: [
-                {
-                  elementNamePattern: '^a$',
-                  groupName: 'custom',
-                  newlinesInside: 0,
-                },
-              ],
-              groups: [{ newlinesInside: 0, group: 'custom' }, 'unknown'],
-              partitionInsideGroup: 'preserve',
-              partitionByNewLine: true,
-              newlinesBetween: 0,
-              newlinesInside: 0,
-            },
-          ],
-          code: dedent`
-            import a from 'a';
-            import b from 'b';
-          `,
-        })
-      },
-    )
+    it('normalizes group overrides when preserving partitions by newline', async () => {
+      await valid({
+        options: [
+          {
+            ...options,
+            customGroups: [
+              {
+                elementNamePattern: '^a$',
+                groupName: 'custom',
+                newlinesInside: 0,
+              },
+            ],
+            groups: [{ newlinesInside: 0, group: 'custom' }, 'unknown'],
+            partitionInsideGroup: 'preserve',
+            partitionByNewLine: true,
+            newlinesBetween: 0,
+            newlinesInside: 0,
+          },
+        ],
+        code: dedent`
+          import a from 'a';
+          import b from 'b';
+        `,
+      })
+    })
 
-    it(
-      'keeps override values when preserving partitions by newline',
-      async () => {
-        await valid({
-          options: [
-            {
-              ...options,
-              customGroups: [
-                {
-                  elementNamePattern: '^a$',
-                  groupName: 'custom',
-                  newlinesInside: 1,
-                },
-              ],
-              groups: [{ newlinesInside: 1, group: 'custom' }, 'unknown'],
-              partitionInsideGroup: 'preserve',
-              partitionByNewLine: true,
-              newlinesBetween: 0,
-              newlinesInside: 1,
-            },
-          ],
-          code: dedent`
-            import a from 'a';
-            import b from 'b';
-          `,
-        })
-      },
-    )
+    it('keeps override values when preserving partitions by newline', async () => {
+      await valid({
+        options: [
+          {
+            ...options,
+            customGroups: [
+              {
+                elementNamePattern: '^a$',
+                groupName: 'custom',
+                newlinesInside: 1,
+              },
+            ],
+            groups: [{ newlinesInside: 1, group: 'custom' }, 'unknown'],
+            partitionInsideGroup: 'preserve',
+            partitionByNewLine: true,
+            newlinesBetween: 0,
+            newlinesInside: 1,
+          },
+        ],
+        code: dedent`
+          import a from 'a';
+          import b from 'b';
+        `,
+      })
+    })
 
-    it(
-      'keeps ignore override values when preserving partitions by newline',
-      async () => {
-        await valid({
-          options: [
-            {
-              ...options,
-              customGroups: [
-                {
-                  elementNamePattern: '^a$',
-                  newlinesInside: 'ignore',
-                  groupName: 'custom',
-                },
-              ],
-              groups: [{ newlinesInside: 'ignore', group: 'custom' }, 'unknown'],
-              partitionInsideGroup: 'preserve',
-              partitionByNewLine: true,
-              newlinesBetween: 0,
-              newlinesInside: 1,
-            },
-          ],
-          code: dedent`
-            import a from 'a';
-            import b from 'b';
-          `,
-        })
-      },
-    )
+    it('keeps ignore override values when preserving partitions by newline', async () => {
+      await valid({
+        options: [
+          {
+            ...options,
+            customGroups: [
+              {
+                elementNamePattern: '^a$',
+                newlinesInside: 'ignore',
+                groupName: 'custom',
+              },
+            ],
+            groups: [{ newlinesInside: 'ignore', group: 'custom' }, 'unknown'],
+            partitionInsideGroup: 'preserve',
+            partitionByNewLine: true,
+            newlinesBetween: 0,
+            newlinesInside: 1,
+          },
+        ],
+        code: dedent`
+          import a from 'a';
+          import b from 'b';
+        `,
+      })
+    })
 
     it('merges partitions inside groups', async () => {
       await invalid({
@@ -2034,41 +2019,38 @@ describe('sort-imports', () => {
       })
     })
 
-    it(
-      'preserves comment partitions when newlinesInside is 0',
-      async () => {
-        await invalid({
-          options: [
-            {
-              ...options,
-              partitionInsideGroup: 'preserve',
-              partitionByComment: 'Section:',
-              groups: ['external'],
-              newlinesBetween: 0,
-              newlinesInside: 0,
-            },
-          ],
-          output: dedent`
-            import axios from 'axios';
-            import z from 'zod';
-            // Section: core
-            import dayjs from 'dayjs';
-            import lodash from 'lodash';
-          `,
-          code: dedent`
-            import z from 'zod';
-            import axios from 'axios';
-            // Section: core
-            import lodash from 'lodash';
-            import dayjs from 'dayjs';
-          `,
-          errors: [
-            { messageId: 'unexpectedImportsOrder' },
-            { messageId: 'unexpectedImportsOrder' },
-          ],
-        })
-      },
-    )
+    it('preserves comment partitions when newlinesInside is 0', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            partitionInsideGroup: 'preserve',
+            partitionByComment: 'Section:',
+            groups: ['external'],
+            newlinesBetween: 0,
+            newlinesInside: 0,
+          },
+        ],
+        output: dedent`
+          import axios from 'axios';
+          import z from 'zod';
+          // Section: core
+          import dayjs from 'dayjs';
+          import lodash from 'lodash';
+        `,
+        code: dedent`
+          import z from 'zod';
+          import axios from 'axios';
+          // Section: core
+          import lodash from 'lodash';
+          import dayjs from 'dayjs';
+        `,
+        errors: [
+          { messageId: 'unexpectedImportsOrder' },
+          { messageId: 'unexpectedImportsOrder' },
+        ],
+      })
+    })
 
     it('enforces newlines between groups with partitions', async () => {
       await invalid({

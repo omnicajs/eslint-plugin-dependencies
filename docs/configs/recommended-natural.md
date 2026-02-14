@@ -15,19 +15,31 @@ keywords:
   - natural sorting rules
   - natural sorting configuration
 ---
-Configuration for the `@omnicajs/eslint-plugin-dependencies` plugin, which provides all plugin rules with predefined options: natural sorting in ascending order.
 
-What is the difference between natural sorting and alphabetical sorting? Natural sort compares strings containing a mixture of letters and numbers, just as a human would do when sorting. For example: `item-1`, `item-2`, `item-10`.
+Configuration for the `@omnicajs/eslint-plugin-dependencies` plugin, which
+provides all plugin rules with predefined options: natural sorting in ascending
+order.
 
-Read more about [natural sort algorithm](https://en.wikipedia.org/wiki/Natural_sort_order).
+What is the difference between natural sorting and alphabetical sorting? Natural
+sort compares strings containing a mixture of letters and numbers, just as a
+human would do when sorting. For example: `item-1`, `item-2`, `item-10`.
 
-This configuration will allow you to navigate through your code faster because all the data that can be safely sorted will be in order.
+Read more about
+[natural sort algorithm](https://en.wikipedia.org/wiki/Natural_sort_order).
+
+This configuration will allow you to navigate through your code faster because
+all the data that can be safely sorted will be in order.
 
 ## When to Use
 
-Use the `recommended-natural` configuration if you want elements in your code to be sorted in a way that feels more intuitive to humans.
+Use the `recommended-natural` configuration if you want elements in your code to
+be sorted in a way that feels more intuitive to humans.
 
-This configuration is particularly useful for projects where an intuitive understanding of the order of elements is important, such as version files, task lists, or any other data sets that contain numerical values. Natural sorting makes your code more readable and easier to comprehend, especially in situations where numerical values play a key role.
+This configuration is particularly useful for projects where an intuitive
+understanding of the order of elements is important, such as version files, task
+lists, or any other data sets that contain numerical values. Natural sorting
+makes your code more readable and easier to comprehend, especially in situations
+where numerical values play a key role.
 
 ## Usage
 
@@ -37,9 +49,7 @@ This configuration is particularly useful for projects where an intuitive unders
 // eslint.config.js
 import dependencies from '@omnicajs/eslint-plugin-dependencies'
 
-export default [
-  dependencies.configs['recommended-natural'],
-]
+export default [dependencies.configs['recommended-natural']]
 ```
 
 ### Legacy Config
@@ -47,9 +57,6 @@ export default [
 ```tsx
 // .eslintrc.js
 module.exports = {
-  extends: [
-    'plugin:dependencies/recommended-natural-legacy',
-  ],
+  extends: ['plugin:dependencies/recommended-natural-legacy'],
 }
 ```
-

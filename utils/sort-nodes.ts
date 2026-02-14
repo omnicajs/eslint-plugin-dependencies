@@ -24,10 +24,9 @@ interface SortNodesParameters<
 /**
  * Core sorting function that performs the actual node sorting.
  *
- * This is the fundamental sorting engine of the Dependencies plugin. It
- * handles the actual comparison and ordering of nodes while preserving the
- * positions of ignored elements. The function separates nodes into two
- * categories:
+ * This is the fundamental sorting engine of the Dependencies plugin. It handles
+ * the actual comparison and ordering of nodes while preserving the positions of
+ * ignored elements. The function separates nodes into two categories:
  *
  * 1. Nodes to be sorted (non-ignored)
  * 2. Nodes to keep in place (ignored or ESLint-disabled).

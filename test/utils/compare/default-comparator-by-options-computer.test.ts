@@ -19,10 +19,7 @@ describe('default-comparator-by-options-computer', () => {
     })
 
     expect(
-      comparator(
-        { name: 'b' } as SortingNode,
-        { name: 'a' } as SortingNode,
-      ),
+      comparator({ name: 'b' } as SortingNode, { name: 'a' } as SortingNode),
     ).toBe(0)
   })
 })

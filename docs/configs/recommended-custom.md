@@ -12,26 +12,36 @@ keywords:
   - custom sorting
   - @omnicajs/eslint-plugin-dependencies
 ---
-Configuration for the `@omnicajs/eslint-plugin-dependencies` plugin, which provides all plugin rules with your predefined custom ordered alphabet.
 
-This configuration allows you to define your own custom order for sorting elements in your codebase as you desire.
+Configuration for the `@omnicajs/eslint-plugin-dependencies` plugin, which
+provides all plugin rules with your predefined custom ordered alphabet.
+
+This configuration allows you to define your own custom order for sorting
+elements in your codebase as you desire.
 
 ## When to Use
 
-Each rule in `@omnicajs/eslint-plugin-dependencies` offers many options that should suit most use cases.
+Each rule in `@omnicajs/eslint-plugin-dependencies` offers many options that
+should suit most use cases.
 
-If this is not enough, you may define your own alphabet and use the `recommended-custom` configuration to enforce a consistent custom order across various data structures in your codebase.
+If this is not enough, you may define your own alphabet and use the
+`recommended-custom` configuration to enforce a consistent custom order across
+various data structures in your codebase.
 
-Use this configuration to precisely tune how elements should be sorted while keeping readability and maintainability at their highest levels.
+Use this configuration to precisely tune how elements should be sorted while
+keeping readability and maintainability at their highest levels.
 
 ## Usage
 
-You must provide an `alphabet` option in the `dependencies` settings object or for each rule individually.
-This option should be a string that represents an ordered alphabet.
+You must provide an `alphabet` option in the `dependencies` settings object or
+for each rule individually. This option should be a string that represents an
+ordered alphabet.
 
 Example: `01234564789abcdef...`
 
-Use the `Alphabet` utility class from `@omnicajs/eslint-plugin-dependencies/alphabet` to quickly generate a custom alphabet.
+Use the `Alphabet` utility class from
+`@omnicajs/eslint-plugin-dependencies/alphabet` to quickly generate a custom
+alphabet.
 
 ### Flat Config
 
@@ -39,22 +49,21 @@ Use the `Alphabet` utility class from `@omnicajs/eslint-plugin-dependencies/alph
 // eslint.config.js
 import { Alphabet } from '@omnicajs/eslint-plugin-dependencies/alphabet'
 import dependencies from '@omnicajs/eslint-plugin-dependencies'
-import naturalCompare from 'natural-compare-lite';
+import naturalCompare from 'natural-compare-lite'
 
-const myCustomAlphabet = Alphabet
-  .generateRecommendedAlphabet()
+const myCustomAlphabet = Alphabet.generateRecommendedAlphabet()
   .sortingBy((a, b) => naturalCompare(a, b))
-  .getCharacters();
+  .getCharacters()
 
 export default [
   {
     ...dependencies.configs['recommended-custom'],
     settings: {
       dependencies: {
-          alphabet: myCustomAlphabet
-      }
-    }
-  }
+        alphabet: myCustomAlphabet,
+      },
+    },
+  },
 ]
 ```
 
@@ -64,39 +73,41 @@ export default [
 // .eslintrc.js
 import { Alphabet } from '@omnicajs/eslint-plugin-dependencies/alphabet'
 import dependencies from '@omnicajs/eslint-plugin-dependencies'
-import naturalCompare from 'natural-compare-lite';
+import naturalCompare from 'natural-compare-lite'
 
-const myCustomAlphabet = Alphabet
-  .generateRecommendedAlphabet()
+const myCustomAlphabet = Alphabet.generateRecommendedAlphabet()
   .sortingBy((a, b) => naturalCompare(a, b))
-  .getCharacters();
+  .getCharacters()
 
 module.exports = {
-  extends: [
-    'plugin:dependencies/recommended-custom-legacy',
-  ],
+  extends: ['plugin:dependencies/recommended-custom-legacy'],
   settings: {
     dependencies: {
-        alphabet: myCustomAlphabet
-    }
-  }
+      alphabet: myCustomAlphabet,
+    },
+  },
 }
 ```
 
 ## Alphabet class
 
-The `Alphabet` class from `@omnicajs/eslint-plugin-dependencies/alphabet` provides a set of methods to generate and manipulate alphabets.
+The `Alphabet` class from `@omnicajs/eslint-plugin-dependencies/alphabet`
+provides a set of methods to generate and manipulate alphabets.
 
 ### Static generators
 
 #### - `static generateCompleteAlphabet(): Alphabet`
 
-Generates an alphabet containing all characters from the Unicode standard except for irrelevant [Unicode planes](https://en.wikipedia.org/wiki/Plane_(Unicode)).
-Contains the Unicode planes 0, 1, 2 and 3.
+Generates an alphabet containing all characters from the Unicode standard except
+for irrelevant
+[Unicode planes](<https://en.wikipedia.org/wiki/Plane_(Unicode)>). Contains the
+Unicode planes 0, 1, 2 and 3.
 
 #### - `static generateRecommendedAlphabet(): Alphabet`
 
-Generates an alphabet containing relevant characters from the Unicode standard. Contains the [Unicode planes](https://en.wikipedia.org/wiki/Plane_(Unicode)) 0 and 1.
+Generates an alphabet containing relevant characters from the Unicode standard.
+Contains the [Unicode planes](<https://en.wikipedia.org/wiki/Plane_(Unicode)>) 0
+and 1.
 
 #### - `static generateFrom(values: string[] | string): Alphabet`
 
@@ -124,7 +135,8 @@ Sorts the alphabet by the locale order of the characters.
 
 #### - `sortByNaturalSort(locale?: string): this`
 
-Sorts the alphabet by the natural order of the characters using [natural-orderby](https://github.com/yobacca/natural-orderby).
+Sorts the alphabet by the natural order of the characters using
+[natural-orderby](https://github.com/yobacca/natural-orderby).
 
 #### - `sortByCharCodeAt(): this`
 
@@ -142,31 +154,35 @@ Reverses the alphabet.
 
 #### - `prioritizeCase(casePriority: 'lowercase' | 'uppercase'): this`
 
-For each character with a lower and upper case, permutes the two cases so that the alphabet is ordered by the case priority entered.
+For each character with a lower and upper case, permutes the two cases so that
+the alphabet is ordered by the case priority entered.
 
 ```ts
-Alphabet.generateFrom('aAbBcdCD')
-.prioritizeCase('uppercase')
+Alphabet.generateFrom('aAbBcdCD').prioritizeCase('uppercase')
 // Returns 'AaBbCDcd'
-````
+```
 
 #### - `placeAllWithCaseBeforeAllWithOtherCase(caseToComeFirst: 'uppercase' | 'lowercase'): this`
 
-Permutes characters with cases so that all characters with the entered case are put before the other characters.
+Permutes characters with cases so that all characters with the entered case are
+put before the other characters.
 
 ```ts
-Alphabet.generateFrom('aAbBcCdD')
-.placeAllWithCaseBeforeAllWithOtherCase('lowercase')
+Alphabet.generateFrom('aAbBcCdD').placeAllWithCaseBeforeAllWithOtherCase(
+  'lowercase',
+)
 // Returns 'abcdABCD'
-````
+```
 
 #### - `placeCharacterBefore({ characterBefore: string; characterAfter: string }): this`
 
 Places a specific character right before another character in the alphabet.
 
 ```ts
-Alphabet.generateFrom('ab-cd/')
-.placeCharacterBefore({ characterBefore: '/', characterAfter: '-' })
+Alphabet.generateFrom('ab-cd/').placeCharacterBefore({
+  characterBefore: '/',
+  characterAfter: '-',
+})
 // Returns 'ab/-cd'
 ```
 
@@ -175,8 +191,10 @@ Alphabet.generateFrom('ab-cd/')
 Places a specific character right after another character in the alphabet.
 
 ```ts
-Alphabet.generateFrom('ab-cd/')
-.placeCharacterAfter({ characterBefore: '/', characterAfter: '-' })
+Alphabet.generateFrom('ab-cd/').placeCharacterAfter({
+  characterBefore: '/',
+  characterAfter: '-',
+})
 // Returns 'abcd/-'
 ```
 

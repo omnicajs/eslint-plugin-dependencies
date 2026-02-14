@@ -49,7 +49,7 @@ and mark each item explicitly:
 - [ ] I added a minimal snapshot under `vendor/<source-repo>/...`.
 - [ ] I copied required license text files into the same `vendor/...` subtree.
 - [ ] I updated `vendor/manifest.json` with repository, commit, files, and
-  license metadata.
+      license metadata.
 - [ ] I verified license compatibility against this contributing guide.
 
 ## Fork Manifesto
@@ -93,11 +93,9 @@ Use this template:
 
 ```ts
 /**
- * Borrowed/adapted from: <org-or-author>/<repo>
- * Source: <repository-url>
- * Commit: <full-commit-hash>
- * License: <SPDX-id>
- * Local changes: <short description>
+ * Borrowed/adapted from: <org-or-author>/<repo> Source: <repository-url>
+ * Commit: <full-commit-hash> License: <SPDX-id> Local changes: <short
+ * description>
  */
 ```
 

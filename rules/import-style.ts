@@ -42,8 +42,7 @@ export default createEslintRule<Options, MessageId>({
       let defaultSpecifier = node.specifiers.find(
         specifier => specifier.type === AST_NODE_TYPES.ImportDefaultSpecifier,
       )
-      let totalSpecifiers =
-        namedSpecifiers.length + (defaultSpecifier ? 1 : 0)
+      let totalSpecifiers = namedSpecifiers.length + (defaultSpecifier ? 1 : 0)
 
       let sourceText = sourceCode.getText(node.source)
       let suffixText = sourceCode.text.slice(
@@ -58,7 +57,8 @@ export default createEslintRule<Options, MessageId>({
       )
 
       let singleLineImportText = buildImportDeclarationText({
-        defaultText: defaultSpecifier ? sourceCode.getText(defaultSpecifier) : null,
+        defaultText:
+          defaultSpecifier ? sourceCode.getText(defaultSpecifier) : null,
         singleLineSpacing: options.singleLineSpacing,
         namedText: singleLineNamedText,
         importKind,
@@ -81,7 +81,8 @@ export default createEslintRule<Options, MessageId>({
       })
       let hasTrailingComma = hasTrailingCommaInNamedBlock(node, sourceCode)
       let multiLineImportText = buildMultiLineImportText({
-        defaultText: defaultSpecifier ? sourceCode.getText(defaultSpecifier) : null,
+        defaultText:
+          defaultSpecifier ? sourceCode.getText(defaultSpecifier) : null,
         specifierIndentation,
         hasTrailingComma,
         namedSpecifiers,
@@ -92,9 +93,8 @@ export default createEslintRule<Options, MessageId>({
         sourceText,
       })
 
-      let expectedText = shouldUseSingleLine
-        ? singleLineImportText
-        : multiLineImportText
+      let expectedText =
+        shouldUseSingleLine ? singleLineImportText : multiLineImportText
 
       let currentText = sourceCode.getText(node)
       if (currentText === expectedText) {
@@ -122,14 +122,15 @@ export default createEslintRule<Options, MessageId>({
               'Controls whether multi-line imports are collapsed into single lines.',
             type: 'boolean',
           },
+          singleLineSpacing: {
+            description:
+              'Controls spacing inside braces for single-line imports.',
+            type: 'boolean',
+          },
           maxSingleLineLength: {
             description:
               'Maximum line length allowed for a single-line import.',
             type: 'number',
-          },
-          singleLineSpacing: {
-            description: 'Controls spacing inside braces for single-line imports.',
-            type: 'boolean',
           },
         },
         additionalProperties: false,
@@ -179,9 +180,8 @@ function buildMultiLineImportText({
   sourceText: string
 }): string {
   let importKeyword = importKind === 'type' ? 'import type' : 'import'
-  let importStart = defaultText
-    ? `${importKeyword} ${defaultText}, {`
-    : `${importKeyword} {`
+  let importStart =
+    defaultText ? `${importKeyword} ${defaultText}, {` : `${importKeyword} {`
 
   let lines = [importStart]
   for (let [index, specifier] of namedSpecifiers.entries()) {

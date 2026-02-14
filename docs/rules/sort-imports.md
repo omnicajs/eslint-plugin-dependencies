@@ -1,6 +1,9 @@
 ---
 title: sort-imports
-description: Maintain a consistent and sorted order of imports for improved code readability and organization. This ESLint rule helps manage import statements effectively
+description:
+  Maintain a consistent and sorted order of imports for improved code
+  readability and organization. This ESLint rule helps manage import statements
+  effectively
 shortDescription: Enforce sorted imports
 keywords:
   - eslint
@@ -12,31 +15,49 @@ keywords:
   - imports sorting
   - import order
 ---
+
 Enforce sorted imports.
 
-Maintaining a consistent and sorted order of imports is crucial for improving code readability and organization.
+Maintaining a consistent and sorted order of imports is crucial for improving
+code readability and organization.
 
-This rule ensures that imports are easily locatable and quickly scannable, especially in modules with numerous import statements.
+This rule ensures that imports are easily locatable and quickly scannable,
+especially in modules with numerous import statements.
 
-By reducing the likelihood of errors caused by import conflicts and providing a clear structure, this rule helps developers manage imports efficiently and maintain a tidy codebase.
+By reducing the likelihood of errors caused by import conflicts and providing a
+clear structure, this rule helps developers manage imports efficiently and
+maintain a tidy codebase.
 
 > **Important**
 >
-> If you use the [`sort-imports`](https://eslint.org/docs/latest/rules/sort-imports) rule or the [`order`](https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/order.md) rule from the [`eslint-plugin-import`](https://github.com/import-js/eslint-plugin-import) plugin, it is highly recommended to [disable them](https://eslint.org/docs/latest/use/configure/rules#using-configuration-files-1) to avoid conflicts.
+> If you use the
+> [`sort-imports`](https://eslint.org/docs/latest/rules/sort-imports) rule or
+> the
+> [`order`](https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/order.md)
+> rule from the
+> [`eslint-plugin-import`](https://github.com/import-js/eslint-plugin-import)
+> plugin, it is highly recommended to
+> [disable them](https://eslint.org/docs/latest/use/configure/rules#using-configuration-files-1)
+> to avoid conflicts.
 >
-> If you use the [`prettier-plugin-sort-imports`](https://github.com/trivago/prettier-plugin-sort-imports) plugin, remove them from the prettier config to avoid conflicts.
+> If you use the
+> [`prettier-plugin-sort-imports`](https://github.com/trivago/prettier-plugin-sort-imports)
+> plugin, remove them from the prettier config to avoid conflicts.
 
-Rule `dependencies/sort-imports` works in a similar way to rule `import/order`, but with some differences:
+Rule `dependencies/sort-imports` works in a similar way to rule `import/order`,
+but with some differences:
 
 1. Supporting for new import types:
-  - `'side-effect'`
-  - `'style'`
-  - `'type-builtin'`
-  - `'type-import'`
-  - `'type-internal'`
-  - `'type-parent'`
-  - `'type-sibling'`
-  - `'type-index'`
+
+- `'side-effect'`
+- `'style'`
+- `'type-builtin'`
+- `'type-import'`
+- `'type-internal'`
+- `'type-parent'`
+- `'type-sibling'`
+- `'type-index'`
+
 2. Supporting for adding custom import groups
 3. Sorting not only alphabetically, but also naturally and by line length
 
@@ -64,6 +85,7 @@ import session from 'express-session'
 import fs from 'node:fs/promises'
 import authRoutes from '~/routes/auth'
 ```
+
 ### After (Alphabetical)
 
 ```tsx
@@ -86,6 +108,7 @@ import authRoutes from '~/routes/auth'
 
 import dbConfig from './db'
 ```
+
 ### After (Line Length)
 
 ```tsx
@@ -119,11 +142,16 @@ This rule accepts an options object with the following properties:
 
 Specifies the sorting method.
 
-- `'alphabetical'` — Sort items alphabetically (e.g., “a” < “b” < “c”) using [localeCompare](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare).
-- `'natural'` — Sort items in a [natural](https://github.com/yobacca/natural-orderby) order (e.g., “item2” < “item10”).
+- `'alphabetical'` — Sort items alphabetically (e.g., “a” < “b” < “c”) using
+  [localeCompare](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare).
+- `'natural'` — Sort items in a
+  [natural](https://github.com/yobacca/natural-orderby) order (e.g., “item2” <
+  “item10”).
 - `'line-length'` — Sort items by code line length (shorter lines first).
-- `'custom'` — Sort items using the alphabet specified in the [`alphabet`](#alphabet) option.
-- `'unsorted'` — Do not sort items. [`grouping`](#groups) and [`newlines behavior`](#newlinesbetween) are still enforced.
+- `'custom'` — Sort items using the alphabet specified in the
+  [`alphabet`](#alphabet) option.
+- `'unsorted'` — Do not sort items. [`grouping`](#groups) and
+  [`newlines behavior`](#newlinesbetween) are still enforced.
 
 ### order
 
@@ -154,9 +182,11 @@ Specifies whether to sort items in ascending or descending order.
 </sub>
 <sub>default: `{ type: 'unsorted' }`</sub>
 
-Specifies fallback sort options for elements that are equal according to the primary sort [`type`](#type).
+Specifies fallback sort options for elements that are equal according to the
+primary sort [`type`](#type).
 
 Example: enforce alphabetical sort between two elements with the same length.
+
 ```ts
 {
   type: 'line-length',
@@ -165,10 +195,11 @@ Example: enforce alphabetical sort between two elements with the same length.
 }
 ```
 
-When importing a type and value import from the same module, you can enforce the order between them using the
-`type-import-first` option.
+When importing a type and value import from the same module, you can enforce the
+order between them using the `type-import-first` option.
 
 Example:
+
 ```ts
 {
   type: 'alphabetical',
@@ -177,9 +208,12 @@ Example:
 }
 ```
 
-You can also sort by subgroup order (nested groups in the [`groups`](#groups) option) using `subgroup-order`.
+You can also sort by subgroup order (nested groups in the [`groups`](#groups)
+option) using `subgroup-order`.
 
-Example: When two imports tie on the primary sort key, sort type imports before value imports inside a subgroup.
+Example: When two imports tie on the primary sort key, sort type imports before
+value imports inside a subgroup.
+
 ```ts
 {
   groups: [['type-import', 'value-import']],
@@ -193,9 +227,12 @@ Example: When two imports tie on the primary sort key, sort type imports before 
 
 <sub>default: `''`</sub>
 
-Used only when the [`type`](#type) option is set to `'custom'`. Specifies the custom alphabet for sorting.
+Used only when the [`type`](#type) option is set to `'custom'`. Specifies the
+custom alphabet for sorting.
 
-Use the `Alphabet` utility class from `@omnicajs/eslint-plugin-dependencies/alphabet` to quickly generate a custom alphabet.
+Use the `Alphabet` utility class from
+`@omnicajs/eslint-plugin-dependencies/alphabet` to quickly generate a custom
+alphabet.
 
 #### Example: Sort subpaths before hyphenated packages
 
@@ -204,17 +241,17 @@ Use the following alphabet to sort subpaths before hyphenated packages.
 ```ts
 const alphabet = Alphabet.generateRecommendedAlphabet()
   .sortByNaturalSort()
-  .placeCharacterBefore({ characterBefore: "/", characterAfter: "-" })
-  .placeCharacterBefore({ characterBefore: ".", characterAfter: "/" })
-  .getCharacters();
+  .placeCharacterBefore({ characterBefore: '/', characterAfter: '-' })
+  .placeCharacterBefore({ characterBefore: '.', characterAfter: '/' })
+  .getCharacters()
 ```
 
 Result:
 
 ```ts
-import { Linter } from "eslint";
-import { globalIgnores } from "eslint/config";
-import { FlatConfigComposer } from "eslint-flat-config-utils";
+import { Linter } from 'eslint'
+import { globalIgnores } from 'eslint/config'
+import { FlatConfigComposer } from 'eslint-flat-config-utils'
 ```
 
 ### ignoreCase
@@ -223,7 +260,8 @@ import { FlatConfigComposer } from "eslint-flat-config-utils";
 
 Specifies whether sorting should be case-sensitive.
 
-- `true` — Ignore case when sorting alphabetically or naturally (e.g., “A” and “a” are the same).
+- `true` — Ignore case when sorting alphabetically or naturally (e.g., “A” and
+  “a” are the same).
 - `false` — Consider case when sorting (e.g., “a” comes before “A”).
 
 ### specialCharacters
@@ -232,15 +270,19 @@ Specifies whether sorting should be case-sensitive.
 
 Specifies whether to trim, remove, or keep special characters before sorting.
 
-- `'keep'` — Keep special characters when sorting (e.g., “_a” comes before “a”).
-- `'trim'` — Trim special characters when sorting alphabetically or naturally (e.g., “_a” and “a” are the same).
-- `'remove'` — Remove special characters when sorting (e.g., “/a/b” and “ab” are the same).
+- `'keep'` — Keep special characters when sorting (e.g., “\_a” comes before
+  “a”).
+- `'trim'` — Trim special characters when sorting alphabetically or naturally
+  (e.g., “\_a” and “a” are the same).
+- `'remove'` — Remove special characters when sorting (e.g., “/a/b” and “ab” are
+  the same).
 
 ### locales
 
 <sub>default: `'en-US'`</sub>
 
-Specifies the sorting locales. Refer To [String.prototype.localeCompare() - locales](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare#locales).
+Specifies the sorting locales. Refer To
+[String.prototype.localeCompare() - locales](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare#locales).
 
 - `string` — A BCP 47 language tag (e.g. `'en'`, `'en-US'`, `'zh-CN'`).
 - `string[]` — An array of BCP 47 language tags.
@@ -249,7 +291,8 @@ Specifies the sorting locales. Refer To [String.prototype.localeCompare() - loca
 
 <sub>default: `'path'`</sub>
 
-Controls whether sorting should be done using the import's path or first specifier.
+Controls whether sorting should be done using the import's path or first
+specifier.
 
 - `'path'` — Use the import's path.
 - `'specifier'` — Use the import's first specifier if it exists.
@@ -258,7 +301,8 @@ Controls whether sorting should be done using the import's path or first specifi
 
 <sub>default: `['^~/.+', '^@/.+']`</sub>
 
-Specifies a pattern for identifying internal imports. This is useful for distinguishing your own modules from external dependencies.
+Specifies a pattern for identifying internal imports. This is useful for
+distinguishing your own modules from external dependencies.
 
 You can use regexp patterns to define these internal imports.
 
@@ -266,7 +310,8 @@ You can use regexp patterns to define these internal imports.
 
 <sub>default: `false`</sub>
 
-Specifies whether side effect imports should be sorted. By default, sorting side-effect imports is disabled for security reasons.
+Specifies whether side effect imports should be sorted. By default, sorting
+side-effect imports is disabled for security reasons.
 
 - `true` — Sort side effect imports.
 - `false` — Do not sort side effect imports.
@@ -279,15 +324,20 @@ Enables the use of comments to separate imports into logical groups.
 
 - `true` — All comments will be treated as delimiters, creating partitions.
 - `false` — Comments will not be used as delimiters.
-- `RegExpPattern = string | { pattern: string; flags: string}` — A regexp pattern to specify which comments should act as delimiters.
-- `RegExpPattern[]` — A list of regexp patterns to specify which comments should act as delimiters.
-- `{ block: boolean | RegExpPattern | RegExpPattern[]; line: boolean | RegExpPattern | RegExpPattern[] }` — Specify which block and line comments should act as delimiters.
+- `RegExpPattern = string | { pattern: string; flags: string}` — A regexp
+  pattern to specify which comments should act as delimiters.
+- `RegExpPattern[]` — A list of regexp patterns to specify which comments should
+  act as delimiters.
+- `{ block: boolean | RegExpPattern | RegExpPattern[]; line: boolean | RegExpPattern | RegExpPattern[] }`
+  — Specify which block and line comments should act as delimiters.
 
 ### partitionByNewLine
 
 <sub>default: `false`</sub>
 
-When `true`, empty lines inside a group define partitions that are sorted independently. Partition boundaries are never crossed when `partitionInsideGroup` is set to `'preserve'`.
+When `true`, empty lines inside a group define partitions that are sorted
+independently. Partition boundaries are never crossed when
+`partitionInsideGroup` is set to `'preserve'`.
 
 ```ts
 import { b1, b2 } from 'b'
@@ -309,10 +359,11 @@ Specifies how to handle newlines between groups.
 - `0` — No newlines are allowed.
 - Any other number — Enforce this number of newlines between each group.
 
-This option controls spacing between groups only. It does not change partition boundaries.
+This option controls spacing between groups only. It does not change partition
+boundaries.
 
-You can also enforce the newline behavior between two specific groups through the [`groups`](#newlines-between-groups)
-option.
+You can also enforce the newline behavior between two specific groups through
+the [`groups`](#newlines-between-groups) option.
 
 ### newlinesInside
 
@@ -325,12 +376,15 @@ Specifies how to handle newlines inside groups.
 
 - `'ignore'` — Do not report errors related to newlines.
 - `0` — No newlines are allowed.
-- Any other number — Enforce this number of newlines between partitions inside the same group.
+- Any other number — Enforce this number of newlines between partitions inside
+  the same group.
 
-You can also enforce the newline behavior inside a given group through the [`groups`](#group-with-overridden-settings)
-or [`customGroups`](#customgroups) options.
+You can also enforce the newline behavior inside a given group through the
+[`groups`](#group-with-overridden-settings) or [`customGroups`](#customgroups)
+options.
 
-This option controls spacing between partitions inside a group only. It does not change partition boundaries.
+This option controls spacing between partitions inside a group only. It does not
+change partition boundaries.
 
 ### partitionInsideGroup
 
@@ -345,8 +399,8 @@ Controls whether partitions are preserved or merged inside a group.
 
 <sub>default: `Infinity`</sub>
 
-Splits each partition into chunks of at most `N` imports after partitions are formed. This applies when
-`partitionInsideGroup` is `'preserve'`.
+Splits each partition into chunks of at most `N` imports after partitions are
+formed. This applies when `partitionInsideGroup` is `'preserve'`.
 
 #### Partition examples
 
@@ -446,7 +500,9 @@ import e from 'e'
 
 <sub>default: `Infinity`</sub>
 
-Specifies a maximum line length for sorting imports. When the line length exceeds this number, sorting will be based only on the import name, excluding the elements.
+Specifies a maximum line length for sorting imports. When the line length
+exceeds this number, sorting will be based only on the import name, excluding
+the elements.
 
 This option is only available when the type is set to `'line-length'`.
 
@@ -457,10 +513,14 @@ This option is only available when the type is set to `'line-length'`.
 </sub>
 <sub>default: `{ rootDir: '' }`</sub>
 
-- `rootDir` — Specifies the directory of the root `tsconfig.json` file (ex: `.`). This is used in [`groups`](#groups) for:
+- `rootDir` — Specifies the directory of the root `tsconfig.json` file (ex:
+  `.`). This is used in [`groups`](#groups) for:
   - Marking aliased imports as `internal`.
-  - Marking imports matching [tsconfig paths](https://www.typescriptlang.org/tsconfig/#paths) as `tsconfig-path`.
-- `filename` — Specifies the `tsconfig` filename to search for (by default: `tsconfig.json`).
+  - Marking imports matching
+    [tsconfig paths](https://www.typescriptlang.org/tsconfig/#paths) as
+    `tsconfig-path`.
+- `filename` — Specifies the `tsconfig` filename to search for (by default:
+  `tsconfig.json`).
 
 If `rootDir` is empty, the rule will not search for a `tsconfig.json` file.
 
@@ -500,17 +560,23 @@ If `rootDir` is empty, the rule will not search for a `tsconfig.json` file.
   ```
 </sub>
 
-Specifies a list of import groups for sorting. Groups help organize imports into meaningful categories, making your code more readable and maintainable.
+Specifies a list of import groups for sorting. Groups help organize imports into
+meaningful categories, making your code more readable and maintainable.
 
-Each import will be assigned a single group specified in the `groups` option (or the `unknown` group if no match is found).
-The order of items in the `groups` option determines how groups are ordered.
+Each import will be assigned a single group specified in the `groups` option (or
+the `unknown` group if no match is found). The order of items in the `groups`
+option determines how groups are ordered.
 
-Within a given group, members will be sorted according to the `type`, `order`, `ignoreCase`, etc. options.
+Within a given group, members will be sorted according to the `type`, `order`,
+`ignoreCase`, etc. options.
 
-Individual groups can be combined together by placing them in an array. The order of groups in that array does not matter.
-All members of the groups in the array will be sorted together as if they were part of a single group.
+Individual groups can be combined together by placing them in an array. The
+order of groups in that array does not matter. All members of the groups in the
+array will be sorted together as if they were part of a single group.
 
-Predefined groups are characterized by a single selector and potentially multiple modifiers. You may enter modifiers in any order, but the selector must always come at the end.
+Predefined groups are characterized by a single selector and potentially
+multiple modifiers. You may enter modifiers in any order, but the selector must
+always come at the end.
 
 #### Selectors
 
@@ -520,11 +586,15 @@ The list of selectors is sorted from most to least important:
 - `'side-effect-style'` — Side effect style imports.
 - `'side-effect'` — Side effect imports.
 - `'style'` — Styles.
-- `'tsconfig-path'` — `tsconfig` [paths](https://www.typescriptlang.org/tsconfig/#paths) alias imports. Requires [`tsconfig.rootDir`](#tsconfig) to be set.
+- `'tsconfig-path'` — `tsconfig`
+  [paths](https://www.typescriptlang.org/tsconfig/#paths) alias imports.
+  Requires [`tsconfig.rootDir`](#tsconfig) to be set.
 - `'index'` — Main file from the current directory.
 - `'sibling'` — Modules from the same directory.
 - `'parent'` — Modules from the parent directory.
-- `'subpath'` — Node.js [subpath](https://nodejs.org/api/packages.html#packages_subpath_imports) imports.
+- `'subpath'` — Node.js
+  [subpath](https://nodejs.org/api/packages.html#packages_subpath_imports)
+  imports.
 - `'internal'` — Your internal modules.
 - `'builtin'` — Node.js Built-in Modules.
 - `'external'` — External modules installed in the project.
@@ -549,17 +619,22 @@ The list of modifiers is sorted from most to least important:
 
 ##### The `unknown` group
 
-Members that don’t fit into any group specified in the `groups` option will be placed in the `unknown` group. If the `unknown` group is not specified in the `groups` option,
-the members will remain in their original order.
+Members that don’t fit into any group specified in the `groups` option will be
+placed in the `unknown` group. If the `unknown` group is not specified in the
+`groups` option, the members will remain in their original order.
 
 ##### Behavior when multiple groups match an element
 
-The lists of selectors and modifiers above are both sorted by importance, from most to least important.
-In case of multiple groups matching an element, the following rules will be applied:
+The lists of selectors and modifiers above are both sorted by importance, from
+most to least important. In case of multiple groups matching an element, the
+following rules will be applied:
 
-1. Selector priority: `type`, `index`, ... will take precedence over `external` groups for example.
-2. If the selector is the same, the group with the most modifiers matching will be selected.
-3. If modifiers quantity is the same, order will be chosen based on modifier importance as listed above.
+1. Selector priority: `type`, `index`, ... will take precedence over `external`
+   groups for example.
+2. If the selector is the same, the group with the most modifiers matching will
+   be selected.
+3. If modifiers quantity is the same, order will be chosen based on modifier
+   importance as listed above.
 
 Example 1:
 
@@ -568,6 +643,7 @@ import type { FC } from 'react'
 ```
 
 `react` can be matched by the following groups, from most to least important:
+
 - `named-type` (`type` selector).
 - `type`.
 - `named-type-external` or `type-named-external` (`type` modifier).
@@ -585,13 +661,14 @@ Example 2:
 import 'style.scss'
 ```
 
-`style.scss` can be matched by the following relevant groups, from most to least important:
+`style.scss` can be matched by the following relevant groups, from most to least
+important:
 
 - `side-effect-style` (`side-effect-style` selector).
 - `side-effect`.
 - `value-style`.
 - `style`.
-- `side-effect-import`.  (`side-effect` modifier)
+- `side-effect-import`. (`side-effect` modifier)
 - `value-import`.
 - `import`.
 
@@ -636,18 +713,23 @@ import NotFoundError = ErrorsNamespace.NotFoundError
 
 #### Group with overridden settings
 
-You may directly override options for a specific group by using an object with the `group` property and other option overrides.
+You may directly override options for a specific group by using an object with
+the `group` property and other option overrides.
 
 - `type` — Overrides the [`type`](#type) option for that group.
 - `order` — Overrides the [`order`](#order) option for that group.
-- `fallbackSort` — Overrides the [`fallbackSort`](#fallbacksort) option for that group.
-- `newlinesInside` — Overrides the [`newlinesInside`](#newlinesinside) option for that group.
-- `commentAbove` — Enforces the presence of a comment containing the content of `commentAbove` above the top element of the group.
-  - An error will be raised if no comment containing the content of `commentAbove` is found above the top element of the
+- `fallbackSort` — Overrides the [`fallbackSort`](#fallbacksort) option for that
   group.
-  - Auto-fixing will add a comment containing the content of `commentAbove` above the top element of the group.
-  - Auto-fixing will also remove invalid auto-added comments (only comments existing in `commentAbove` objects are
-  considered as auto-removable).
+- `newlinesInside` — Overrides the [`newlinesInside`](#newlinesinside) option
+  for that group.
+- `commentAbove` — Enforces the presence of a comment containing the content of
+  `commentAbove` above the top element of the group.
+  - An error will be raised if no comment containing the content of
+    `commentAbove` is found above the top element of the group.
+  - Auto-fixing will add a comment containing the content of `commentAbove`
+    above the top element of the group.
+  - Auto-fixing will also remove invalid auto-added comments (only comments
+    existing in `commentAbove` objects are considered as auto-removable).
 
 ```ts
 {
@@ -661,7 +743,8 @@ You may directly override options for a specific group by using an object with t
 
 #### Newlines between groups
 
-You may place `newlinesBetween` objects between your groups to enforce the newline behavior between two specific groups.
+You may place `newlinesBetween` objects between your groups to enforce the
+newline behavior between two specific groups.
 
 See the [`newlinesBetween`](#newlinesbetween) option.
 
@@ -685,6 +768,7 @@ See the [`newlinesBetween`](#newlinesbetween) option.
 > Here is how to migrate from the old to the current API:
 >
 > Old API:
+>
 > ```ts
 > {
 >   value: {
@@ -699,26 +783,27 @@ See the [`newlinesBetween`](#newlinesbetween) option.
 > ```
 >
 > Current API:
+>
 > ```ts
-> [
+> ;[
 >   {
->     "selector": "type",
->     "groupName": "keyForType1",
->     "elementNamePattern": "value1"
+>     selector: 'type',
+>     groupName: 'keyForType1',
+>     elementNamePattern: 'value1',
 >   },
 >   {
->     "selector": "type",
->     "groupName": "keyForType2",
->     "elementNamePattern": "value2"
+>     selector: 'type',
+>     groupName: 'keyForType2',
+>     elementNamePattern: 'value2',
 >   },
 >   {
->     "groupName": "keyForValue1",
->     "elementNamePattern": "value1"
+>     groupName: 'keyForValue1',
+>     elementNamePattern: 'value1',
 >   },
 >   {
->     "groupName": "keyForValue2",
->     "elementNamePattern": "value2"
->   }
+>     groupName: 'keyForValue2',
+>     elementNamePattern: 'value2',
+>   },
 > ]
 > ```
 
@@ -731,7 +816,7 @@ You can define your own groups and use regex for matching very specific imports.
 
 A custom group definition may follow one of the two following interfaces:
 
-```ts
+````ts
 interface CustomGroupDefinition {
   groupName: string
   type?: 'alphabetical' | 'natural' | 'line-length' | 'unsorted'
@@ -760,28 +845,36 @@ interface CustomGroupAnyOfDefinition {
       elementNamePattern?: string | string[] | { pattern: string; flags?: string } | { pattern: string; flags?: string }[]
   }>
 }
-```
+````
 
-An import will match a `CustomGroupAnyOfDefinition` group if it matches all the filters of at least one of the `anyOf` items.
+An import will match a `CustomGroupAnyOfDefinition` group if it matches all the
+filters of at least one of the `anyOf` items.
 
 #### Attributes
 
-- `groupName` — The group's name, which needs to be put in the [`groups`](#groups) option.
+- `groupName` — The group's name, which needs to be put in the
+  [`groups`](#groups) option.
 - `selector` — Filter on the `selector` of the element.
-- `modifiers` — Filter on the `modifiers` of the element. (All the modifiers of the element must be present in that list)
-- `elementNamePattern` — If entered, will check that the name of the element matches the pattern entered.
+- `modifiers` — Filter on the `modifiers` of the element. (All the modifiers of
+  the element must be present in that list)
+- `elementNamePattern` — If entered, will check that the name of the element
+  matches the pattern entered.
 - `type` — Overrides the [`type`](#type) option for that custom group.
 - `order` — Overrides the [`order`](#order) option for that custom group.
-- `fallbackSort` — Overrides the [`fallbackSort`](#fallbacksort) option for that custom group.
-- `newlinesInside` — Overrides the [`newlinesInside`](#newlinesinside) option for that custom group.
+- `fallbackSort` — Overrides the [`fallbackSort`](#fallbacksort) option for that
+  custom group.
+- `newlinesInside` — Overrides the [`newlinesInside`](#newlinesinside) option
+  for that custom group.
 
 #### Match importance
 
-The `customGroups` list is ordered:
-The first custom group definition that matches an element will be used.
+The `customGroups` list is ordered: The first custom group definition that
+matches an element will be used.
 
-Custom groups have a higher priority than any predefined group. If you want a predefined group to take precedence over a custom group,
-you must write a custom group definition that does the same as what the predefined group does (using `selector` and `modifiers` filters), and put it first in the list.
+Custom groups have a higher priority than any predefined group. If you want a
+predefined group to take precedence over a custom group, you must write a custom
+group definition that does the same as what the predefined group does (using
+`selector` and `modifiers` filters), and put it first in the list.
 
 #### Example
 
@@ -815,13 +908,15 @@ you must write a custom group definition that does the same as what the predefin
 
 <sub>default: `'node'`</sub>
 
-Specifies which environment’s built-in modules should be recognized. If you are using [Bun](https://bun.sh), change the value to `'bun'`.
+Specifies which environment’s built-in modules should be recognized. If you are
+using [Bun](https://bun.sh), change the value to `'bun'`.
 
 ### useExperimentalDependencyDetection
 
 <sub>default: `true`</sub>
 
-Specifies whether to use a new experimental dependency detection logic, with reduced false positives.
+Specifies whether to use a new experimental dependency detection logic, with
+reduced false positives.
 
 - `true` — Use the new experimental dependency detection logic.
 - `false` — Use the legacy dependency detection logic.
@@ -880,9 +975,7 @@ export default [
 ```tsx
 // .eslintrc.js
 module.exports = {
-  plugins: [
-    'dependencies',
-  ],
+  plugins: ['dependencies'],
   rules: {
     'dependencies/sort-imports': [
       'error',

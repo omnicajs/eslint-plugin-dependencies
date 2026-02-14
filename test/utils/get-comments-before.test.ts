@@ -35,7 +35,9 @@ describe('get-comments-before', () => {
     } as TSESTree.Token
 
     let sourceCode = {
-      getTokenBefore: (target: TSESTree.Comment | TSESTree.Token | TSESTree.Node) => {
+      getTokenBefore: (
+        target: TSESTree.Comment | TSESTree.Token | TSESTree.Node,
+      ) => {
         if (target === node) {
           return tokenBeforeNode
         }

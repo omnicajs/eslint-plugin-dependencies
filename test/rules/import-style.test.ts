@@ -73,10 +73,7 @@ describe('import-style', () => {
 
           import { valueA } from './mod';
         `,
-        errors: [
-          { messageId: 'formatImport' },
-          { messageId: 'formatImport' },
-        ],
+        errors: [{ messageId: 'formatImport' }, { messageId: 'formatImport' }],
       })
     })
   })

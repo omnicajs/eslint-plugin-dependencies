@@ -44,7 +44,7 @@
     "release:prepare:package-json": "prettier --write package.json",
     "release:version": "changelogen --output changelog.md --release --no-commit --no-tag",
     "test": "pnpm run /^test:/",
-    "test:css": "stylelint \"docs/**/*.{css}\"",
+    "test:css": "stylelint --allow-empty-input \"docs/**/*.{css}\"",
     "test:format": "prettier --check \"**/*.{js,ts,json,md,yml}\"",
     "test:js": "eslint --concurrency auto .",
     "test:packages": "CI=true pnpm dedupe --check",

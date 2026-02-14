@@ -478,12 +478,15 @@ function sortImportNodes({
         ...node,
         partitionId: contentGroupIndex + 1,
       }))
-    let { partitionsInSortedOrder, partitionsInSourceOrder, partitionKeyByNode } =
-      buildPartitionGroups({
-        nodes: sortingNodes,
-        sourceCode,
-        options,
-      })
+    let {
+      partitionsInSortedOrder,
+      partitionsInSourceOrder,
+      partitionKeyByNode,
+    } = buildPartitionGroups({
+      nodes: sortingNodes,
+      sourceCode,
+      options,
+    })
 
     if (options.useExperimentalDependencyDetection) {
       let dependenciesBySortingNode = computeDependenciesBySortingNode({
@@ -530,8 +533,10 @@ function sortImportNodes({
       expandedSortingNodes.some(node => node.specifier)
 
     let partitionOrderInfo =
-      (usesSpecifierSorting || shouldSortPartitions(options)) &&
-      partitionsInSourceOrder.length > 0 ?
+      (
+        (usesSpecifierSorting || shouldSortPartitions(options)) &&
+        partitionsInSourceOrder.length > 0
+      ) ?
         buildPartitionOrderInfo({
           sortedPartitions: partitionsInSortedOrder,
           partitions: partitionsInSourceOrder,
@@ -552,13 +557,13 @@ function sortImportNodes({
       : null
 
     let partitionOrderFixes =
-      shouldSortPartitions(options) && partitionOrderInfo ? (
+      shouldSortPartitions(options) && partitionOrderInfo ?
         createPartitionOrderFixes({
           partitionSortingInfo: partitionOrderInfo,
           sourceCode,
           options,
         })
-      ) : undefined
+      : undefined
 
     let shouldPartitionNewlinesInside =
       options.partitionByNewLine ||
@@ -586,7 +591,8 @@ function sortImportNodes({
       }
 
       let leftGroupNode = usesSpecifierSorting ? left.parentSortingNode : left
-      let rightGroupNode = usesSpecifierSorting ? right.parentSortingNode : right
+      let rightGroupNode =
+        usesSpecifierSorting ? right.parentSortingNode : right
       let leftGroupIndex = getGroupIndex(options.groups, leftGroupNode)
       let rightGroupIndex = getGroupIndex(options.groups, rightGroupNode)
       if (leftGroupIndex !== rightGroupIndex) {
@@ -847,9 +853,7 @@ function buildPartitionGroups({
   }
 
   if (options.partitionInsideGroup === 'merge') {
-    let partitionKeyByNode = new Map(
-      nodes.map(node => [node, 0] as const),
-    )
+    let partitionKeyByNode = new Map(nodes.map(node => [node, 0] as const))
     return {
       partitionsInSortedOrder: [nodes],
       partitionsInSourceOrder: [nodes],
@@ -1269,8 +1273,8 @@ function createPartitionOrderFixes({
           sortedNodes,
           sourceCode,
           partition,
-              options,
-            })
+          options,
+        })
         let separator =
           index < separatorsBetween.length ?
             computeSeparatorBetweenPartitions({
@@ -1506,9 +1510,9 @@ function buildSortedPartitionTextWithSpecifiers({
     options.partitionInsideGroup !== 'merge' &&
     Boolean(
       options.partitionByNewLine ||
-        options.partitionByComment ||
-        (Number.isFinite(options.partitionMaxImports) &&
-          options.partitionMaxImports > 0),
+      options.partitionByComment ||
+      (Number.isFinite(options.partitionMaxImports) &&
+        options.partitionMaxImports > 0),
     )
 
   let outputNodes = buildOutputNodes(sortedNodes)

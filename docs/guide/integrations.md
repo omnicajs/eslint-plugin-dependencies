@@ -1,6 +1,9 @@
 ---
 title: Integrations
-description: Explore the integrations of our ESLint Plugin Dependencies with popular code editors and development tools. Seamlessly integrate our tool into your workflow to improve code quality and maintainability
+description:
+  Explore the integrations of our ESLint Plugin Dependencies with popular code
+  editors and development tools. Seamlessly integrate our tool into your
+  workflow to improve code quality and maintainability
 keywords:
   - eslint
   - eslint plugin
@@ -13,17 +16,22 @@ keywords:
   - vscode eslint
   - vim eslint
 ---
+
 # Integrations
 
-The best way to use ESLint Plugin Dependencies is to configure it to fix errors on save in your code editor. This ensures your code stays clean and organized automatically.
+The best way to use ESLint Plugin Dependencies is to configure it to fix errors
+on save in your code editor. This ensures your code stays clean and organized
+automatically.
 
 ## JetBrains IDE
 
-Open Settings (<kbd>⌘</kbd> + <kbd>,</kbd>), then select Languages & Frameworks / Code Quality Tools / ESLint. Check the box next to "Run eslint --fix on save".
+Open Settings (<kbd>⌘</kbd> + <kbd>,</kbd>), then select Languages & Frameworks
+/ Code Quality Tools / ESLint. Check the box next to "Run eslint --fix on save".
 
 ## Vim
 
-If you are using [ALE Vim plugin](https://github.com/dense-analysis/ale) add the following code to your `.vimrc`:
+If you are using [ALE Vim plugin](https://github.com/dense-analysis/ale) add the
+following code to your `.vimrc`:
 
 ```vim
 let g:ale_fix_on_save = 1
@@ -31,9 +39,11 @@ let g:ale_fix_on_save = 1
 
 ## Visual Studio Code
 
-If you are using [ESLint extension](https://github.com/Microsoft/vscode-eslint) for VS Code open your `settings.json` file:
+If you are using [ESLint extension](https://github.com/Microsoft/vscode-eslint)
+for VS Code open your `settings.json` file:
 
-Press <kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> and type "Open User Settings (JSON)".
+Press <kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> and type "Open User
+Settings (JSON)".
 
 Then add the following code to your `settings.json`:
 

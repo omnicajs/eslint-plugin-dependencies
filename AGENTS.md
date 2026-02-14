@@ -12,8 +12,8 @@
   explicitly ask for a change.
 - Treat a language switch in the user's message as an explicit request to
   respond in that language.
-- If a message is mixed-language, reply in the dominant language unless the
-  user specifies otherwise.
+- If a message is mixed-language, reply in the dominant language unless the user
+  specifies otherwise.
 
 ## Testing
 
@@ -31,8 +31,8 @@
 - On failure, stop and report the failing test and likely cause; do not
   auto-retry in a loop.
 - Keep coverage at 100% (global thresholds are strict).
-- Run tests immediately after making any changes (excluding *.md files) in the codebase; do not add
-  suggestions to run them.
+- Run tests immediately after making any changes (excluding \*.md files) in the
+  codebase; do not add suggestions to run them.
 - The maximum timeout for full test runs is 5 minutes.
 - If a full run exceeds the standard timeout, run specific tests instead. Use a
   1 minute timeout for narrowed runs.

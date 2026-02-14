@@ -32,8 +32,8 @@ export default createEslintRule<Options, MessageId>({
           let valueBlockText = buildBlockText(valueChunks, newline)
           let combinedText = `${typeBlockText}${newline}${newline}${valueBlockText}`
 
-          let {rangeStart} = (chunks[0]!)
-          let {rangeEnd} = (chunks.at(-1)!)
+          let { rangeStart } = chunks[0]!
+          let { rangeEnd } = chunks.at(-1)!
 
           context.report({
             fix: fixer =>
@@ -138,10 +138,12 @@ function getImportRangeEndWithInlineComment(
   node: TSESTree.ImportDeclaration,
   sourceCode: Readonly<{ text: string }>,
 ): number {
-  let [,end] = node.range
+  let [, end] = node.range
   let lineEnd = getLineEndIndex(sourceCode.text, end)
   let trailingText = sourceCode.text.slice(end, lineEnd)
-  let match = trailingText.match(/^[\t ]*(?:(?<temp1>\/\/.*)|\/\*.*\*\/[\t ]*)$/u)
+  let match = trailingText.match(
+    /^[\t ]*(?:(?<temp1>\/\/.*)|\/\*.*\*\/[\t ]*)$/u,
+  )
 
   if (!match) {
     return end

@@ -1,6 +1,8 @@
 ---
 title: sort-exports
-description: Enforce a consistent order of exports to enhance code readability and maintainability. Use this ESLint rule to keep your exports well-organized
+description:
+  Enforce a consistent order of exports to enhance code readability and
+  maintainability. Use this ESLint rule to keep your exports well-organized
 shortDescription: Enforce sorted exports
 keywords:
   - eslint
@@ -11,11 +13,15 @@ keywords:
   - javascript linting
   - module exports sorting
 ---
+
 Enforce sorted exports.
 
-Sorting exports in a consistent manner can greatly enhance the readability and maintainability of your codebase. By alphabetically ordering exports, developers can quickly identify and correct any missing or incorrect exports.
+Sorting exports in a consistent manner can greatly enhance the readability and
+maintainability of your codebase. By alphabetically ordering exports, developers
+can quickly identify and correct any missing or incorrect exports.
 
-This rule promotes a structured approach to exporting modules, which simplifies code management and improves the overall quality of the project.
+This rule promotes a structured approach to exporting modules, which simplifies
+code management and improves the overall quality of the project.
 
 ## Try it out
 
@@ -36,6 +42,7 @@ export { Header } from './components/Header'
 export { createUser } from './actions/createUser'
 export { parseQueryString } from './utils/parseQueryString'
 ```
+
 ### After (Alphabetical)
 
 ```tsx
@@ -53,6 +60,7 @@ export { formatDate } from './utils/format-date'
 export { generateUUID } from './utils/generate-uuid'
 export { parseQueryString } from './utils/parse-query-string'
 ```
+
 ### After (Line Length)
 
 ```tsx
@@ -81,11 +89,16 @@ This rule accepts an options object with the following properties:
 
 Specifies the sorting method.
 
-- `'alphabetical'` — Sort items alphabetically (e.g., “a” < “b” < “c”) using [localeCompare](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare).
-- `'natural'` — Sort items in a [natural](https://github.com/yobacca/natural-orderby) order (e.g., “item2” < “item10”).
+- `'alphabetical'` — Sort items alphabetically (e.g., “a” < “b” < “c”) using
+  [localeCompare](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare).
+- `'natural'` — Sort items in a
+  [natural](https://github.com/yobacca/natural-orderby) order (e.g., “item2” <
+  “item10”).
 - `'line-length'` — Sort items by code line length (shorter lines first).
-- `'custom'` — Sort items using the alphabet specified in the [`alphabet`](#alphabet) option.
-- `'unsorted'` — Do not sort items. [`grouping`](#groups) and [`newlines behavior`](#newlinesbetween) are still enforced.
+- `'custom'` — Sort items using the alphabet specified in the
+  [`alphabet`](#alphabet) option.
+- `'unsorted'` — Do not sort items. [`grouping`](#groups) and
+  [`newlines behavior`](#newlinesbetween) are still enforced.
 
 ### order
 
@@ -115,9 +128,11 @@ Specifies whether to sort items in ascending or descending order.
 </sub>
 <sub>default: `{ type: 'unsorted' }`</sub>
 
-Specifies fallback sort options for elements that are equal according to the primary sort [`type`](#type).
+Specifies fallback sort options for elements that are equal according to the
+primary sort [`type`](#type).
 
 Example: enforce alphabetical sort between two elements with the same length.
+
 ```ts
 {
   type: 'line-length',
@@ -126,9 +141,12 @@ Example: enforce alphabetical sort between two elements with the same length.
 }
 ```
 
-You can also sort by subgroup order (nested groups in the [`groups`](#groups) option) using `subgroup-order`.
+You can also sort by subgroup order (nested groups in the [`groups`](#groups)
+option) using `subgroup-order`.
 
-Example: When two exports tie on the primary sort key, sort type exports before value exports inside a subgroup.
+Example: When two exports tie on the primary sort key, sort type exports before
+value exports inside a subgroup.
+
 ```ts
 {
   groups: [['type-export', 'value-export']],
@@ -142,9 +160,12 @@ Example: When two exports tie on the primary sort key, sort type exports before 
 
 <sub>default: `''`</sub>
 
-Used only when the [`type`](#type) option is set to `'custom'`. Specifies the custom alphabet for sorting.
+Used only when the [`type`](#type) option is set to `'custom'`. Specifies the
+custom alphabet for sorting.
 
-Use the `Alphabet` utility class from `@omnicajs/eslint-plugin-dependencies/alphabet` to quickly generate a custom alphabet.
+Use the `Alphabet` utility class from
+`@omnicajs/eslint-plugin-dependencies/alphabet` to quickly generate a custom
+alphabet.
 
 Example: `0123456789abcdef...`
 
@@ -154,7 +175,8 @@ Example: `0123456789abcdef...`
 
 Specifies whether sorting should be case-sensitive.
 
-- `true` — Ignore case when sorting alphabetically or naturally (e.g., “A” and “a” are the same).
+- `true` — Ignore case when sorting alphabetically or naturally (e.g., “A” and
+  “a” are the same).
 - `false` — Consider case when sorting (e.g., “a” comes before “A”).
 
 ### specialCharacters
@@ -163,15 +185,19 @@ Specifies whether sorting should be case-sensitive.
 
 Specifies whether to trim, remove, or keep special characters before sorting.
 
-- `'keep'` — Keep special characters when sorting (e.g., “_a” comes before “a”).
-- `'trim'` — Trim special characters when sorting alphabetically or naturally (e.g., “_a” and “a” are the same).
-- `'remove'` — Remove special characters when sorting (e.g., “/a/b” and “ab” are the same).
+- `'keep'` — Keep special characters when sorting (e.g., “\_a” comes before
+  “a”).
+- `'trim'` — Trim special characters when sorting alphabetically or naturally
+  (e.g., “\_a” and “a” are the same).
+- `'remove'` — Remove special characters when sorting (e.g., “/a/b” and “ab” are
+  the same).
 
 ### locales
 
 <sub>default: `'en-US'`</sub>
 
-Specifies the sorting locales. Refer To [String.prototype.localeCompare() - locales](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare#locales).
+Specifies the sorting locales. Refer To
+[String.prototype.localeCompare() - locales](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare#locales).
 
 - `string` — A BCP 47 language tag (e.g. `'en'`, `'en-US'`, `'zh-CN'`).
 - `string[]` — An array of BCP 47 language tags.
@@ -180,32 +206,40 @@ Specifies the sorting locales. Refer To [String.prototype.localeCompare() - loca
 
 <sub>default: `false`</sub>
 
-Enables the use of comments to separate the exports into logical groups. This can help in organizing and maintaining large export blocks by creating partitions based on comments.
+Enables the use of comments to separate the exports into logical groups. This
+can help in organizing and maintaining large export blocks by creating
+partitions based on comments.
 
 - `true` — All comments will be treated as delimiters, creating partitions.
 - `false` — Comments will not be used as delimiters.
-- `RegExpPattern = string | { pattern: string; flags: string}` — A regexp pattern to specify which comments should act as delimiters.
-- `RegExpPattern[]` — A list of regexp patterns to specify which comments should act as delimiters.
-- `{ block: boolean | RegExpPattern | RegExpPattern[]; line: boolean | RegExpPattern | RegExpPattern[] }` — Specify which block and line comments should act as delimiters.
+- `RegExpPattern = string | { pattern: string; flags: string}` — A regexp
+  pattern to specify which comments should act as delimiters.
+- `RegExpPattern[]` — A list of regexp patterns to specify which comments should
+  act as delimiters.
+- `{ block: boolean | RegExpPattern | RegExpPattern[]; line: boolean | RegExpPattern | RegExpPattern[] }`
+  — Specify which block and line comments should act as delimiters.
 
 ### partitionByNewLine
 
 <sub>default: `false`</sub>
 
-When `true`, the rule will not sort the exports if there is an empty line between them. This helps maintain the defined order of logically separated groups of exports.
+When `true`, the rule will not sort the exports if there is an empty line
+between them. This helps maintain the defined order of logically separated
+groups of exports.
 
 ```ts
 // Group 1
-export * from "./atoms";
-export * from "./organisms";
-export * from "./shared";
+export * from './atoms'
+export * from './organisms'
+export * from './shared'
 
 // Group 2
-export { Named } from './folder';
-export { AnotherNamed } from './second-folder';
+export { Named } from './folder'
+export { AnotherNamed } from './second-folder'
 ```
 
-Each group of exports (separated by empty lines) is treated independently, and the order within each group is preserved.
+Each group of exports (separated by empty lines) is treated independently, and
+the order within each group is preserved.
 
 ### newlinesBetween
 
@@ -220,10 +254,11 @@ Specifies how to handle newlines between groups.
 - `0` — No newlines are allowed.
 - Any other number — Enforce this number of newlines between each group.
 
-You can also enforce the newline behavior between two specific groups through the [`groups`](#newlines-between-groups)
-option.
+You can also enforce the newline behavior between two specific groups through
+the [`groups`](#newlines-between-groups) option.
 
-This option is only applicable when [`partitionByNewLine`](#partitionbynewline) is `false`.
+This option is only applicable when [`partitionByNewLine`](#partitionbynewline)
+is `false`.
 
 ### newlinesInside
 
@@ -235,14 +270,18 @@ This option is only applicable when [`partitionByNewLine`](#partitionbynewline) 
 Specifies how to handle newlines inside groups.
 
 - `'ignore'` — Do not report errors related to newlines.
-- `'newlinesBetween'` — [DEPRECATED] If [`newlinesBetween`](#newlinesbetween) is `'ignore'`, then `'ignore'`, otherwise `0`.
+- `'newlinesBetween'` — [DEPRECATED] If [`newlinesBetween`](#newlinesbetween) is
+  `'ignore'`, then `'ignore'`, otherwise `0`.
 - `0` — No newlines are allowed.
-- Any other number — Enforce this number of newlines between each element of the same group.
+- Any other number — Enforce this number of newlines between each element of the
+  same group.
 
-You can also enforce the newline behavior inside a given group through the [`groups`](#group-with-overridden-settings)
-or [`customGroups`](#customgroups) options.
+You can also enforce the newline behavior inside a given group through the
+[`groups`](#group-with-overridden-settings) or [`customGroups`](#customgroups)
+options.
 
-This option is only applicable when [`partitionByNewLine`](#partitionbynewline) is `false`.
+This option is only applicable when [`partitionByNewLine`](#partitionbynewline)
+is `false`.
 
 ### groups
 
@@ -266,17 +305,23 @@ This option is only applicable when [`partitionByNewLine`](#partitionbynewline) 
 </sub>
 <sub>default: `[]`</sub>
 
-Specifies a list of export groups for sorting. Groups help organize exports into categories, making them more readable and maintainable.
+Specifies a list of export groups for sorting. Groups help organize exports into
+categories, making them more readable and maintainable.
 
-Each export will be assigned a single group specified in the `groups` option (or the `unknown` group if no match is found).
-The order of items in the `groups` option determines how groups are ordered.
+Each export will be assigned a single group specified in the `groups` option (or
+the `unknown` group if no match is found). The order of items in the `groups`
+option determines how groups are ordered.
 
-Within a given group, members will be sorted according to the `type`, `order`, `ignoreCase`, etc. options.
+Within a given group, members will be sorted according to the `type`, `order`,
+`ignoreCase`, etc. options.
 
-Individual groups can be combined together by placing them in an array. The order of groups in that array does not matter.
-All members of the groups in the array will be sorted together as if they were part of a single group.
+Individual groups can be combined together by placing them in an array. The
+order of groups in that array does not matter. All members of the groups in the
+array will be sorted together as if they were part of a single group.
 
-Predefined groups are characterized by a single selector and potentially multiple modifiers. You may enter modifiers in any order, but the selector must always come at the end.
+Predefined groups are characterized by a single selector and potentially
+multiple modifiers. You may enter modifiers in any order, but the selector must
+always come at the end.
 
 #### Selectors
 
@@ -299,23 +344,29 @@ Example: `type-export`.
 
 ##### The `unknown` group
 
-Members that don’t fit into any group specified in the `groups` option will be placed in the `unknown` group. If the `unknown` group is not specified in the `groups` option,
-it will automatically be added to the end of the list.
+Members that don’t fit into any group specified in the `groups` option will be
+placed in the `unknown` group. If the `unknown` group is not specified in the
+`groups` option, it will automatically be added to the end of the list.
 
 ##### Group with overridden settings
 
-You may directly override options for a specific group by using an object with the `group` property and other option overrides.
+You may directly override options for a specific group by using an object with
+the `group` property and other option overrides.
 
 - `type` — Overrides the [`type`](#type) option for that group.
 - `order` — Overrides the [`order`](#order) option for that group.
-- `fallbackSort` — Overrides the [`fallbackSort`](#fallbacksort) option for that group.
-- `newlinesInside` — Overrides the [`newlinesInside`](#newlinesinside) option for that group.
-- `commentAbove` — Enforces the presence of a comment containing the content of `commentAbove` above the top element of the group.
-  - An error will be raised if no comment containing the content of `commentAbove` is found above the top element of the
+- `fallbackSort` — Overrides the [`fallbackSort`](#fallbacksort) option for that
   group.
-  - Auto-fixing will add a comment containing the content of `commentAbove` above the top element of the group.
-  - Auto-fixing will also remove invalid auto-added comments (only comments existing in `commentAbove` objects are
-  considered as auto-removable).
+- `newlinesInside` — Overrides the [`newlinesInside`](#newlinesinside) option
+  for that group.
+- `commentAbove` — Enforces the presence of a comment containing the content of
+  `commentAbove` above the top element of the group.
+  - An error will be raised if no comment containing the content of
+    `commentAbove` is found above the top element of the group.
+  - Auto-fixing will add a comment containing the content of `commentAbove`
+    above the top element of the group.
+  - Auto-fixing will also remove invalid auto-added comments (only comments
+    existing in `commentAbove` objects are considered as auto-removable).
 
 ```ts
 {
@@ -329,11 +380,13 @@ You may directly override options for a specific group by using an object with t
 
 ##### Newlines between groups
 
-You may place `newlinesBetween` objects between your groups to enforce the newline behavior between two specific groups.
+You may place `newlinesBetween` objects between your groups to enforce the
+newline behavior between two specific groups.
 
 See the [`newlinesBetween`](#newlinesbetween) option.
 
-This feature is only applicable when [`partitionByNewLine`](#partitionbynewline) is `false`.
+This feature is only applicable when [`partitionByNewLine`](#partitionbynewline)
+is `false`.
 
 ```ts
 {
@@ -365,11 +418,16 @@ interface CustomGroupDefinition {
   fallbackSort?: { type: string; order?: 'asc' | 'desc' }
   newlinesInside?: number | 'ignore'
   selector?: string
-  elementNamePattern?: string | string[] | { pattern: string; flags?: string } | { pattern: string; flags?: string }[]
+  elementNamePattern?:
+    | string
+    | string[]
+    | { pattern: string; flags?: string }
+    | { pattern: string; flags?: string }[]
 }
 ```
 
-An export will match a `CustomGroupDefinition` group if it matches all the filters of the custom group's definition.
+An export will match a `CustomGroupDefinition` group if it matches all the
+filters of the custom group's definition.
 
 or:
 
@@ -381,28 +439,37 @@ interface CustomGroupAnyOfDefinition {
   fallbackSort?: { type: string; order?: 'asc' | 'desc' }
   newlinesInside?: number | 'ignore'
   anyOf: Array<{
-      selector?: string
-      elementNamePattern?: string | string[] | { pattern: string; flags?: string } | { pattern: string; flags?: string }[]
+    selector?: string
+    elementNamePattern?:
+      | string
+      | string[]
+      | { pattern: string; flags?: string }
+      | { pattern: string; flags?: string }[]
   }>
 }
 ```
 
-An export will match a `CustomGroupAnyOfDefinition` group if it matches all the filters of at least one of the `anyOf` items.
+An export will match a `CustomGroupAnyOfDefinition` group if it matches all the
+filters of at least one of the `anyOf` items.
 
 #### Attributes
 
-- `groupName` — The group's name, which needs to be put in the [`groups`](#groups) option.
+- `groupName` — The group's name, which needs to be put in the
+  [`groups`](#groups) option.
 - `selector` — Filter on the `selector` of the element.
-- `elementNamePattern` — If entered, will check that the name of the element matches the pattern entered.
+- `elementNamePattern` — If entered, will check that the name of the element
+  matches the pattern entered.
 - `type` — Overrides the [`type`](#type) option for that custom group.
 - `order` — Overrides the [`order`](#order) option for that custom group.
-- `fallbackSort` — Overrides the [`fallbackSort`](#fallbacksort) option for that custom group.
-- `newlinesInside` — Overrides the [`newlinesInside`](#newlinesinside) option for that custom group.
+- `fallbackSort` — Overrides the [`fallbackSort`](#fallbacksort) option for that
+  custom group.
+- `newlinesInside` — Overrides the [`newlinesInside`](#newlinesinside) option
+  for that custom group.
 
 #### Match importance
 
-The `customGroups` list is ordered:
-The first custom group definition that matches an element will be used.
+The `customGroups` list is ordered: The first custom group definition that
+matches an element will be used.
 
 Custom groups have a higher priority than any predefined group.
 
@@ -446,9 +513,7 @@ export default [
 ```tsx
 // .eslintrc.js
 module.exports = {
-  plugins: [
-    'dependencies',
-  ],
+  plugins: ['dependencies'],
   rules: {
     'dependencies/sort-exports': [
       'error',

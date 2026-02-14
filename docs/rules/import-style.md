@@ -1,6 +1,8 @@
 ---
 title: import-style
-description: Enforce consistent formatting for import declarations by collapsing safe single-line imports.
+description:
+  Enforce consistent formatting for import declarations by collapsing safe
+  single-line imports.
 shortDescription: Enforce consistent import formatting
 keywords:
   - eslint
@@ -11,6 +13,7 @@ keywords:
   - javascript linting
   - import declarations
 ---
+
 Enforce consistent formatting for import declarations.
 
 This rule collapses multi-line named imports into a single line when the
@@ -22,15 +25,11 @@ skips imports that contain comments inside the named specifier block.
 ### Before
 
 ```tsx
-import type {
-  TypeA,
-} from './types'
+import type { TypeA } from './types'
 
-import {
-  valueA,
-  valueB,
-} from './mod'
+import { valueA, valueB } from './mod'
 ```
+
 ### After (Alphabetical)
 
 ```tsx
@@ -38,6 +37,7 @@ import type { TypeA } from './types'
 
 import { valueA, valueB } from './mod'
 ```
+
 ### After (Line Length)
 
 ```tsx
@@ -67,12 +67,11 @@ import statement.
 
 <sub>default: `3`</sub>
 
-Sets the maximum number of specifiers allowed in a single-line import
-statement.
+Sets the maximum number of specifiers allowed in a single-line import statement.
 
 ### singleLineSpacing
 
 <sub>default: `true`</sub>
 
-Controls spacing inside braces for single-line imports. When set to `false`,
-the rule emits `{a}` instead of `{ a }`.
+Controls spacing inside braces for single-line imports. When set to `false`, the
+rule emits `{a}` instead of `{ a }`.

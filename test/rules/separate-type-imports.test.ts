@@ -147,7 +147,6 @@ describe('separate-type-imports', () => {
         errors: [{ messageId: 'separateTypeImports' }],
       })
     })
-
   })
 
   describe('options', () => {
@@ -188,7 +187,6 @@ describe('separate-type-imports', () => {
         errors: [{ messageId: 'separateTypeImports' }],
       })
     })
-
   })
 
   describe('valid', () => {

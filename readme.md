@@ -145,9 +145,8 @@ module.exports = {
 ## Configs
 
 The easiest way to use `@omnicajs/eslint-plugin-dependencies` is to use
-ready-made
-configs. Config files use all the rules of the current plugin, but you can
-override them.
+ready-made configs. Config files use all the rules of the current plugin, but
+you can override them.
 
 ### Flat Config ([`eslint.config.js`](https://eslint.org/docs/latest/use/configure/configuration-files))
 
@@ -173,8 +172,8 @@ module.exports = {
 
 ### List of Configs
 
-| Name                                                                                   | Description                                                      |
-| :------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
+| Name                                                                                           | Description                                                      |
+| :--------------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
 | [recommended-alphabetical](https://dependencies.omnicajs.dev/configs/recommended-alphabetical) | All plugin rules with alphabetical sorting in ascending order    |
 | [recommended-natural](https://dependencies.omnicajs.dev/configs/recommended-natural)           | All plugin rules with natural sorting in ascending order         |
 | [recommended-line-length](https://dependencies.omnicajs.dev/configs/recommended-line-length)   | All plugin rules with sorting by line length in descending order |
@@ -187,17 +186,17 @@ module.exports = {
 🔧 Automatically fixable by the
 [`--fix` CLI option](https://eslint.org/docs/user-guide/command-line-interface#--fix).
 
-| Name                                                                                     | Description                                   | 🔧  |
-| :--------------------------------------------------------------------------------------- | :-------------------------------------------- | :-- |
-| [sort-export-attributes](https://dependencies.omnicajs.dev/rules/sort-export-attributes)         | Enforce sorted export attributes              | 🔧  |
-| [sort-exports](https://dependencies.omnicajs.dev/rules/sort-exports)                             | Enforce sorted exports                        | 🔧  |
-| [sort-import-attributes](https://dependencies.omnicajs.dev/rules/sort-import-attributes)         | Enforce sorted import attributes              | 🔧  |
-| [sort-imports](https://dependencies.omnicajs.dev/rules/sort-imports)                             | Enforce sorted imports                        | 🔧  |
-| [sort-named-exports](https://dependencies.omnicajs.dev/rules/sort-named-exports)                 | Enforce sorted named exports                  | 🔧  |
-| [sort-named-imports](https://dependencies.omnicajs.dev/rules/sort-named-imports)                 | Enforce sorted named imports                  | 🔧  |
-| [import-style](https://dependencies.omnicajs.dev/rules/import-style)                             | Enforce explicit module import style          | 🔧  |
-| separate-type-imports                                                                      | Enforce dedicated type import declarations    | 🔧  |
-| separate-type-partitions                                                                    | Enforce partitions for type-only imports      | 🔧  |
+| Name                                                                                     | Description                                | 🔧  |
+| :--------------------------------------------------------------------------------------- | :----------------------------------------- | :-- |
+| [sort-export-attributes](https://dependencies.omnicajs.dev/rules/sort-export-attributes) | Enforce sorted export attributes           | 🔧  |
+| [sort-exports](https://dependencies.omnicajs.dev/rules/sort-exports)                     | Enforce sorted exports                     | 🔧  |
+| [sort-import-attributes](https://dependencies.omnicajs.dev/rules/sort-import-attributes) | Enforce sorted import attributes           | 🔧  |
+| [sort-imports](https://dependencies.omnicajs.dev/rules/sort-imports)                     | Enforce sorted imports                     | 🔧  |
+| [sort-named-exports](https://dependencies.omnicajs.dev/rules/sort-named-exports)         | Enforce sorted named exports               | 🔧  |
+| [sort-named-imports](https://dependencies.omnicajs.dev/rules/sort-named-imports)         | Enforce sorted named imports               | 🔧  |
+| [import-style](https://dependencies.omnicajs.dev/rules/import-style)                     | Enforce explicit module import style       | 🔧  |
+| separate-type-imports                                                                    | Enforce dedicated type import declarations | 🔧  |
+| separate-type-partitions                                                                 | Enforce partitions for type-only imports   | 🔧  |
 
 <!-- end auto-generated rules list -->
 
