@@ -1,6 +1,9 @@
 /**
- * Borrowed/adapted from: azat-io/eslint-plugin-perfectionist Source: https://github.com/azat-io/eslint-plugin-perfectionist
- * Commit: 1c5682b5ee2fd855b4f5176991366dd894f750bb License: MIT Local changes: fork-specific vNext options normalization and additional sort-imports behavior/validation scenarios.
+ * Borrowed/adapted from: azat-io/eslint-plugin-perfectionist Source:
+ * https://github.com/azat-io/eslint-plugin-perfectionist Commit:
+ * 1c5682b5ee2fd855b4f5176991366dd894f750bb License: MIT Local changes:
+ * fork-specific vNext options normalization and additional sort-imports
+ * behavior/validation scenarios.
  */
 import type {
   RuleListener,
@@ -83,7 +86,8 @@ describe('sort-imports', () => {
       normalizedImports['orderBy'] = sortBy === 'specifier' ? 'alias' : 'path'
     }
     if (!('splitDeclarations' in normalizedImports)) {
-      normalizedImports['splitDeclarations'] = partitionImportsSplitOnSort ?? false
+      normalizedImports['splitDeclarations'] =
+        partitionImportsSplitOnSort ?? false
     }
     if (!('sortSideEffects' in normalizedImports)) {
       normalizedImports['sortSideEffects'] = sortSideEffects ?? false
@@ -98,16 +102,22 @@ describe('sort-imports', () => {
       normalizedPartitions = 'merge'
     } else {
       let partitionsObject: Record<string, unknown> =
-        partitions && typeof partitions === 'object' && !Array.isArray(partitions) ?
+        (
+          partitions &&
+          typeof partitions === 'object' &&
+          !Array.isArray(partitions)
+        ) ?
           { ...partitions }
         : {}
       if (partitionInsideGroup === 'merge') {
         normalizedPartitions = 'merge'
       } else {
         let splitBy: Record<string, unknown> =
-          partitionsObject['splitBy'] &&
+          (
+            partitionsObject['splitBy'] &&
             typeof partitionsObject['splitBy'] === 'object' &&
-            !Array.isArray(partitionsObject['splitBy']) ?
+            !Array.isArray(partitionsObject['splitBy'])
+          ) ?
             { ...(partitionsObject['splitBy'] as Record<string, unknown>) }
           : {}
         if (!('newlines' in splitBy)) {
@@ -121,10 +131,12 @@ describe('sort-imports', () => {
         let { maxImports } = partitionsObject
         let { orderBy } = partitionsObject
         if (!('orderStability' in partitionsObject)) {
-          orderStability = partitionSortingStable === false ? 'unstable' : 'stable'
+          orderStability =
+            partitionSortingStable === false ? 'unstable' : 'stable'
         }
         if (!('maxImports' in partitionsObject)) {
-          maxImports = typeof partitionMaxImports === 'number' ? partitionMaxImports : null
+          maxImports =
+            typeof partitionMaxImports === 'number' ? partitionMaxImports : null
         }
         if (!('orderBy' in partitionsObject)) {
           orderBy = partitionSorting === 'type-first' ? 'type-first' : 'source'
@@ -13557,7 +13569,9 @@ describe('sort-imports', () => {
       it('throws error when imports is not an object', () => {
         expect(() =>
           rule.create({
-            options: [{ imports: null as unknown as Options[number]['imports'] }],
+            options: [
+              { imports: null as unknown as Options[number]['imports'] },
+            ],
           } as unknown as Readonly<RuleContext<MessageId, Options>>),
         ).toThrowError(
           "The 'imports' option must be an object with valid vNext fields.",
@@ -13602,7 +13616,9 @@ describe('sort-imports', () => {
         expect(() =>
           rule.create({
             options: [
-              { imports: { casingPriority: 'camelCase' as unknown as string[] } },
+              {
+                imports: { casingPriority: 'camelCase' as unknown as string[] },
+              },
             ],
           } as unknown as Readonly<RuleContext<MessageId, Options>>),
         ).toThrowError(

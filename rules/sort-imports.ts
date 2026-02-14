@@ -1,6 +1,9 @@
 /**
- * Borrowed/adapted from: azat-io/eslint-plugin-perfectionist Source: https://github.com/azat-io/eslint-plugin-perfectionist
- * Commit: 1c5682b5ee2fd855b4f5176991366dd894f750bb License: MIT Local changes: fork migration, vNext imports/partitions contract, casingPriority pre-sort, and related validation updates.
+ * Borrowed/adapted from: azat-io/eslint-plugin-perfectionist Source:
+ * https://github.com/azat-io/eslint-plugin-perfectionist Commit:
+ * 1c5682b5ee2fd855b4f5176991366dd894f750bb License: MIT Local changes: fork
+ * migration, vNext imports/partitions contract, casingPriority pre-sort, and
+ * related validation updates.
  */
 import type { TSESLint } from '@typescript-eslint/utils'
 import type { TSESTree } from '@typescript-eslint/types'
@@ -657,10 +660,7 @@ function sortImportNodes({
         return computedNewlinesBetween
       }
 
-      if (
-        shouldPartitionNewlinesInside &&
-        options.partitions !== 'merge'
-      ) {
+      if (shouldPartitionNewlinesInside && options.partitions !== 'merge') {
         let leftPartitionKey = partitionKeyByNode.get(leftGroupNode)
         let rightPartitionKey = partitionKeyByNode.get(rightGroupNode)
         if (
@@ -777,8 +777,13 @@ function isValidImportsOption(imports: unknown): boolean {
     'splitDeclarations',
   ])
 
-  let { splitDeclarations, sortSideEffects, casingPriority, maxLineLength, orderBy } =
-    imports
+  let {
+    splitDeclarations,
+    sortSideEffects,
+    casingPriority,
+    maxLineLength,
+    orderBy,
+  } = imports
 
   if (casingPriority !== undefined) {
     if (!Array.isArray(casingPriority)) {
@@ -873,7 +878,11 @@ function isValidPartitionsOption(partitions: unknown): boolean {
     return false
   }
 
-  if (maxImports !== undefined && maxImports !== null && !isPositiveInteger(maxImports)) {
+  if (
+    maxImports !== undefined &&
+    maxImports !== null &&
+    !isPositiveInteger(maxImports)
+  ) {
     return false
   }
 
@@ -903,20 +912,25 @@ function normalizeSortImportsOptions(
 ): SortImportsOptions {
   let importsOption = options.imports
   let partitionsOption = options.partitions
-  let partitionsSplitByOption = partitionsOption === 'merge' ? undefined : partitionsOption.splitBy
+  let partitionsSplitByOption =
+    partitionsOption === 'merge' ? undefined : partitionsOption.splitBy
   let partitionsSplitByComments = partitionsSplitByOption?.comments
 
   let normalizedPartitions: SortImportsOptions['partitions'] =
-    partitionsOption === 'merge' ? 'merge'
-    : {
+    partitionsOption === 'merge' ? 'merge' : (
+      {
         splitBy: {
-          comments: isValidPartitionByCommentOption(partitionsSplitByComments) ? partitionsSplitByComments : false,
+          comments:
+            isValidPartitionByCommentOption(partitionsSplitByComments) ?
+              partitionsSplitByComments
+            : false,
           newlines: partitionsSplitByOption?.newlines ?? false,
         },
         maxImports: partitionsOption.maxImports ?? Infinity,
         orderStability: partitionsOption.orderStability,
         orderBy: partitionsOption.orderBy,
       }
+    )
 
   return {
     ...options,
@@ -1080,10 +1094,7 @@ function isValidPartitionByCommentOption(
 
   assertNoUnknownKeys(value, ['block', 'line'])
   let { block, line } = value
-  if (
-    block !== undefined &&
-    !isValidPartitionByCommentOption(block)
-  ) {
+  if (block !== undefined && !isValidPartitionByCommentOption(block)) {
     return false
   }
   if (line !== undefined && !isValidPartitionByCommentOption(line)) {
@@ -1133,10 +1144,7 @@ function assertNoUnknownKeys(
 
 function normalizeNewlinesInsideValue<
   T extends SortImportsOptions['newlinesInside'] | NewlinesInsideOption,
->(
-  newlinesInside:
-    T,
-): T {
+>(newlinesInside: T): T {
   if (typeof newlinesInside !== 'number') {
     return newlinesInside
   }
@@ -1147,7 +1155,9 @@ function normalizeNewlinesInsideValue<
 function getPartitionByCommentOption(
   options: SortImportsOptions,
 ): PartitionByCommentOption | false {
-  return options.partitions === 'merge' ? false : options.partitions.splitBy.comments
+  return options.partitions === 'merge' ?
+      false
+    : options.partitions.splitBy.comments
 }
 
 function isPartitionByNewLineEnabled(options: SortImportsOptions): boolean {
@@ -1155,7 +1165,9 @@ function isPartitionByNewLineEnabled(options: SortImportsOptions): boolean {
 }
 
 function getPartitionMaxImports(options: SortImportsOptions): number {
-  return options.partitions === 'merge' ? Infinity : options.partitions.maxImports
+  return options.partitions === 'merge' ?
+      Infinity
+    : options.partitions.maxImports
 }
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
@@ -2231,7 +2243,10 @@ function isTypeOnlyPartition(nodes: SortImportsSortingNode[]): boolean {
 }
 
 function shouldSortPartitions(options: SortImportsOptions): boolean {
-  return options.partitions !== 'merge' && options.partitions.orderBy === 'type-first'
+  return (
+    options.partitions !== 'merge' &&
+    options.partitions.orderBy === 'type-first'
+  )
 }
 
 let styleExtensions = [

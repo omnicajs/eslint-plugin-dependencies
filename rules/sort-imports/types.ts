@@ -1,12 +1,19 @@
 /**
- * Borrowed/adapted from: azat-io/eslint-plugin-perfectionist Source: https://github.com/azat-io/eslint-plugin-perfectionist
- * Commit: 1c5682b5ee2fd855b4f5176991366dd894f750bb License: MIT Local changes: fork-specific options typing, vNext imports/partitions schema, and casingPriority contract.
+ * Borrowed/adapted from: azat-io/eslint-plugin-perfectionist Source:
+ * https://github.com/azat-io/eslint-plugin-perfectionist Commit:
+ * 1c5682b5ee2fd855b4f5176991366dd894f750bb License: MIT Local changes:
+ * fork-specific options typing, vNext imports/partitions schema, and
+ * casingPriority contract.
  */
 import type { JSONSchema4 } from '@typescript-eslint/utils/json-schema'
 import type { TSESTree } from '@typescript-eslint/types'
 
 import type { SortingNodeWithDependencies } from '../../utils/sort-nodes-by-dependencies'
-import type { CommonOptions, RegexOption, TypeOption } from '../../types/common-options'
+import type {
+  CommonOptions,
+  RegexOption,
+  TypeOption,
+} from '../../types/common-options'
 import type { PartitionByCommentOption } from '../../types/common-partition-options'
 import type { CommonGroupsOptions } from '../../types/common-groups-options'
 
@@ -49,7 +56,7 @@ export type Options = Partial<
      * Partition configuration.
      *
      * - `'merge'` merges partitions inside every group.
-     * - object configuration preserves partitions and controls how they are
+     * - Object configuration preserves partitions and controls how they are
      *   built/reordered.
      */
     partitions: PartitionsOptions | 'merge'
@@ -218,14 +225,13 @@ export interface ImportsOptions {
    *
    * - `'path'`: module source path.
    * - `'alias'`: first local binding identifier.
-   * - `'specifier'`: first imported (source-side) identifier with alias
-   *   fallback.
+   * - `'specifier'`: first imported (source-side) identifier with alias fallback.
    */
   orderBy: ImportsOrderByOption
 
   /**
-   * Maximum line length threshold for name-based sorting fallback.
-   * `null` disables the threshold.
+   * Maximum line length threshold for name-based sorting fallback. `null`
+   * disables the threshold.
    */
   maxLineLength: number | null
 
@@ -260,8 +266,7 @@ export interface PartitionsOptions {
   orderBy: PartitionsOrderByOption
 
   /**
-   * Maximum imports per partition.
-   * `null` disables size-based splitting.
+   * Maximum imports per partition. `null` disables size-based splitting.
    */
   maxImports: number | null
 }
@@ -271,7 +276,8 @@ export type PartitionsOrderStabilityOption =
 export type ImportsCasingPriorityOption =
   (typeof IMPORTS_CASING_PRIORITY_OPTION)[number]
 
-export type PartitionsOrderByOption = (typeof PARTITIONS_ORDER_BY_OPTION)[number]
+export type PartitionsOrderByOption =
+  (typeof PARTITIONS_ORDER_BY_OPTION)[number]
 export type ImportsOrderByOption = (typeof IMPORTS_ORDER_BY_OPTION)[number]
 
 export let importsOrderByJsonSchema: JSONSchema4 = {

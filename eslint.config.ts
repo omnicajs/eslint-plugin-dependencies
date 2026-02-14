@@ -32,4 +32,7 @@ let configs = await eslintConfig({
   node: true,
 })
 
-export default [globalIgnores(['vendor/**']), ...configs] satisfies Linter.Config[]
+export default [
+  globalIgnores(['vendor/**']),
+  ...configs,
+] satisfies Linter.Config[]

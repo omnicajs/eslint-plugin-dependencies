@@ -3,9 +3,11 @@
 [![Version](https://img.shields.io/npm/v/%40omnicajs%2Feslint-plugin-dependencies.svg?color=4a32c3&labelColor=26272b)](https://npmjs.com/package/@omnicajs/eslint-plugin-dependencies)
 [![GitHub License](https://img.shields.io/badge/license-MIT-232428.svg?color=4a32c3&labelColor=26272b)](license.md)
 
-An ESLint plugin focused on consistent `import` / `export` declaration order and structure.
+An ESLint plugin focused on consistent `import` / `export` declaration order and
+structure.
 
-This plugin defines rules for sorting and structuring `import` and `export` declarations.
+This plugin defines rules for sorting and structuring `import` and `export`
+declarations.
 
 All rules are automatically fixable.
 
@@ -106,7 +108,7 @@ module.exports = {
 ### List of Configs
 
 | Name                                                                 | Description                                                         |
-|:---------------------------------------------------------------------|:--------------------------------------------------------------------|
+| :------------------------------------------------------------------- | :------------------------------------------------------------------ |
 | [recommended-alphabetical](docs/configs/recommended-alphabetical.md) | Import/export rules with alphabetical sorting in ascending order    |
 | [recommended-natural](docs/configs/recommended-natural.md)           | Import/export rules with natural sorting in ascending order         |
 | [recommended-line-length](docs/configs/recommended-line-length.md)   | Import/export rules with sorting by line length in descending order |
@@ -117,17 +119,17 @@ module.exports = {
 🔧 Automatically fixable by the
 [`--fix` CLI option](https://eslint.org/docs/user-guide/command-line-interface#--fix).
 
-| Name                                                           | Description                                | 🔧 |
-|:---------------------------------------------------------------|:-------------------------------------------|:---|
-| [sort-export-attributes](docs/rules/sort-export-attributes.md) | Enforce sorted export attributes           | 🔧 |
-| [sort-exports](docs/rules/sort-exports.md)                     | Enforce sorted exports                     | 🔧 |
-| [sort-import-attributes](docs/rules/sort-import-attributes.md) | Enforce sorted import attributes           | 🔧 |
-| [sort-imports](docs/rules/sort-imports.md)                     | Enforce sorted imports                     | 🔧 |
-| [sort-named-exports](docs/rules/sort-named-exports.md)         | Enforce sorted named exports               | 🔧 |
-| [sort-named-imports](docs/rules/sort-named-imports.md)         | Enforce sorted named imports               | 🔧 |
-| [import-style](docs/rules/import-style.md)                     | Enforce explicit module import style       | 🔧 |
-| separate-type-imports                                          | Enforce dedicated type import declarations | 🔧 |
-| separate-type-partitions                                       | Enforce partitions for type-only imports   | 🔧 |
+| Name                                                           | Description                                | 🔧  |
+| :------------------------------------------------------------- | :----------------------------------------- | :-- |
+| [sort-export-attributes](docs/rules/sort-export-attributes.md) | Enforce sorted export attributes           | 🔧  |
+| [sort-exports](docs/rules/sort-exports.md)                     | Enforce sorted exports                     | 🔧  |
+| [sort-import-attributes](docs/rules/sort-import-attributes.md) | Enforce sorted import attributes           | 🔧  |
+| [sort-imports](docs/rules/sort-imports.md)                     | Enforce sorted imports                     | 🔧  |
+| [sort-named-exports](docs/rules/sort-named-exports.md)         | Enforce sorted named exports               | 🔧  |
+| [sort-named-imports](docs/rules/sort-named-imports.md)         | Enforce sorted named imports               | 🔧  |
+| [import-style](docs/rules/import-style.md)                     | Enforce explicit module import style       | 🔧  |
+| separate-type-imports                                          | Enforce dedicated type import declarations | 🔧  |
+| separate-type-partitions                                       | Enforce partitions for type-only imports   | 🔧  |
 
 ## Versioning Policy
 

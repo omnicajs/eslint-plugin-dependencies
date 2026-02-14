@@ -1,6 +1,9 @@
 /**
- * Borrowed/adapted from: azat-io/eslint-plugin-perfectionist Source: https://github.com/azat-io/eslint-plugin-perfectionist
- * Commit: 1c5682b5ee2fd855b4f5176991366dd894f750bb License: MIT Local changes: maintained and adapted in this fork; see git history for file-specific modifications.
+ * Borrowed/adapted from: azat-io/eslint-plugin-perfectionist Source:
+ * https://github.com/azat-io/eslint-plugin-perfectionist Commit:
+ * 1c5682b5ee2fd855b4f5176991366dd894f750bb License: MIT Local changes:
+ * maintained and adapted in this fork; see git history for file-specific
+ * modifications.
  */
 import type { TSESLint } from '@typescript-eslint/utils'
 import type { TSESTree } from '@typescript-eslint/types'
@@ -121,7 +124,9 @@ function computeVariableDeclarationSourceName(
 
   switch (declaration.id.type) {
     case AST_NODE_TYPES.ObjectPattern:
-      return computeObjectPatternPropertySourceName(declaration.id.properties[0])
+      return computeObjectPatternPropertySourceName(
+        declaration.id.properties[0],
+      )
     case AST_NODE_TYPES.ArrayPattern:
     case AST_NODE_TYPES.Identifier:
       return computeVariableDeclarationAliasName(node, sourceCode)

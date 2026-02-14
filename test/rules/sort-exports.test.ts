@@ -1,6 +1,9 @@
 /**
- * Borrowed/adapted from: azat-io/eslint-plugin-perfectionist Source: https://github.com/azat-io/eslint-plugin-perfectionist
- * Commit: 1c5682b5ee2fd855b4f5176991366dd894f750bb License: MIT Local changes: maintained and adapted in this fork; see git history for file-specific modifications.
+ * Borrowed/adapted from: azat-io/eslint-plugin-perfectionist Source:
+ * https://github.com/azat-io/eslint-plugin-perfectionist Commit:
+ * 1c5682b5ee2fd855b4f5176991366dd894f750bb License: MIT Local changes:
+ * maintained and adapted in this fork; see git history for file-specific
+ * modifications.
  */
 import { createRuleTester } from 'eslint-vitest-rule-tester'
 import typescriptParser from '@typescript-eslint/parser'
@@ -18,7 +21,9 @@ type LegacyOption = {
   partitionByNewLine?: unknown
 } & Options[number]
 
-function normalizeOptions(options: LegacyOption[] | undefined): undefined | Options {
+function normalizeOptions(
+  options: LegacyOption[] | undefined,
+): undefined | Options {
   if (!options) {
     return options
   }

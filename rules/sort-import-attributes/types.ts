@@ -1,6 +1,9 @@
 /**
- * Borrowed/adapted from: azat-io/eslint-plugin-perfectionist Source: https://github.com/azat-io/eslint-plugin-perfectionist
- * Commit: 1c5682b5ee2fd855b4f5176991366dd894f750bb License: MIT Local changes: maintained and adapted in this fork; see git history for file-specific modifications.
+ * Borrowed/adapted from: azat-io/eslint-plugin-perfectionist Source:
+ * https://github.com/azat-io/eslint-plugin-perfectionist Commit:
+ * 1c5682b5ee2fd855b4f5176991366dd894f750bb License: MIT Local changes:
+ * maintained and adapted in this fork; see git history for file-specific
+ * modifications.
  */
 import type { TSESTree } from '@typescript-eslint/types'
 
@@ -15,7 +18,7 @@ export type Options = Partial<
      * Partition configuration.
      *
      * - `'merge'` disables partition boundaries and sorts as a single block.
-     * - object configuration controls how partitions are detected.
+     * - Object configuration controls how partitions are detected.
      */
     partitions: PartitionsOptions | 'merge'
   } & CommonGroupsOptions<
