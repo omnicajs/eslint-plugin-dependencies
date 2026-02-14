@@ -1,3 +1,7 @@
+/**
+ * Borrowed/adapted from: azat-io/eslint-plugin-perfectionist Source: https://github.com/azat-io/eslint-plugin-perfectionist
+ * Commit: 707b2c4cf694a84dac45eaf9a885edf69522ca2a License: MIT Local changes: fork-native test coverage derived from upstream rule behavior.
+ */
 import type { TSESTree } from '@typescript-eslint/types'
 import type { TSESLint } from '@typescript-eslint/utils'
 
