@@ -5,16 +5,73 @@ import typescriptParser from '@typescript-eslint/parser'
 import { describe, expect, it } from 'vitest'
 import dedent from 'dedent'
 
+import type { Options } from '../../rules/sort-import-attributes/types'
+
 import { validateRuleJsonSchema } from '../utils/validate-rule-json-schema'
 import rule from '../../rules/sort-import-attributes'
 import { Alphabet } from '../../utils/alphabet'
 
+type LegacyOption = {
+  partitionByComment?: unknown
+  partitionByNewLine?: unknown
+} & Options[number]
+
+function normalizeOptions(options: LegacyOption[] | undefined): undefined | Options {
+  if (!options) {
+    return options
+  }
+
+  return options.map(option => {
+    if ('partitions' in option) {
+      return option
+    }
+
+    let {
+      partitionByComment = false,
+      partitionByNewLine = false,
+      ...rest
+    } = option
+
+    return {
+      ...rest,
+      partitions: {
+        splitBy: {
+          comments: partitionByComment as NonNullable<
+            Exclude<Options[number]['partitions'], 'merge'>
+          >['splitBy']['comments'],
+          newlines: partitionByNewLine as boolean,
+        },
+      },
+    } as Options[number]
+  })
+}
+
 describe('sort-import-attributes', () => {
-  let { invalid, valid } = createRuleTester({
+  let { invalid: baseInvalid, valid: baseValid } = createRuleTester({
     name: 'sort-import-attributes',
     parser: typescriptParser,
     rule,
   })
+  let valid: typeof baseValid = input => {
+    if (typeof input === 'string') {
+      return baseValid(input)
+    }
+
+    return baseValid({
+      ...input,
+      options: normalizeOptions(input.options as LegacyOption[] | undefined),
+    })
+  }
+  let invalid: typeof baseInvalid = input => {
+    if (typeof input === 'string') {
+      return baseInvalid(input)
+    }
+
+    return baseInvalid({
+      ...input,
+      options: normalizeOptions(input.options as LegacyOption[] | undefined),
+    })
+  }
 
   describe('alphabetical', () => {
     let options = {
@@ -1094,6 +1151,23 @@ describe('sort-import-attributes', () => {
   })
 
   describe('misc', () => {
+    it('supports partitions merge mode', async () => {
+      await valid({
+        code: dedent`
+          import data from 'module' with {
+            a: '1',
+
+            b: '2',
+          }
+        `,
+        options: [
+          {
+            partitions: 'merge',
+          },
+        ],
+      })
+    })
+
     it('validates the JSON schema', async () => {
       await expect(
         validateRuleJsonSchema(rule.meta.schema),

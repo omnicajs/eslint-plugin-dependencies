@@ -145,12 +145,21 @@ How to handle special characters before comparison.
 
 Locales passed to `localeCompare` for alphabetical/natural sorts.
 
-### partitionByComment
+### partitions
+
+<sub>default: `{ splitBy: { comments: false, newlines: false } }`</sub>
+
+Controls partitioning behavior for import attributes.
+
+- `'merge'` — Treat all attributes as a single partition.
+- `{ splitBy: ... }` — Preserve partition boundaries based on configured
+  delimiters.
+
+### partitions.splitBy.comments
 
 <sub>default: `false`</sub>
 
-Use comments to split attributes into independent partitions that are sorted
-separately.
+Use comments as partition delimiters.
 
 - `true` — Any non-ESLint comment creates a partition.
 - `false` — Ignore comments for partitioning.
@@ -160,12 +169,11 @@ separately.
 - `{ block: boolean | RegExpPattern | RegExpPattern[]; line: boolean | RegExpPattern | RegExpPattern[] }`
   — Separate settings for block/line comments.
 
-### partitionByNewLine
+### partitions.splitBy.newlines
 
 <sub>default: `false`</sub>
 
-When `true`, an empty line between attributes creates a partition. Each
-partition is sorted independently.
+When `true`, an empty line between attributes creates a partition.
 
 ### newlinesBetween
 
@@ -183,8 +191,8 @@ Specifies how to handle newlines between groups.
 You can also enforce the newline behavior between two specific groups through
 the [`groups`](#newlines-between-groups) option.
 
-This option is only applicable when [`partitionByNewLine`](#partitionbynewline)
-is `false`.
+This option is only applicable when
+[`partitions.splitBy.newlines`](#partitionssplitbynewlines) is `false`.
 
 ### newlinesInside
 
@@ -206,8 +214,8 @@ You can also enforce the newline behavior inside a given group through the
 [`groups`](#group-with-overridden-settings) or [`customGroups`](#customgroups)
 options.
 
-This option is only applicable when [`partitionByNewLine`](#partitionbynewline)
-is `false`.
+This option is only applicable when
+[`partitions.splitBy.newlines`](#partitionssplitbynewlines) is `false`.
 
 ### groups
 
@@ -277,8 +285,8 @@ newline behavior between two specific groups.
 
 See the [`newlinesBetween`](#newlinesbetween) option.
 
-This feature is only applicable when [`partitionByNewLine`](#partitionbynewline)
-is `false`.
+This feature is only applicable when
+[`partitions.splitBy.newlines`](#partitionssplitbynewlines) is `false`.
 
 ```ts
 {
@@ -338,8 +346,12 @@ export default [
           specialCharacters: 'keep',
           locales: 'en-US',
           alphabet: '',
-          partitionByComment: false,
-          partitionByNewLine: false,
+          partitions: {
+            splitBy: {
+              comments: false,
+              newlines: false,
+            },
+          },
           newlinesBetween: 'ignore',
           newlinesInside: 'ignore',
           groups: [],
@@ -368,8 +380,12 @@ module.exports = {
         specialCharacters: 'keep',
         locales: 'en-US',
         alphabet: '',
-        partitionByComment: false,
-        partitionByNewLine: false,
+        partitions: {
+          splitBy: {
+            comments: false,
+            newlines: false,
+          },
+        },
         newlinesBetween: 'ignore',
         newlinesInside: 'ignore',
         groups: [],
