@@ -51,7 +51,9 @@ jobs:
         run: pnpm run ci:clear
 
       - name: Publish Root Package to NPM
-        run: npm publish --access public --no-git-checks
+        run: |
+          npm config set //registry.npmjs.org/:_authToken="$NODE_AUTH_TOKEN"
+          npm publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
