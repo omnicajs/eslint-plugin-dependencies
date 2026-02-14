@@ -1,5 +1,3 @@
-/* eslint-disable typescript/no-unsafe-member-access */
-
 import type { Diagnostic } from 'typescript'
 import type { PathLike } from 'node:fs'
 import type { Mock } from 'vitest'
@@ -66,12 +64,14 @@ let testInput = {
   contextCwd: '../../../',
 }
 
+let compilerOptions: ts.CompilerOptions = {
+  baseUrl: './packages/package',
+}
+
 let tsConfigContent = {
   raw: {
     config: {
-      compilerOptions: {
-        baseUrl: './packages/package',
-      },
+      compilerOptions,
     },
   },
 } as ts.ParsedCommandLine
@@ -145,9 +145,7 @@ describe('readClosestTsConfigByPath', () => {
         readClosestTsConfigByPath(testInput)
         let actual = readClosestTsConfigByPath(testInput)
 
-        expect(actual?.compilerOptions).toEqual(
-          tsConfigContent.raw.config.compilerOptions,
-        )
+        expect(actual?.compilerOptions).toEqual(compilerOptions)
         expect(mockExistsSync).toHaveBeenCalledOnce()
       })
 
@@ -178,9 +176,7 @@ describe('readClosestTsConfigByPath', () => {
           contextCwd: './',
         })
 
-        expect(actual?.compilerOptions).toEqual(
-          tsConfigContent.raw.config.compilerOptions,
-        )
+        expect(actual?.compilerOptions).toEqual(compilerOptions)
         expect(mockExistsSync).toHaveBeenCalledTimes(4)
       })
 
@@ -213,9 +209,7 @@ describe('readClosestTsConfigByPath', () => {
           contextCwd: '../../',
         })
 
-        expect(actual?.compilerOptions).toEqual(
-          tsConfigContent.raw.config.compilerOptions,
-        )
+        expect(actual?.compilerOptions).toEqual(compilerOptions)
         expect(mockExistsSync).toHaveBeenCalledTimes(6)
       })
     })
@@ -229,9 +223,7 @@ describe('readClosestTsConfigByPath', () => {
 
         let actual = readClosestTsConfigByPath(testInput)
 
-        expect(actual?.compilerOptions).toEqual(
-          tsConfigContent.raw.config.compilerOptions,
-        )
+        expect(actual?.compilerOptions).toEqual(compilerOptions)
       })
 
       it('returns a parent tsconfig.json when matched', () => {
@@ -245,9 +237,7 @@ describe('readClosestTsConfigByPath', () => {
 
         let actual = readClosestTsConfigByPath(testInput)
 
-        expect(actual?.compilerOptions).toEqual(
-          tsConfigContent.raw.config.compilerOptions,
-        )
+        expect(actual?.compilerOptions).toEqual(compilerOptions)
       })
 
       it('throws when searching fails.', () => {
@@ -287,11 +277,9 @@ describe('readClosestTsConfigByPath', () => {
 
     function mockConvertCompilerOptionsFromJsonReturnValue(): void {
       mockConvertCompilerOptionsFromJson.mockReturnValue({
-        options: tsConfigContent.raw.config.compilerOptions,
+        options: compilerOptions,
         errors: [],
       })
     }
   })
 })
-
-/* eslint-enable typescript/no-unsafe-member-access */

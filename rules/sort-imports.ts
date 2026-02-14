@@ -1069,7 +1069,7 @@ function buildSplitImportDeclarationText({
     }
   }
 
-  let importClause = ''
+  let importClause: string
   if (namespaceSpecifier) {
     // Default + namespace never appear in the same split group.
     importClause = sourceCode.getText(namespaceSpecifier)

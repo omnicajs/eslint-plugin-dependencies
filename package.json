@@ -47,7 +47,7 @@
     "test:css": "stylelint \"docs/**/*.{css}\"",
     "test:format": "prettier --check \"**/*.{js,ts,json,md,yml}\"",
     "test:js": "eslint --concurrency auto .",
-    "test:packages": "pnpm dedupe --check",
+    "test:packages": "CI=true pnpm dedupe --check",
     "test:spelling": "cspell \"**/*\"",
     "test:types": "tsc --noEmit --pretty",
     "test:unit": "vitest --run --coverage"
