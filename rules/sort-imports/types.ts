@@ -46,7 +46,7 @@ export type Options = Partial<
     useExperimentalDependencyDetection: boolean
 
     /**
-     * VNext partition configuration.
+     * Partition configuration.
      *
      * - `'merge'` merges partitions inside every group.
      * - object configuration preserves partitions and controls how they are
@@ -69,7 +69,7 @@ export type Options = Partial<
     environment: 'node' | 'bun'
 
     /**
-     * VNext import node sorting configuration.
+     * Import node sorting configuration.
      */
     imports: ImportsOptions
   } & CommonGroupsOptions<CustomTypeOption, object, CustomGroupMatchOptions> &

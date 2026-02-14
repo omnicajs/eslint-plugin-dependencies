@@ -12,7 +12,7 @@ import type { SortingNode } from '../../types/sorting-node'
 export type Options = Partial<
   {
     /**
-     * VNext partition configuration.
+     * Partition configuration.
      *
      * - `'merge'` disables partition boundaries and sorts as a single block.
      * - object configuration controls how partitions are detected.

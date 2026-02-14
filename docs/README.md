@@ -1,7 +1,5 @@
 # Documentation
 
-This directory contains the project documentation in plain Markdown.
-
 ## Guide
 
 - [Introduction](./guide/introduction.md)
