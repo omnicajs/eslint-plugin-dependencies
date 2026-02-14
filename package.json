@@ -1,7 +1,7 @@
 {
   "name": "@omnicajs/eslint-plugin-dependencies",
   "version": "0.0.0",
-  "description": "ESLint plugin for sorting various data such as objects, imports, types, enums, JSX props, etc.",
+  "description": "ESLint plugin for sorting and structuring import and export declarations.",
   "keywords": [
     "eslint",
     "eslint-plugin",
@@ -10,7 +10,9 @@
   "homepage": "https://github.com/omnicajs/eslint-plugin-dependencies",
   "repository": "omnicajs/eslint-plugin-dependencies",
   "license": "MIT",
-  "author": "Azat S. <to@azat.io>",
+  "contributors": [
+    "Azat S. <to@azat.io>"
+  ],
   "type": "module",
   "exports": {
     ".": {

@@ -22,6 +22,7 @@ let configs = await eslintConfig({
           },
         ],
         'eslint-plugin/require-meta-default-options': 'off',
+        'package-json/require-author': 'off',
       },
     },
   ],
