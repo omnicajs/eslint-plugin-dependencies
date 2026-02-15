@@ -25,10 +25,7 @@ skips imports that contain comments inside the named specifier block.
 ### Before
 
 ```ts
-import {
-  useState,
-  useEffect,
-} from 'react'
+import { useState, useEffect } from 'react'
 ```
 
 ### After

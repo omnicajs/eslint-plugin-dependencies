@@ -175,11 +175,7 @@ function getCasingKinds(value: string): ImportsCasingPriorityOption[] {
   }
 
   /* One-word lowercase terms can match both camelCase and snake_case. */
-  if (
-    !hasUnderscore &&
-    !hasHyphen &&
-    /^[a-z][\da-z]*$/u.test(value)
-  ) {
+  if (!hasUnderscore && !hasHyphen && /^[a-z][\da-z]*$/u.test(value)) {
     kinds.add('camelCase')
     kinds.add('snake_case')
   }
