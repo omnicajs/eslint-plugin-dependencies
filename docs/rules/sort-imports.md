@@ -136,6 +136,34 @@ import dbConfig from './db'
 
 This rule accepts an options object with the following properties:
 
+> **Contract note**
+>
+> In this fork the import-specific settings live under `imports`, and
+> partition-specific settings live under `partitions`.
+>
+> Legacy top-level keys such as `orderBy`, `sortSideEffects`, `maxLineLength`,
+> `partitionByComment`, and `partitionByNewLine` are not part of the current
+> contract.
+
+```ts
+// Contract snapshot (defaults)
+{
+  imports: {
+    orderBy: 'path',
+    casingPriority: [],
+    splitDeclarations: false,
+    sortSideEffects: false,
+    maxLineLength: null,
+  },
+  partitions: {
+    splitBy: { comments: false, newlines: false },
+    orderBy: 'source',
+    orderStability: 'stable',
+    maxImports: null,
+  },
+}
+```
+
 ### type
 
 <sub>default: `'alphabetical'`</sub>
@@ -339,16 +367,43 @@ within the same casing bucket.
 - `'PascalCase'`
 - `'kebab-case'`
 
-Example:
+The option is applied independently inside each sortable partition. The
+effective order is:
+
+1. Casing kinds listed in `casingPriority` (in the exact order you provide).
+2. Known casing kinds that are not listed.
+3. Values that do not match known casing kinds.
+
+Inside each casing bucket, regular sorting still applies (`type`, `order`, and
+`fallbackSort`).
+
+Example configuration:
 
 ```ts
 {
   type: 'alphabetical',
+  order: 'asc',
   imports: {
     orderBy: 'alias',
     casingPriority: ['camelCase', 'snake_case', 'UPPER_CASE', 'PascalCase'],
   },
 }
+```
+
+Example result (inside one partition):
+
+```ts
+// Before
+import PascalCase from 'delta'
+import snake_case from 'beta'
+import camelCase from 'alpha'
+import UPPER_CASE from 'gamma'
+
+// After
+import camelCase from 'alpha'
+import snake_case from 'beta'
+import UPPER_CASE from 'gamma'
+import PascalCase from 'delta'
 ```
 
 #### imports.splitDeclarations
@@ -822,52 +877,6 @@ See the [`newlinesBetween`](#newlinesbetween) option.
 ```
 
 ### customGroups
-
-> **Important: Migrating from the old API**
->
-> Support for the object-based `customGroups` option is deprecated.
->
-> Here is how to migrate from the old to the current API:
->
-> Old API:
->
-> ```ts
-> {
->   value: {
->     "keyForValue1": "value1",
->     "keyForValue2": "value2"
->   },
->   type: {
->     "keyForType1": "value1",
->     "keyForType2": "value2"
->   }
-> }
-> ```
->
-> Current API:
->
-> ```ts
-> ;[
->   {
->     selector: 'type',
->     groupName: 'keyForType1',
->     elementNamePattern: 'value1',
->   },
->   {
->     selector: 'type',
->     groupName: 'keyForType2',
->     elementNamePattern: 'value2',
->   },
->   {
->     groupName: 'keyForValue1',
->     elementNamePattern: 'value1',
->   },
->   {
->     groupName: 'keyForValue2',
->     elementNamePattern: 'value2',
->   },
-> ]
-> ```
 
 <sub>
   type: `Array<CustomGroupDefinition | CustomGroupAnyOfDefinition>`

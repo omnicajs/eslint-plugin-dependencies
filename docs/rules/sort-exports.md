@@ -83,6 +83,20 @@ export { debounce } from './utils/debounce'
 
 This rule accepts an options object with the following properties:
 
+```ts
+// Contract snapshot (defaults)
+{
+  partitions: { splitBy: { comments: false, newlines: false } },
+  type: 'alphabetical',
+  order: 'asc',
+  fallbackSort: { type: 'unsorted' },
+  newlinesBetween: 'ignore',
+  newlinesInside: 'newlinesBetween',
+  groups: [],
+  customGroups: [],
+}
+```
+
 ### type
 
 <sub>default: `'alphabetical'`</sub>

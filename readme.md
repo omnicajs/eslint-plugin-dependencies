@@ -119,17 +119,17 @@ module.exports = {
 🔧 Automatically fixable by the
 [`--fix` CLI option](https://eslint.org/docs/user-guide/command-line-interface#--fix).
 
-| Name                                                           | Description                                | 🔧  |
-| :------------------------------------------------------------- | :----------------------------------------- | :-- |
-| [sort-export-attributes](docs/rules/sort-export-attributes.md) | Enforce sorted export attributes           | 🔧  |
-| [sort-exports](docs/rules/sort-exports.md)                     | Enforce sorted exports                     | 🔧  |
-| [sort-import-attributes](docs/rules/sort-import-attributes.md) | Enforce sorted import attributes           | 🔧  |
-| [sort-imports](docs/rules/sort-imports.md)                     | Enforce sorted imports                     | 🔧  |
-| [sort-named-exports](docs/rules/sort-named-exports.md)         | Enforce sorted named exports               | 🔧  |
-| [sort-named-imports](docs/rules/sort-named-imports.md)         | Enforce sorted named imports               | 🔧  |
-| [import-style](docs/rules/import-style.md)                     | Enforce explicit module import style       | 🔧  |
-| separate-type-imports                                          | Enforce dedicated type import declarations | 🔧  |
-| separate-type-partitions                                       | Enforce partitions for type-only imports   | 🔧  |
+| Name                                                               | Description                                | 🔧  |
+| :----------------------------------------------------------------- | :----------------------------------------- | :-- |
+| [sort-export-attributes](docs/rules/sort-export-attributes.md)     | Enforce sorted export attributes           | 🔧  |
+| [sort-exports](docs/rules/sort-exports.md)                         | Enforce sorted exports                     | 🔧  |
+| [sort-import-attributes](docs/rules/sort-import-attributes.md)     | Enforce sorted import attributes           | 🔧  |
+| [sort-imports](docs/rules/sort-imports.md)                         | Enforce sorted imports                     | 🔧  |
+| [sort-named-exports](docs/rules/sort-named-exports.md)             | Enforce sorted named exports               | 🔧  |
+| [sort-named-imports](docs/rules/sort-named-imports.md)             | Enforce sorted named imports               | 🔧  |
+| [import-style](docs/rules/import-style.md)                         | Enforce explicit module import style       | 🔧  |
+| [separate-type-imports](docs/rules/separate-type-imports.md)       | Enforce dedicated type import declarations | 🔧  |
+| [separate-type-partitions](docs/rules/separate-type-partitions.md) | Enforce partitions for type-only imports   | 🔧  |
 
 ## Versioning Policy
 

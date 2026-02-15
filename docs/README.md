@@ -9,6 +9,8 @@
 ## Rules
 
 - [`import-style`](./rules/import-style.md)
+- [`separate-type-imports`](./rules/separate-type-imports.md)
+- [`separate-type-partitions`](./rules/separate-type-partitions.md)
 - [`sort-export-attributes`](./rules/sort-export-attributes.md)
 - [`sort-exports`](./rules/sort-exports.md)
 - [`sort-import-attributes`](./rules/sort-import-attributes.md)

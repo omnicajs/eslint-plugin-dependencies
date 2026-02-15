@@ -24,31 +24,32 @@ skips imports that contain comments inside the named specifier block.
 
 ### Before
 
-```tsx
-import type { TypeA } from './types'
-
-import { valueA, valueB } from './mod'
+```ts
+import {
+  useState,
+  useEffect,
+} from 'react'
 ```
 
-### After (Alphabetical)
+### After
 
-```tsx
-import type { TypeA } from './types'
-
-import { valueA, valueB } from './mod'
-```
-
-### After (Line Length)
-
-```tsx
-import type { TypeA } from './types'
-
-import { valueA, valueB } from './mod'
+```ts
+import { useState, useEffect } from 'react'
 ```
 
 ## Options
 
 This rule accepts an options object with the following properties:
+
+```ts
+// Contract snapshot (defaults)
+{
+  forceSingleLine: true,
+  maxSingleLineLength: 120,
+  maxSingleLineSpecifiers: 3,
+  singleLineSpacing: true,
+}
+```
 
 ### forceSingleLine
 
