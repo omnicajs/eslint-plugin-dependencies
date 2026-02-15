@@ -149,6 +149,56 @@ let bySpecifierComparatorByOptionsComputer: ComparatorByOptionsComputer<
   }
 }
 
+function getCasingKinds(value: string): ImportsCasingPriorityOption[] {
+  let kinds = new Set<ImportsCasingPriorityOption>()
+  let hasUnderscore = value.includes('_')
+  let hasHyphen = value.includes('-')
+
+  if (hasUnderscore && hasHyphen) {
+    return []
+  }
+
+  if (SNAKE_CASE_PATTERN.test(value)) {
+    kinds.add('snake_case')
+  }
+  if (KEBAB_CASE_PATTERN.test(value)) {
+    kinds.add('kebab-case')
+  }
+  if (UPPER_CASE_PATTERN.test(value) && /[A-Z]/u.test(value)) {
+    kinds.add('UPPER_CASE')
+  }
+  if (CAMEL_CASE_PATTERN.test(value) && /[A-Z]/u.test(value)) {
+    kinds.add('camelCase')
+  }
+  if (PASCAL_CASE_PATTERN.test(value) && /[a-z]/u.test(value)) {
+    kinds.add('PascalCase')
+  }
+
+  /* One-word lowercase terms can match both camelCase and snake_case. */
+  if (
+    !hasUnderscore &&
+    !hasHyphen &&
+    /^[a-z][\da-z]*$/u.test(value)
+  ) {
+    kinds.add('camelCase')
+    kinds.add('snake_case')
+  }
+
+  /* Hybrid tokens joined by '_' are compatible with snake_case and camelCase. */
+  if (hasUnderscore && !hasHyphen && isMixedSnakeCamelHybrid(value)) {
+    kinds.add('snake_case')
+    kinds.add('camelCase')
+  }
+
+  /* Hybrid tokens joined by '-' are compatible with kebab-case and camelCase. */
+  if (hasHyphen && !hasUnderscore && isMixedKebabCamelHybrid(value)) {
+    kinds.add('kebab-case')
+    kinds.add('camelCase')
+  }
+
+  return [...kinds]
+}
+
 function buildComparatorWithCasingPriority({
   casingPriority,
   getSortValue,
@@ -187,23 +237,60 @@ function buildComparatorWithCasingPriority({
   }
 }
 
-function getCasingKind(value: string): ImportsCasingPriorityOption | null {
-  if (SNAKE_CASE_PATTERN.test(value)) {
-    return 'snake_case'
+function isMixedSnakeCamelHybrid(value: string): boolean {
+  let segments = value.split('_')
+  if (segments.length < 2 || segments.some(segment => segment.length === 0)) {
+    return false
   }
-  if (KEBAB_CASE_PATTERN.test(value)) {
-    return 'kebab-case'
+
+  let hasCamelSegment = false
+
+  for (let segment of segments) {
+    if (!/^[\dA-Za-z]+$/u.test(segment)) {
+      return false
+    }
+
+    if (CAMEL_CASE_PATTERN.test(segment) && /[A-Z]/u.test(segment)) {
+      hasCamelSegment = true
+      continue
+    }
+
+    if (/^[\da-z]+$/u.test(segment)) {
+      continue
+    }
+
+    return false
   }
-  if (UPPER_CASE_PATTERN.test(value) && /[A-Z]/u.test(value)) {
-    return 'UPPER_CASE'
+
+  return hasCamelSegment
+}
+
+function isMixedKebabCamelHybrid(value: string): boolean {
+  let segments = value.split('-')
+  if (segments.length < 2 || segments.some(segment => segment.length === 0)) {
+    return false
   }
-  if (CAMEL_CASE_PATTERN.test(value) && /[A-Z]/u.test(value)) {
-    return 'camelCase'
+
+  let hasCamelSegment = false
+
+  for (let segment of segments) {
+    if (!/^[\dA-Za-z]+$/u.test(segment)) {
+      return false
+    }
+
+    if (CAMEL_CASE_PATTERN.test(segment) && /[A-Z]/u.test(segment)) {
+      hasCamelSegment = true
+      continue
+    }
+
+    if (/^[\da-z]+$/u.test(segment)) {
+      continue
+    }
+
+    return false
   }
-  if (PASCAL_CASE_PATTERN.test(value) && /[a-z]/u.test(value)) {
-    return 'PascalCase'
-  }
-  return null
+
+  return hasCamelSegment
 }
 
 function getCasingPriorityRank(
@@ -211,11 +298,21 @@ function getCasingPriorityRank(
   priorityByCasing: Map<ImportsCasingPriorityOption, number>,
   fallbackPriority: number,
 ): number {
-  let casing = getCasingKind(value)
-  if (!casing) {
-    return fallbackPriority
+  let casingKinds = getCasingKinds(value)
+
+  if (casingKinds.length === 0) {
+    return fallbackPriority + 1
   }
-  return priorityByCasing.get(casing) ?? fallbackPriority
+
+  let prioritizedRanks = casingKinds
+    .map(casing => priorityByCasing.get(casing))
+    .filter((rank): rank is number => rank !== undefined)
+
+  if (prioritizedRanks.length > 0) {
+    return Math.min(...prioritizedRanks)
+  }
+
+  return fallbackPriority
 }
 
 function getSpecifierNameByOrderBy(

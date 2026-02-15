@@ -4899,6 +4899,324 @@ describe('sort-imports', () => {
       })
     })
 
+    it('treats one-word lowercase aliases as camelCase-compatible', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['camelCase', 'snake_case'],
+              orderBy: 'alias',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import camel from 'alpha'
+          import snake_case from 'beta'
+        `,
+        code: dedent`
+          import snake_case from 'beta'
+          import camel from 'alpha'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('allows one-word lowercase aliases in the expected casingPriority order', async () => {
+      await valid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['camelCase', 'snake_case'],
+              orderBy: 'alias',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        code: dedent`
+          import camel from 'alpha'
+          import snake_case from 'beta'
+        `,
+      })
+    })
+
+    it('treats underscore hybrids as camelCase-compatible', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['camelCase', 'snake_case'],
+              orderBy: 'alias',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import camelCase_but_snake from 'alpha'
+          import snake_case from 'beta'
+        `,
+        code: dedent`
+          import snake_case from 'beta'
+          import camelCase_but_snake from 'alpha'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('allows underscore hybrids in the expected casingPriority order', async () => {
+      await valid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['camelCase', 'snake_case'],
+              orderBy: 'alias',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        code: dedent`
+          import camelCase_but_snake from 'alpha'
+          import snake_case from 'beta'
+        `,
+      })
+    })
+
+    it('treats hyphen hybrids as camelCase-compatible when sorting by path', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['camelCase', 'kebab-case'],
+              orderBy: 'path',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import hybridValue from 'camelCase-but-kebab'
+          import kebabValue from 'kebab-case'
+        `,
+        code: dedent`
+          import kebabValue from 'kebab-case'
+          import hybridValue from 'camelCase-but-kebab'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('places known but non-prioritized casing before unknown values', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['camelCase'],
+              orderBy: 'path',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import snakeValue from 'snake_case'
+          import mixedValue from 'camelCase_but-kebab'
+        `,
+        code: dedent`
+          import mixedValue from 'camelCase_but-kebab'
+          import snakeValue from 'snake_case'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('treats underscore values with non-alphanumeric segments as unknown casing', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['camelCase'],
+              orderBy: 'path',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import snakeValue from 'snake_case'
+          import mixedValue from 'camelCase_@segment'
+        `,
+        code: dedent`
+          import mixedValue from 'camelCase_@segment'
+          import snakeValue from 'snake_case'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('treats underscore values with Pascal segments as unknown casing', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['camelCase'],
+              orderBy: 'path',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import snakeValue from 'snake_case'
+          import mixedValue from 'camelCase_PascalSegment'
+        `,
+        code: dedent`
+          import mixedValue from 'camelCase_PascalSegment'
+          import snakeValue from 'snake_case'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('treats underscore values with empty segments as unknown casing', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['camelCase'],
+              orderBy: 'path',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import snakeValue from 'snake_case'
+          import mixedValue from 'camelCase__snake'
+        `,
+        code: dedent`
+          import mixedValue from 'camelCase__snake'
+          import snakeValue from 'snake_case'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('treats kebab values with empty segments as unknown casing', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['camelCase'],
+              orderBy: 'path',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import kebabValue from 'kebab-case'
+          import mixedValue from 'camelCase--kebab'
+        `,
+        code: dedent`
+          import mixedValue from 'camelCase--kebab'
+          import kebabValue from 'kebab-case'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('treats kebab values with non-alphanumeric segments as unknown casing', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['camelCase'],
+              orderBy: 'path',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import kebabValue from 'kebab-case'
+          import mixedValue from 'camelCase-@segment'
+        `,
+        code: dedent`
+          import mixedValue from 'camelCase-@segment'
+          import kebabValue from 'kebab-case'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
+    it('treats kebab values with Pascal segments as unknown casing', async () => {
+      await invalid({
+        options: [
+          {
+            ...options,
+            imports: {
+              casingPriority: ['camelCase'],
+              orderBy: 'path',
+            },
+            groups: ['unknown'],
+          },
+        ],
+        output: dedent`
+          import kebabValue from 'kebab-case'
+          import mixedValue from 'camelCase-PascalSegment'
+        `,
+        code: dedent`
+          import mixedValue from 'camelCase-PascalSegment'
+          import kebabValue from 'kebab-case'
+        `,
+        errors: [
+          {
+            messageId: 'unexpectedImportsOrder',
+          },
+        ],
+      })
+    })
+
     it('sorts imports by specifier names when sortBy is "specifier"', async () => {
       await invalid({
         errors: [
