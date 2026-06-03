@@ -1,20 +1,70 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Release type
+        required: true
+        default: auto
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+      prerelease:
+        description: Prerelease channel
+        required: true
+        default: none
+        type: choice
+        options:
+          - none
+          - alpha
+          - beta
+          - rc
+      npm_tag:
+        description: NPM dist-tag for publication
+        required: true
+        default: latest
+        type: string
 
 permissions:
-  id-token: write
-  contents: write
-  packages: write
-  models: read
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
+  detect-publish-auth:
+    name: Detect Publish Auth
+    runs-on: ubuntu-latest
+
+    outputs:
+      has-npm-token: ${{ steps.detect.outputs.has-npm-token }}
+
+    steps:
+      - name: Detect NPM Token
+        id: detect
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -n "$NPM_TOKEN" ]; then
+            echo "has-npm-token=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-npm-token=false" >> "$GITHUB_OUTPUT"
+          fi
+
   release:
     name: Release
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    outputs:
+      release_tag: ${{ steps.release_meta.outputs.tag }}
 
     steps:
       - name: Harden Runner
@@ -30,6 +80,136 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
+          token: ${{ secrets.RELEASE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Validate Release Branch and NPM Tag
+        env:
+          NPM_TAG: ${{ inputs.npm_tag }}
+        run: |
+          if [ "$NPM_TAG" = "latest" ] && [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "Release to npm tag 'latest' must be started from the main branch."
+            exit 1
+          fi
+
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
+
+      - name: Install Dependencies
+        uses: ./.github/actions/install-dependencies
+
+      - name: Configure Git User
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Prepare Release Commit and Tag
+        env:
+          RELEASE_TYPE: ${{ inputs.release }}
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          pnpm release:check
+
+          case "$RELEASE_TYPE" in
+            auto)
+              RELEASE_FLAG=""
+              ;;
+            patch)
+              RELEASE_FLAG="--patch"
+              ;;
+            minor)
+              RELEASE_FLAG="--minor"
+              ;;
+            major)
+              RELEASE_FLAG="--major"
+              ;;
+            *)
+              echo "Unknown release type: $RELEASE_TYPE"
+              exit 1
+              ;;
+          esac
+
+          if [ "$PRERELEASE" != "none" ]; then
+            case "$RELEASE_TYPE" in
+              auto)
+                RELEASE_FLAG="--prerelease"
+                ;;
+              patch)
+                RELEASE_FLAG="--prepatch"
+                ;;
+              minor)
+                RELEASE_FLAG="--preminor"
+                ;;
+              major)
+                RELEASE_FLAG="--premajor"
+                ;;
+            esac
+          fi
+
+          CMD=(pnpm release:version)
+          if [ -n "$RELEASE_FLAG" ]; then
+            CMD+=(-- "$RELEASE_FLAG")
+            if [ "$PRERELEASE" != "none" ]; then
+              CMD+=("$PRERELEASE")
+            fi
+          fi
+
+          "${CMD[@]}"
+          pnpm release:prepare
+
+          version="$(node -p "require('./package.json').version")"
+
+          git add package.json changelog.md
+          if git diff --cached --quiet; then
+            echo "No release changes to commit."
+            exit 1
+          fi
+
+          git commit -m "build: publish v${version}"
+          git tag "v${version}"
+
+      - name: Resolve Release Metadata
+        id: release_meta
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          echo "tag=v${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Push Release Commit and Tag
+        env:
+          RELEASE_TAG: ${{ steps.release_meta.outputs.tag }}
+        run:
+          git push --atomic origin "HEAD:${GITHUB_REF_NAME}"
+          "refs/tags/${RELEASE_TAG}"
+
+      - name: Create GitHub Release
+        run: pnpm run ci:changelog
+        env:
+          GITHUB_TOKEN:
+            ${{ secrets.RELEASE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+
+  publish-token:
+    name: Publish to NPM with Token
+    runs-on: ubuntu-latest
+    needs:
+      - detect-publish-auth
+      - release
+    if: ${{ needs.detect-publish-auth.outputs.has-npm-token == 'true' }}
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443 github.com:443 registry.npmjs.org:443
+            release-assets.githubusercontent.com:443
+
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: refs/tags/${{ needs.release.outputs.release_tag }}
 
       - name: Install Tools
         uses: ./.github/actions/install-tools
@@ -40,24 +220,128 @@ jobs:
       - name: Build Package
         run: pnpm run build
 
-      - name: Create GitHub Release
-        run: pnpm run ci:changelog
+      - name: Clear Package JSON
+        run: pnpm run ci:clear
+
+      - name: Check NPM Package Version
+        id: npm_version
+        run: |
+          package_name="$(node -p "require('./package.json').name")"
+          package_version="$(node -p "require('./package.json').version")"
+
+          if npm view "${package_name}@${package_version}" version --silent >/dev/null 2>&1; then
+            echo "${package_name}@${package_version} is already published; skipping npm publish."
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish Root Package to NPM with Token
+        if: ${{ steps.npm_version.outputs.published == 'false' }}
+        run: |
+          npm config set //registry.npmjs.org/:_authToken="$NODE_AUTH_TOKEN"
+          npm publish --access public --no-git-checks --tag "$NPM_TAG"
         env:
-          GITHUB_TOKEN:
-            ${{ secrets.RELEASE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TAG: ${{ inputs.npm_tag }}
+
+  publish-trusted:
+    name: Publish to NPM with Trusted Publishing
+    runs-on: ubuntu-latest
+    needs:
+      - detect-publish-auth
+      - release
+    if: ${{ needs.detect-publish-auth.outputs.has-npm-token == 'false' }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443 github.com:443
+            pipelines.actions.githubusercontent.com:443 registry.npmjs.org:443
+            release-assets.githubusercontent.com:443
+            token.actions.githubusercontent.com:443
+
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: refs/tags/${{ needs.release.outputs.release_tag }}
+
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
+
+      - name: Install Dependencies
+        uses: ./.github/actions/install-dependencies
+
+      - name: Build Package
+        run: pnpm run build
 
       - name: Clear Package JSON
         run: pnpm run ci:clear
 
-      - name: Publish Root Package to NPM
+      - name: Check NPM Package Version
+        id: npm_version
         run: |
-          npm config set //registry.npmjs.org/:_authToken="$NODE_AUTH_TOKEN"
-          npm publish --access public --no-git-checks
+          package_name="$(node -p "require('./package.json').name")"
+          package_version="$(node -p "require('./package.json').version")"
+
+          if npm view "${package_name}@${package_version}" version --silent >/dev/null 2>&1; then
+            echo "${package_name}@${package_version} is already published; skipping npm publish."
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish Root Package to NPM with Trusted Publishing
+        if: ${{ steps.npm_version.outputs.published == 'false' }}
+        run: npm publish --access public --no-git-checks --tag "$NPM_TAG"
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TAG: ${{ inputs.npm_tag }}
+
+  social:
+    name: Post Release to Social Media
+    runs-on: ubuntu-latest
+    needs:
+      - release
+      - publish-token
+      - publish-trusted
+    if:
+      ${{ always() && needs.release.result == 'success' &&
+      (needs.publish-token.result == 'success' || needs.publish-trusted.result
+      == 'success') }}
+    continue-on-error: true
+
+    permissions:
+      contents: read
+      models: read
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443 github.com:443 registry.npmjs.org:443
+            release-assets.githubusercontent.com:443
+
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: refs/tags/${{ needs.release.outputs.release_tag }}
+
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
+
+      - name: Install Dependencies
+        uses: ./.github/actions/install-dependencies
 
       - name: Generate Social Changelog
-        continue-on-error: true
         run: |
           pnpm social-changelog \
             --org ${{ github.repository_owner }} \
@@ -69,7 +353,6 @@ jobs:
             ${{ secrets.RELEASE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Post to Social Media
-        continue-on-error: true
         run: |
           pnpm crosspost \
             --twitter \
