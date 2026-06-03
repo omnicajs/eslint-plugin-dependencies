@@ -7,7 +7,6 @@ export default defineConfig({
     'browserslistrc',
     'changelogen',
     'changelogithub',
-    'crosspost',
     'frontmatter',
     'grotesk',
     'humanwhocodes',
