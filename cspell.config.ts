@@ -38,6 +38,7 @@ export default defineConfig({
     'tses',
     'uncategorized',
     'undici',
+    'unrs', // Library name.
     'usefathom',
     'vimrc',
   ],
