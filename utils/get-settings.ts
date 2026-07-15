@@ -105,5 +105,5 @@ export function getSettings(
     )
   }
 
-  return settings['dependencies'] as Settings
+  return settings['dependencies']
 }

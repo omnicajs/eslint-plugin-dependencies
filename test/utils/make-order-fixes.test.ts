@@ -47,11 +47,10 @@ describe('make-order-fixes', () => {
       text: 'firstsecond',
     } as unknown as TSESLint.SourceCode
     let fixer = {
-      replaceTextRange: (range, text) =>
-        ({
-          range,
-          text,
-        }) as TSESLint.RuleFix,
+      replaceTextRange: (range, text) => ({
+        range,
+        text,
+      }),
     } as TSESLint.RuleFixer
 
     let fixes = makeOrderFixes({

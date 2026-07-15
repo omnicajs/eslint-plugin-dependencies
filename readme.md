@@ -17,7 +17,7 @@ See [docs](docs/README.md).
 
 ## Installation
 
-You'll first need to install [ESLint](https://eslint.org) v8.45.0 or greater:
+You'll first need to install [ESLint](https://eslint.org) v8.57.0, v9, or v10:
 
 ```sh
 npm install --save-dev eslint
@@ -57,7 +57,10 @@ export default [
 ]
 ```
 
-### Legacy Config ([`.eslintrc.js`](https://eslint.org/docs/latest/use/configure/configuration-files-deprecated))
+### Legacy Config (ESLint 8–9 only)
+
+ESLint v10 no longer supports `.eslintrc.*` files. Use the flat config example
+above with ESLint v10.
 
 <!-- prettier-ignore -->
 ```js
@@ -94,7 +97,10 @@ export default [
 ]
 ```
 
-### Legacy Config ([`.eslintrc.js`](https://eslint.org/docs/latest/use/configure/configuration-files-deprecated))
+### Legacy Config (ESLint 8–9 only)
+
+ESLint v10 no longer supports legacy shareable configs. Use the flat preset
+above with ESLint v10.
 
 <!-- prettier-ignore -->
 ```js

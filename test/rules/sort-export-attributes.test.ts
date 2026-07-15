@@ -51,7 +51,7 @@ function normalizeOptions(
           newlines: partitionByNewLine as boolean,
         },
       },
-    } as Options[number]
+    }
   })
 }
 

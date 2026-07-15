@@ -21,8 +21,8 @@ keywords:
 
 ## Installation
 
-Let's get started. You'll need to install [ESLint](https://eslint.org/) v8.45.0
-or greater:
+Let's get started. You'll need to install [ESLint](https://eslint.org/) v8.57.0,
+v9, or v10:
 
 ### npm
 
@@ -97,7 +97,10 @@ export default [
 ]
 ```
 
-### Legacy Config
+### Legacy Config (ESLint 8–9 only)
+
+ESLint v10 no longer supports `.eslintrc.*` files. Use flat config with ESLint
+v10.
 
 ```tsx
 // .eslintrc.js
@@ -179,7 +182,7 @@ export default [
 ]
 ```
 
-### Legacy Config
+### Legacy Config (ESLint 8–9 only)
 
 ```tsx
 // .eslintrc.js

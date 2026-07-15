@@ -50,7 +50,7 @@ export let comparatorByOptionsComputer: ComparatorByOptionsComputer<
       switch (options.imports.orderBy) {
         case 'specifier':
         case 'alias': {
-          let orderBy = options.imports.orderBy as SpecifierOrderByOption
+          let { casingPriority, orderBy } = options.imports
 
           return buildComparatorWithCasingPriority({
             comparator: bySpecifierComparatorByOptionsComputer({
@@ -59,7 +59,7 @@ export let comparatorByOptionsComputer: ComparatorByOptionsComputer<
               orderBy,
             }),
             getSortValue: node => getSpecifierNameByOrderBy(node, orderBy),
-            casingPriority: options.imports.casingPriority,
+            casingPriority,
           })
         }
         case 'path':

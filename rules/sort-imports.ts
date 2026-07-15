@@ -1022,48 +1022,6 @@ function shouldIgnoreSpecifierOrder({
   return true
 }
 
-function validateSortImportsConfiguration(
-  options: Required<Options[number]>,
-): void {
-  assertNoUnknownKeys(options as Record<string, unknown>, [
-    'alphabet',
-    'customGroups',
-    'environment',
-    'fallbackSort',
-    'groups',
-    'ignoreCase',
-    'imports',
-    'internalPattern',
-    'locales',
-    'newlinesBetween',
-    'newlinesInside',
-    'order',
-    'partitions',
-    'specialCharacters',
-    'tsconfig',
-    'type',
-    'useExperimentalDependencyDetection',
-  ])
-
-  if (!isValidImportsOption(options.imports)) {
-    throw new Error(
-      "The 'imports' option must be an object with valid vNext fields.",
-    )
-  }
-
-  if (!isValidPartitionsOption(options.partitions)) {
-    throw new Error(
-      "The 'partitions' option must be 'merge' or an object with valid vNext fields.",
-    )
-  }
-
-  if (!isValidTsconfigOption(options.tsconfig)) {
-    throw new Error(
-      "The 'tsconfig' option must be an object with { rootDir, filename? }.",
-    )
-  }
-}
-
 function isValidPartitionByCommentOption(
   value: unknown,
 ): value is PartitionByCommentOption {
@@ -1101,6 +1059,48 @@ function isValidPartitionByCommentOption(
     return false
   }
   return Object.keys(value).length > 0
+}
+
+function validateSortImportsConfiguration(
+  options: Required<Options[number]>,
+): void {
+  assertNoUnknownKeys(options, [
+    'alphabet',
+    'customGroups',
+    'environment',
+    'fallbackSort',
+    'groups',
+    'ignoreCase',
+    'imports',
+    'internalPattern',
+    'locales',
+    'newlinesBetween',
+    'newlinesInside',
+    'order',
+    'partitions',
+    'specialCharacters',
+    'tsconfig',
+    'type',
+    'useExperimentalDependencyDetection',
+  ])
+
+  if (!isValidImportsOption(options.imports)) {
+    throw new Error(
+      "The 'imports' option must be an object with valid vNext fields.",
+    )
+  }
+
+  if (!isValidPartitionsOption(options.partitions)) {
+    throw new Error(
+      "The 'partitions' option must be 'merge' or an object with valid vNext fields.",
+    )
+  }
+
+  if (!isValidTsconfigOption(options.tsconfig)) {
+    throw new Error(
+      "The 'tsconfig' option must be an object with { rootDir, filename? }.",
+    )
+  }
 }
 
 function isValidRegexOptionValue(value: unknown): boolean {
@@ -1804,7 +1804,7 @@ function expandSortingNodesBySpecifier({
       return [
         Object.assign(node, {
           parentSortingNode: node,
-        }) as SortImportsSpecifierSortingNode,
+        }),
       ]
     }
 

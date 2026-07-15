@@ -12,7 +12,7 @@ let defaultOptions: Options = []
 
 export default createEslintRule<Options, MessageId>({
   create: context => {
-    let sourceCode = context.getSourceCode()
+    let { sourceCode } = context
 
     return {
       Program: node => {

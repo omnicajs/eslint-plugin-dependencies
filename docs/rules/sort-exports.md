@@ -532,7 +532,7 @@ export default [
 ]
 ```
 
-### Legacy Config
+### Legacy Config (ESLint 8–9 only)
 
 ```tsx
 // .eslintrc.js

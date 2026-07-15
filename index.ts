@@ -32,6 +32,15 @@ interface BaseOptions {
 
 let pluginName = 'dependencies'
 
+let rulesWithSortingOptions = new Set([
+  'sort-import-attributes',
+  'sort-export-attributes',
+  'sort-named-imports',
+  'sort-named-exports',
+  'sort-imports',
+  'sort-exports',
+])
+
 export let rules = {
   'separate-type-partitions': separateTypePartitions,
   'sort-import-attributes': sortImportAttributes,
@@ -56,7 +65,7 @@ function getRules(options: BaseOptions): Linter.RulesRecord {
   return Object.fromEntries(
     Object.keys(plugin.rules!).map(ruleName => [
       `${pluginName}/${ruleName}`,
-      ['error', options],
+      rulesWithSortingOptions.has(ruleName) ? ['error', options] : 'error',
     ]),
   )
 }

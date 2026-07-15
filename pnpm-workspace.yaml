@@ -8,4 +8,7 @@ configDependencies:
 
 onlyBuiltDependenciesFile: node_modules/.pnpm-config/@pnpm/plugin-trusted-deps/allow.json
 
+overrides:
+  '@vitest/eslint-plugin': 1.6.7
+
 sideEffectsCache: false

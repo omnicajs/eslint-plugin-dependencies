@@ -50,7 +50,7 @@ import dependencies from '@omnicajs/eslint-plugin-dependencies'
 export default [dependencies.configs['recommended-line-length']]
 ```
 
-### Legacy Config
+### Legacy Config (ESLint 8–9 only)
 
 ```tsx
 // .eslintrc.js
